@@ -40,7 +40,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
 
-    'rest_framework',       # Pra la ap
+    'rest_framework',       # Pra la api
     'corsheaders',          # Para conectar con React
     'channels',             # Para los WebSockets
 
@@ -84,8 +84,12 @@ ASGI_APPLICATION = 'config.asgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'djangoprueba',
+        'USER': 'admin',
+        'PASSWORD': 'abc123.',
+        'HOST': 'localhost',
+        'PORT': '5432',
     }
 }
 
