@@ -4,7 +4,7 @@ from .views import DevicesViewSet, GroupViewSet
 
 router = routers.DefaultRouter()
 
-router.register('devices', DevicesViewSet, 'devices')
-router.register('groups', GroupViewSet, 'groups')
+router.register(r'devices', DevicesViewSet, 'device')
+router.register(r'groups', GroupViewSet, 'group')
 
 urlpatterns = router.urls

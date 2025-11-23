@@ -2,6 +2,10 @@ from django.db import models
 
 class Group(models.Model):
     name = models.CharField()
+    
+
+    def __str__(self):
+        return self.name
 
 
 class Device(models.Model):
@@ -10,10 +14,13 @@ class Device(models.Model):
     hostname = models.CharField(max_length=100)
     
 
-    group = models.ManyToManyField(
+    groups = models.ManyToManyField(
         Group,
         related_name="devices",
         blank=True
     )
+
+    def __str__(self):
+        return  f'hostname = {self.hostname} , mac = {self.mac}'
 
 
