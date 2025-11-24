@@ -1,0 +1,20 @@
+# --- CORE DEL PROYECTO ---
+Django>=5.0,<6.0
+djangorestframework
+django-cors-headers
+
+# --- TIEMPO REAL (WebSockets) ---
+daphne
+channels
+channels_redis
+
+# --- BASE DE DATOS ---
+psycopg2-binary
+
+# --- REDES Y MIKROTIK ---
+librouteros
+requests
+
+# --- UTILIDADES ---
+python-dotenv
+Pillow

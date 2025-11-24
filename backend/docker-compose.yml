@@ -1,0 +1,18 @@
+services:
+  # --- SERVICIO DE BASE DE DATOS (PostgreSQL) ---
+  db:
+    image: postgres:16-alpine  # Versión ligera y estable (LTS de facto)
+    container_name: PostgreSQL
+    restart: always
+    environment:
+      POSTGRES_DB: djangoprueba
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: abc123.
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+# Definición de volúmenes para que los datos no se borren al apagar
+volumes:
+  postgres_data:
