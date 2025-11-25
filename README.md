@@ -1,7 +1,15 @@
 # **🛡️ Sistema de Monitorización y Control de Equipos (Mikrotik NetManagement)**
 
-Proyecto de Fin de Grado (PFG)  
-Sistema integral para la gestión de aulas informáticas que combina el control de hardware remoto con aislamiento de red automatizado mediante infraestructura Mikrotik RouterOS.
+![Status](https://img.shields.io/badge/Estado-En%20Desarrollo-yellow?style=for-the-badge)
+![Django](https://img.shields.io/badge/Backend-Django_Rest_Framework-092E20?style=for-the-badge&logo=django)
+![React](https://img.shields.io/badge/Frontend-React_Vite-61DAFB?style=for-the-badge&logo=react)
+![Postgres](https://img.shields.io/badge/DB-PostgreSQL-336791?style=for-the-badge&logo=postgresql)
+![Mikrotik](https://img.shields.io/badge/Network-Mikrotik-E10B18?style=for-the-badge)
+
+> **Proyecto de Fin de curso **
+> Sistema integral para la gestión de aulas de informática, permitiendo el control remoto de equipos y el aislamiento de red automatizado mediante infraestructura Mikrotik.
+
+---
 
 ## **📋 Descripción del Proyecto**
 
