@@ -39,30 +39,34 @@ Este sistema soluciona la necesidad de administrar aulas informáticas de forma 
 
 El sistema utiliza una arquitectura distribuida basada en eventos asíncronos para el tiempo real.
 
-```mermaid
-graph TD
-    subgraph "AULA (Clientes)"
+```graph TD
+    %% SUBGRAFO AULA
+    subgraph Aula ["🏫 AULA (Clientes)"]
       PC1[🖥️ Agente PC 1]
       PC2[🖥️ Agente PC 2]
     end
 
-    subgraph "INFRAESTRUCTURA DE RED"
+    %% SUBGRAFO RED
+    subgraph Infra ["🌐 INFRAESTRUCTURA DE RED"]
       Switch[🔌 Switch Mikrotik]
     end
 
-    subgraph "SERVIDOR (Dockerizado)"
+    %% SUBGRAFO SERVIDOR
+    subgraph Servidor ["⚙️ SERVIDOR (Dockerizado)"]
+      direction TB
       Redis[⚡ Redis (Canales)]
       DB[(🐘 PostgreSQL)]
       Backend[🐍 Django + Channels]
     end
 
-    subgraph "PROFESOR"
+    %% SUBGRAFO PROFESOR
+    subgraph Profesor ["🎓 PROFESOR"]
       Frontend[⚛️ React Dashboard]
     end
 
-    %% Conexiones
-    PC1 <-->|WebSockets (Tiempo Real)| Backend
-    PC2 <-->|WebSockets (Tiempo Real)| Backend
+    %% CONEXIONES
+    PC1 <-->|WebSockets| Backend
+    PC2 <-->|WebSockets| Backend
     
     Frontend <-->|API REST / WS| Backend
     
@@ -72,6 +76,12 @@ graph TD
     
     Switch -.->|Filtra Tráfico| PC1
     Switch -.->|Filtra Tráfico| PC2
+
+    %% ESTILOS (Opcional, para que se vea más bonito)
+    classDef hardware fill:#f9f,stroke:#333,stroke-width:2px;
+    classDef server fill:#e1f5fe,stroke:#0277bd,stroke-width:2px;
+    class PC1,PC2,Switch hardware;
+    class Backend,Redis,DB server;
 ```
 
 ### 🛠️ Stack Tecnológico
