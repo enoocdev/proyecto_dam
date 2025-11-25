@@ -16,6 +16,7 @@ class GroupSerializer(serializers.HyperlinkedModelSerializer):
         queryset = Device.objects.all(),
 
     )
+    
 
     class Meta:
         model = Group
