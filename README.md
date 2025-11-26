@@ -1,13 +1,13 @@
 # **🛡️ Sistema de Monitorización y Control de Equipos (Mikrotik NetManagement)**
 
 ![Status](https://img.shields.io/badge/Estado-En%20Desarrollo-yellow?style=for-the-badge)
-![Django](https://img.shields.io/badge/Backend-Django_Rest_Framework-092E20?style=for-the-badge&logo=django)
-![React](https://img.shields.io/badge/Frontend-React_Vite-61DAFB?style=for-the-badge&logo=react)
-![Postgres](https://img.shields.io/badge/DB-PostgreSQL-336791?style=for-the-badge&logo=postgresql)
-![Mikrotik](https://img.shields.io/badge/Network-Mikrotik-E10B18?style=for-the-badge)
+[![Django](https://img.shields.io/badge/Backend-Django_Rest_Framework-092E20?style=for-the-badge&logo=django)](https://www.django-rest-framework.org/)
+[![React](https://img.shields.io/badge/Frontend-React_Vite-61DAFB?style=for-the-badge&logo=react)](https://react.dev/)
+[![Postgres](https://img.shields.io/badge/DB-PostgreSQL-336791?style=for-the-badge&logo=postgresql)](https://www.postgresql.org/)
+[![Mikrotik](https://img.shields.io/badge/Network-Mikrotik-E10B18?style=for-the-badge)](https://mikrotik.com/)
 
-> **Proyecto de Fin de curso **
-> Sistema integral para la gestión de aulas de informática, permitiendo el control remoto de equipos y el aislamiento de red automatizado mediante infraestructura Mikrotik.
+> **Proyecto de Fin de curso**
+> Sistema integral para la gestión de aulas de informática, permitiendo el control remoto de equipos y el aislamiento de red automatizado mediante infraestructura [Mikrotik](https://mikrotik.com/).
 
 ---
 
@@ -17,65 +17,60 @@ Este sistema aborda la necesidad de administrar aulas informáticas de forma cen
 
 ### **🌟 Funcionalidades Clave**
 
-#### **1\. Monitorización y Control (Agente PC)**
-
-* **📡 Transmisión en Tiempo Real:** Visualización de pantallas de los alumnos mediante WebSockets de baja latencia.  
-* **⚡ Control de Energía:** Ejecución remota de comandos de Apagado, Reinicio y Suspensión.  
+#### **1. Monitorización y Control (Agente PC)**
+* **📡 Transmisión en Tiempo Real:** Visualización de pantallas de los alumnos mediante [WebSockets](https://developer.mozilla.org/es/docs/Web/API/WebSockets_API) de baja latencia.
+* **⚡ Control de Energía:** Ejecución remota de comandos de Apagado, Reinicio y Suspensión.
 * **📸 Evidencias:** Toma de capturas de pantalla bajo demanda y almacenamiento centralizado.
 
-#### **2\. Gestión de Infraestructura (Network Fencing)**
-
-\* **🔒 Aislamiento Dinámico:** Integración directa con la API de Mikrotik RouterOS.
-
-* **🚫 Modos de Restricción:**  
-  * **Modo Examen:** Bloquea el acceso a Internet y LAN, permitiendo únicamente tráfico hacia el servidor de control.  
-  * **Modo Bloqueo Total:** Aísla completamente el puerto del switch (Port Disable / VLAN switching).  
+#### **2. Gestión de Infraestructura (Network Fencing)**
+* **🔒 Aislamiento Dinámico:** Integración directa con la API de [Mikrotik RouterOS](https://mikrotik.com/software).
+* **🚫 Modos de Restricción:**
+  * **Modo Examen:** Bloquea el acceso a Internet y LAN, permitiendo únicamente tráfico hacia el servidor de control.
+  * **Modo Bloqueo Total:** Aísla completamente el puerto del switch (Port Disable / VLAN switching).
 * **🆔 Identificación Hardware:** Mapeo automático de direcciones MAC a puertos físicos del switch.
 
-#### **3\. Panel de Administración (Web)**
-
-* **Dashboard Interactivo:** Interfaz desarrollada en React con Material UI para visualización en grid de todos los equipos.  
-* **RBAC (Role-Based Access Control):** \* *Profesores:* Control de aula y visualización.  
+#### **3. Panel de Administración (Web)**
+* **Dashboard Interactivo:** Interfaz desarrollada en [React](https://react.dev/) con [Material UI](https://mui.com/) para visualización en grid de todos los equipos.
+* **RBAC (Role-Based Access Control):**
+  * *Profesores:* Control de aula y visualización.
   * *Administradores:* Configuración de red y gestión de dispositivos.
 
 ## **🏗️ Arquitectura Técnica**
 
-El sistema utiliza una arquitectura distribuida orientada a eventos. La comunicación en tiempo real se gestiona mediante canales asíncronos (ASGI).
+El sistema utiliza una arquitectura distribuida orientada a eventos. La comunicación en tiempo real se gestiona mediante canales asíncronos ([ASGI](https://asgi.readthedocs.io/)).
 
 ### **Flujo de Datos**
-
-1. **Capa de Gestión (Frontend):** El profesor interactúa con el Dashboard (React), enviando peticiones REST y escuchando eventos por WebSocket.  
-2. **Servidor Central (Backend):** Django recibe las órdenes. Si es un comando de red, contacta con la **API de Mikrotik**. Si es un comando de PC, lo publica en **Redis**.  
-3. **Capa de Infraestructura:** El router/switch Mikrotik aplica las reglas de firewall o VLANs instantáneamente al recibir la orden del backend.  
+1. **Capa de Gestión (Frontend):** El profesor interactúa con el Dashboard ([React](https://react.dev/)), enviando peticiones REST y escuchando eventos por WebSocket.
+2. **Servidor Central (Backend):** [Django](https://www.djangoproject.com/) recibe las órdenes. Si es un comando de red, contacta con la **API de Mikrotik**. Si es un comando de PC, lo publica en **[Redis](https://redis.io/)**.
+3. **Capa de Infraestructura:** El router/switch [Mikrotik](https://mikrotik.com/) aplica las reglas de firewall o VLANs instantáneamente al recibir la orden del backend.
 4. **Capa de Aula (Agentes):** Los PCs de los alumnos, suscritos al canal de Redis vía WebSocket, reciben la orden (ej. bloquear pantalla) y envían el stream de vídeo de vuelta al servidor.
 
 ### **🛠️ Stack Tecnológico**
 
 | Capa | Tecnología | Justificación |
-| :---- | :---- | :---- |
-| **Backend** | Python, Django 5, DRF | Robustez, seguridad y estructura sólida de modelos. |
-| **Real-Time** | Django Channels (Daphne) | Manejo de WebSockets asíncronos (ASGI) para streaming. |
-| **Frontend** | React 18, Vite, Material UI | Interfaz SPA rápida, reactiva y moderna. |
-| **Base de Datos** | PostgreSQL 16 | Soporte nativo de JSONB y alta concurrencia transaccional. |
-| **Cache/Bus** | Redis 7 | Broker de mensajes para comunicar procesos y WebSockets. |
-| **Redes** | Librouteros (Python) | Comunicación segura con la API de Mikrotik. |
-| **Agente** | Python (mss, psutil) | Cliente ligero multiplataforma para captura y control. |
-| **DevOps** | Docker Compose | Orquestación de servicios (DB, Redis) para desarrollo. |
+| :--- | :--- | :--- |
+| **Backend** | [Python](https://www.python.org/), [Django 5](https://www.djangoproject.com/), [DRF](https://www.django-rest-framework.org/) | Robustez, seguridad y estructura sólida de modelos. |
+| **Real-Time** | [Django Channels](https://channels.readthedocs.io/) ([Daphne](https://github.com/django/daphne)) | Manejo de WebSockets asíncronos (ASGI) para streaming. |
+| **Frontend** | [React 18](https://react.dev/), [Vite](https://vitejs.dev/), [Material UI](https://mui.com/) | Interfaz SPA rápida, reactiva y moderna. |
+| **Base de Datos** | [PostgreSQL 16](https://www.postgresql.org/) | Soporte nativo de JSONB y alta concurrencia transaccional. |
+| **Cache/Bus** | [Redis 7](https://redis.io/) | Broker de mensajes para comunicar procesos y WebSockets. |
+| **Redes** | [Librouteros](https://librouteros.readthedocs.io/) (Python) | Comunicación segura con la API de Mikrotik. |
+| **Agente** | Python ([mss](https://python-mss.readthedocs.io/), [psutil](https://psutil.readthedocs.io/)) | Cliente ligero multiplataforma para captura y control. |
+| **DevOps** | [Docker Compose](https://docs.docker.com/compose/) | Orquestación de servicios (DB, Redis) para desarrollo. |
 
 ## **🚀 Guía de Instalación y Despliegue**
 
 ### **Prerrequisitos**
+* **[Docker](https://www.docker.com/)** y **[Docker Compose](https://docs.docker.com/compose/)**
+* **[Python 3.10+](https://www.python.org/downloads/)**
+* **[Node.js 18+](https://nodejs.org/)**
+* Acceso a un router/switch **[Mikrotik](https://mikrotik.com/products)** (Opcional, se puede simular).
 
-* **Docker** y **Docker Compose**  
-* **Python 3.10+**  
-* **Node.js 18+**
-
-\* Acceso a un router/switch Mikrotik (Opcional, se puede simular).
-
-### **1\. Clonar el Repositorio**
-
-git clone \[https://github.com/tu-usuario/proyecto-monitorizacion.git\](https://github.com/tu-usuario/proyecto-monitorizacion.git)  
+### **1. Clonar el Repositorio**
+```bash
+git clone [https://github.com/tu-usuario/proyecto-monitorizacion.git](https://github.com/tu-usuario/proyecto-monitorizacion.git)
 cd proyecto-monitorizacion
+```
 
 ### **2\. Infraestructura (Base de Datos & Redis)**
 
