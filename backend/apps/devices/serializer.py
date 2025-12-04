@@ -53,10 +53,24 @@ class DeviceGroupSerializer(serializers.ModelSerializer):
             lookup_field='pk',
             read_only=True
     )
+
+    devices = serializers.HyperlinkedRelatedField(
+        view_name = "device-detail",
+        read_only= True,
+        many  = True
+    )
+
+    devices_id = serializers.PrimaryKeyRelatedField(
+        queryset = Device.objects.all(),
+        source="devices",
+        write_only=True,
+        many=True,
+        required=False
+    )
     
     class Meta:
         model = DeviceGroup
-        fields = ["url", 'id' , 'name', "devices"]
+        fields = ["url", 'id' , 'name', "devices", "devices_id"]
 
 
 class DeviceSerializer(serializers.ModelSerializer):
@@ -72,11 +86,17 @@ class DeviceSerializer(serializers.ModelSerializer):
         many = True
     )
 
-    
+    groups_id = serializers.PrimaryKeyRelatedField(
+        queryset= DeviceGroup.objects.all(),
+        source='groups',          
+        write_only=True,
+        many=True,
+        required = False
+    )
 
     class Meta:
         model = Device
-        fields = ["url" ,'id' , 'mac', 'ip', 'hostname', "groups"]
+        fields = ["url" ,'id' , 'mac', 'ip', 'hostname', "groups", "groups_id"]
 
 
 
