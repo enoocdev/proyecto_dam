@@ -1,9 +1,15 @@
 from django.db import models
+from django.contrib.auth.models import AbstractUser
 
-class Group(models.Model):
+
+
+class User(AbstractUser):
+    pass
+
+
+class DeviceGroup(models.Model):
     name = models.CharField()
     
-
     def __str__(self):
         return self.name
 
@@ -15,7 +21,7 @@ class Device(models.Model):
     
 
     groups = models.ManyToManyField(
-        Group,
+        DeviceGroup,
         related_name="devices",
         blank=True
     )

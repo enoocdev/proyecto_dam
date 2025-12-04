@@ -1,6 +1,8 @@
 # --- CORE DEL PROYECTO ---
 Django>=5.0,<6.0
 djangorestframework
+djangorestframework-simplejwt
+PyJWT
 django-cors-headers
 
 # --- TIEMPO REAL (WebSockets) ---
@@ -18,3 +20,4 @@ requests
 # --- UTILIDADES ---
 python-dotenv
 Pillow
+python-dotenv
