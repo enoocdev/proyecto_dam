@@ -32,7 +32,7 @@ DEBUG = True
 
 ALLOWED_HOSTS = ["*"]
 
-AUTH_USER_MODEL = 'devices.User'
+AUTH_USER_MODEL = 'users.User'
 
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": (
@@ -68,8 +68,10 @@ INSTALLED_APPS = [
     'channels',             # Para los WebSockets
 
     # Mis apps
-    'apps.devices'
+    'apps.users',
+    'apps.devices',
 ]
+    
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
