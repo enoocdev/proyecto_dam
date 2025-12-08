@@ -1,32 +1,34 @@
 
 from rest_framework import serializers
-from .models import Device, DeviceGroup
+from .models import Device, Classroom, NetworkDevice
 
-class DeviceGroupSerializer(serializers.ModelSerializer):
+class ClassroomSerializer(serializers.ModelSerializer):
     url = serializers.HyperlinkedIdentityField(
-            view_name='device-group-detail',
+            view_name='classroom-detail',
             lookup_field='pk',
             read_only=True
     )
 
-    devices = serializers.HyperlinkedRelatedField(
-        view_name = "device-detail",
-        read_only= True,
-        many  = True
-    )
-
-    devices_id = serializers.PrimaryKeyRelatedField(
-        queryset = Device.objects.all(),
-        source="devices",
-        write_only=True,
-        many=True,
-        required=False
-    )
-    
     class Meta:
-        model = DeviceGroup
-        fields = ["url", 'id' , 'name', "devices", "devices_id"]
+        model = Classroom
+        fields = ["url", 'id' , 'name']
 
+
+class NetworkDeviceSerializer(serializers.ModelSerializer):
+    url = serializers.HyperlinkedIdentityField(
+            view_name='network-device-detail',
+            lookup_field='pk',
+            read_only=True
+    )
+
+    class Meta:
+        model = NetworkDevice
+
+        fields = ["url", "id", "name", "ip_address", "username", "password", "api_port"]
+        extra_kwargs = {
+            'password': {'write_only': True},
+            'api_port': {'required': False}, 
+        }
 
 class DeviceSerializer(serializers.ModelSerializer):
     url = serializers.HyperlinkedIdentityField(
@@ -35,23 +37,26 @@ class DeviceSerializer(serializers.ModelSerializer):
             read_only=True
     )
 
-    groups = serializers.HyperlinkedRelatedField(
-        view_name='device-group-detail',
-        read_only=True,
-        many = True
+    classroom_url = serializers.HyperlinkedRelatedField(
+        source='classroom',
+        view_name = "classroom-detail",
+        read_only= True,
     )
 
-    groups_id = serializers.PrimaryKeyRelatedField(
-        queryset= DeviceGroup.objects.all(),
-        source='groups',          
-        write_only=True,
-        many=True,
-        required = False
+    network_device_url = serializers.HyperlinkedRelatedField(
+        source='connected_device',
+        view_name = "network-device-detail",
+        read_only= True,
     )
 
     class Meta:
         model = Device
-        fields = ["url" ,'id' , 'mac', 'ip', 'hostname', "groups", "groups_id"]
-
-
-
+        fields = ["url" ,'id' , 'mac', 'ip', 
+                'hostname', "classroom_url" , 'classroom', "network_device_url" ,"connected_device", 
+                "switch_port", "is_online", "is_internet_blocked"]
+        extra_kwargs = {
+            'classroom': {'write_only': True},
+            "connected_device" : {'write_only': True},
+            'switch_port': {'read_only': False}, 
+        }
+        
