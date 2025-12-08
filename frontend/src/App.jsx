@@ -1,15 +1,29 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import Login from "./pages/Login";
+import ProtectedRoute from "./components/ProtecterRoute";
+import "./App.css"
 
 function App() {
-  const [count, setCount] = useState(0)
 
   return (
-    <div>
-      <p>Conectando con Django...</p>
-    </div>
+    <BrowserRouter>
+      <Routes>
+        
+        <Route 
+          path="/" 
+          element={
+            <ProtectedRoute>
+              <div>
+                Cargando Django ...
+              </div>
+            </ProtectedRoute>
+          } 
+        />
+
+        <Route path="/login" element={<Login />} />
+        
+      </Routes>
+    </BrowserRouter>
   )
 }
 

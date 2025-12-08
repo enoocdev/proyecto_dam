@@ -1,0 +1,57 @@
+/* src/pages/Login.css */
+
+/* El contenedor que centra todo */
+.login-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    width: 100%;
+}
+
+/* La tarjeta del formulario */
+.login-card {
+    background-color: #1e1e1e;
+    /* Gris oscuro */
+    padding: 2.5rem;
+    border-radius: 8px;
+    border: 1px solid #333;
+    width: 100%;
+    max-width: 400px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+/* --- OVERRIDES (SOBREESCRIBIR) MATERIAL UI --- */
+/* Esto es necesario porque sin tema JS, MUI cree que es fondo blanco */
+
+/* Color del texto que escribes */
+.login-card .MuiInputBase-input {
+    color: white !important;
+}
+
+/* Color de la etiqueta (Label) */
+.login-card .MuiInputLabel-root {
+    color: #aaaaaa !important;
+}
+
+.login-card .MuiInputLabel-root.Mui-focused {
+    color: #90caf9 !important;
+    /* Azul al hacer click */
+}
+
+/* Color del borde del input */
+.login-card .MuiOutlinedInput-notchedOutline {
+    border-color: #444444 !important;
+}
+
+.login-card .MuiOutlinedInput-root:hover .MuiOutlinedInput-notchedOutline {
+    border-color: #ffffff !important;
+    /* Borde blanco al pasar ratón */
+}
+
+.login-card .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline {
+    border-color: #90caf9 !important;
+    /* Borde azul al escribir */
+}
