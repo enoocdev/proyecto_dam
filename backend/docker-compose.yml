@@ -1,18 +1,33 @@
-services:
-  # --- SERVICIO DE BASE DE DATOS (PostgreSQL) ---
-  db:
-    image: postgres:16-alpine  # Versión ligera y estable (LTS de facto)
-    container_name: PostgreSQL
-    restart: always
-    environment:
-      POSTGRES_DB: djangoprueba
-      POSTGRES_USER: admin
-      POSTGRES_PASSWORD: abc123.
-    ports:
-      - "5432:5432"
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
+version: '3.8'
 
-# Definición de volúmenes para que los datos no se borren al apagar
+services:
+  # --- SERVICIO 1: BASE DE DATOS (PostgreSQL) ---
+  db:
+    image: postgres:15
+    restart: always
+    volumes:
+      # Esto crea un "disco duro" virtual para que no pierdas los datos al apagar
+      - postgres_data:/var/lib/postgresql/data
+    env_file:
+      - .env  # Lee tu archivo .env para saber usuario y contraseña
+    ports:
+      - "5432:5432" # Te permite conectar DBeaver o TablePlus desde fuera
+
+  # --- SERVICIO 2: TU APP DJANGO ---
+  backend:
+    build:
+      context: .              # La "cámara" mira desde la raíz del proyecto
+      dockerfile: docker/Dockerfile  # Busca el archivo de instrucciones dentro de la carpeta docker
+    command: python manage.py runserver 0.0.0.0:8000
+    volumes:
+      - .:/app                # "Espejo" de tu código en tiempo real
+    ports:
+      - "8000:8000"
+    env_file:
+      - .env                  # Carga las mismas variables (SECRET_KEY, DEBUG, etc)
+    depends_on:
+      - db                    # Espera a que la base de datos exista antes de arrancar
+
+# Definición del volumen persistente para la DB
 volumes:
   postgres_data:
