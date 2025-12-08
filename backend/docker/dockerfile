@@ -15,7 +15,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 COPY . /app/
 
-COPY entrypoint.sh /init.sh
+COPY docker/init.sh /init.sh
 RUN chmod +x /init.sh
 
 EXPOSE 8000
