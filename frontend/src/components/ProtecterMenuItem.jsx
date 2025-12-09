@@ -14,7 +14,7 @@ function  ProtecterMenuItem ({ item }){
     const [mostrar, setMostrar] = useState(true)
     
     useEffect(()=>{
-        const a = async() =>{
+        const fetch = async() =>{
         try{
             await api.get(item.apiPath)
 
@@ -25,7 +25,7 @@ function  ProtecterMenuItem ({ item }){
         
         }
 
-        a()
+        fetch()
     },[item.apiPath])
     
     

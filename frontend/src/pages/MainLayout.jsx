@@ -15,6 +15,9 @@ import ProfileIcon from '@mui/icons-material/Person';
 import DashboardIcon from '@mui/icons-material/Dashboard';
 import SchoolIcon from '@mui/icons-material/School';
 import RouterIcon from '@mui/icons-material/Router';
+import PeopleIcon from '@mui/icons-material/People';
+import GroupsIcon from '@mui/icons-material/Groups';
+import VpnKeyIcon from '@mui/icons-material/VpnKey';
 
 import "../styles/MainLayout.css";
 
@@ -28,7 +31,11 @@ function MainLayout() {
         { text: "Dashboard", icon: <DashboardIcon />, path: "/", apiPath : "/devices/devices/"},
         { text: "Classroom", icon: <SchoolIcon />, path: "/classroom", apiPath : "/devices/classroom/"},
         { text: "Switchs / routers", icon: <RouterIcon />, path: "/network-device",apiPath : "/devices/network-device/"},
-        { text: "permisos", icon: <RouterIcon />, path: "/permissions",apiPath : "/permissions/"}
+        { text: "Usuarios", icon: <PeopleIcon />, path: "/users",apiPath : "/users/"},
+        { text: "Grupos", icon: <GroupsIcon />, path: "/users-groups",apiPath : "/users-groups/"},
+        { text: "Permisos", icon: <VpnKeyIcon />, path: "/permissions",apiPath : "/permissions/"}
+        
+        
     ];
 
     return (
