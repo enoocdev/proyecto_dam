@@ -1,7 +1,9 @@
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Outlet } from "react-router-dom";
 import Login from "./pages/Login";
 import Logout from "./components/Logout";
+import Profile from "./pages/Profile";
 import ProtectedRoute from "./components/ProtecterRoute";
+import MainLayout from "./pages/MainLayout";
 import "./App.css"
 
 function App() {
@@ -11,11 +13,12 @@ function App() {
       <Routes>
         <Route path="/login" element={<Login />} />
         <Route path="/logout" element={<Logout />} />
-        <Route element={<ProtectedRoute><div>Cargando Django ...</div></ProtectedRoute>} >
+        <Route element={<ProtectedRoute><MainLayout/></ProtectedRoute>} >
           <Route path="/" element={<div>Dashboard ...</div>} />
-          <Route path="/profile" element={<div>Profile ...</div>} />
+          <Route path="/classroom" element={<div>classrooms ...</div>} />
+          <Route path="/network-device" element={<div>network-device ...</div>} />
+          <Route path="/profile" element={<Profile/>} />
         </Route>
-
       </Routes>
     </BrowserRouter>
   )

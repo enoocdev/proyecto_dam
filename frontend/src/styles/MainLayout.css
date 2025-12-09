@@ -1,0 +1,130 @@
+/* src/styles/MainLayout.css */
+
+:root {
+    /* Paleta de Colores Modernos */
+    --bg-app: #121212;
+    /* Fondo principal (casi negro) */
+    --bg-sidebar: #1e1e1e;
+    /* Fondo barra lateral (gris oscuro) */
+    --text-primary: #ffffff;
+    /* Texto blanco */
+    --text-secondary: #a1a1aa;
+    /* Texto gris suave */
+    --accent-color: #8b5cf6;
+    /* Violeta neón para el estado activo */
+    --accent-bg: rgba(139, 92, 246, 0.15);
+    /* Fondo semitransparente para activo */
+    --hover-bg: rgba(255, 255, 255, 0.05);
+    /* Efecto hover sutil */
+    --danger-color: #ef4444;
+    /* Rojo para cerrar sesión */
+}
+
+/* --- ESTRUCTURA GENERAL --- */
+
+.layout-root {
+    display: flex;
+    min-height: 100vh;
+    background-color: var(--bg-app);
+    overflow: hidden;
+    /* Evita scrollbars dobles */
+}
+
+.layout-content {
+    flex-grow: 1;
+    padding: 32px;
+    background-color: var(--bg-app);
+    color: var(--text-primary);
+    overflow-y: auto;
+    /* Scroll solo en el contenido */
+    height: 100vh;
+}
+
+/* --- BARRA LATERAL (DRAWER) --- */
+
+/* Sobreescribimos los estilos por defecto de MUI */
+.layout-drawer .MuiDrawer-paper {
+    background-color: var(--bg-sidebar) !important;
+    color: var(--text-primary) !important;
+    border-right: 1px solid #333 !important;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    /* Empuja el footer abajo */
+}
+
+.sidebar-header {
+    padding: 24px;
+    border-bottom: 1px solid #333;
+    margin-bottom: 16px;
+}
+
+/* --- BOTONES DEL MENÚ --- */
+
+/* Estilo base del botón */
+.menu-item-btn {
+    border-radius: 12px !important;
+    /* Bordes redondeados modernos */
+    margin: 4px 12px !important;
+    /* Margen para que no toque los bordes */
+    transition: all 0.3s ease !important;
+    /* Animación suave */
+    color: var(--text-secondary) !important;
+}
+
+.menu-item-btn .MuiListItemIcon-root {
+    color: var(--text-secondary) !important;
+    min-width: 40px !important;
+}
+
+/* Efecto Hover (Pasar el ratón) */
+.menu-item-btn:hover {
+    background-color: var(--hover-bg) !important;
+    color: var(--text-primary) !important;
+    transform: translateX(5px);
+    /* Pequeño movimiento a la derecha */
+}
+
+.menu-item-btn:hover .MuiListItemIcon-root {
+    color: var(--text-primary) !important;
+}
+
+/* --- ESTADO ACTIVO (PÁGINA ACTUAL) --- */
+/* MUI añade la clase .Mui-selected automáticamente */
+
+.menu-item-btn.Mui-selected {
+    background-color: var(--accent-bg) !important;
+    color: var(--accent-color) !important;
+    font-weight: bold;
+}
+
+.menu-item-btn.Mui-selected .MuiListItemIcon-root {
+    color: var(--accent-color) !important;
+}
+
+/* Pequeña línea decorativa a la izquierda cuando está activo */
+.menu-item-btn.Mui-selected::before {
+    content: '';
+    position: absolute;
+    left: -12px;
+    height: 60%;
+    width: 4px;
+    background-color: var(--accent-color);
+    border-radius: 0 4px 4px 0;
+}
+
+.menu-item-btn.Mui-selected:hover {
+    background-color: var(--accent-bg) !important;
+}
+
+/* --- BOTÓN DE CERRAR SESIÓN --- */
+/* Un estilo especial para el logout */
+
+.logout-btn:hover {
+    background-color: rgba(239, 68, 68, 0.1) !important;
+    color: var(--danger-color) !important;
+}
+
+.logout-btn:hover .MuiListItemIcon-root {
+    color: var(--danger-color) !important;
+}

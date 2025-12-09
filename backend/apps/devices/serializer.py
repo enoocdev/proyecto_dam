@@ -28,6 +28,7 @@ class NetworkDeviceSerializer(serializers.ModelSerializer):
         extra_kwargs = {
             'password': {'write_only': True},
             'api_port': {'required': False}, 
+            
         }
 
 class DeviceSerializer(serializers.ModelSerializer):
@@ -55,6 +56,10 @@ class DeviceSerializer(serializers.ModelSerializer):
                 'hostname', "classroom_url" , 'classroom', "network_device_url" ,"connected_device", 
                 "switch_port", "is_online", "is_internet_blocked"]
         extra_kwargs = {
+            'mac': {'read_only': True},
+            "hostname" : {'read_only': True},
+            'is_online': {'read_only': True},
+            "is_internet_blocked" : {'read_only': True},
             'classroom': {'write_only': True},
             "connected_device" : {'write_only': True},
             'switch_port': {'read_only': False}, 
