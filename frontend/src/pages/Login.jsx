@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import api from "../api";
-import { ACCESS_TOKEN, REFRESH_TOKEN } from "../constants";
+import { ACCESS_TOKEN, REFRESH_TOKEN , USER_PERMISSIONS} from "../constants";
 
 import { TextField, Button, Alert, CircularProgress, Typography } from "@mui/material";
 import "../styles/Login.css";
@@ -27,6 +27,12 @@ function Login() {
             const res = await api.post("/token/", credentials);
             localStorage.setItem(ACCESS_TOKEN, res.data.access);
             localStorage.setItem(REFRESH_TOKEN, res.data.refresh);
+            const userData = {
+                is_superuser: res.data.is_superuser,
+                permissions: res.data.permissions,
+                username: res.data.username
+            }
+            localStorage.setItem(USER_PERMISSIONS, userData)
             navigate("/");
         } catch (err) {
             if (err.response && err.response.status === 401) {

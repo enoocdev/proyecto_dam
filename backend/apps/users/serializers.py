@@ -2,6 +2,7 @@
 from django.contrib.auth.models import Permission, Group
 from rest_framework import serializers
 from django.contrib.auth import get_user_model
+from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 
 User = get_user_model()
 
@@ -76,3 +77,26 @@ class GroupSerializer(serializers.ModelSerializer):
     class Meta:
         model = Group
         fields = "__all__"
+
+
+
+
+class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
+
+    @classmethod
+    def get_token(cls, user):
+        token = super().get_token(user)
+
+        
+        token['username'] = user.username
+        token['is_superuser'] = user.is_superuser
+        return token
+
+    def validate(self, attrs):
+
+        data = super().validate(attrs)
+        data['is_superuser'] = self.user.is_superuser
+        data['permissions'] = list(self.user.get_all_permissions())
+        data['username'] = self.user.username
+
+        return data
