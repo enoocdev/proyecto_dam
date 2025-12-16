@@ -16,6 +16,18 @@ class UserSerializer(serializers.ModelSerializer):
             'groups': {'required': False}, 
         }
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        request = self.context.get('request')
+
+        if request and hasattr(request, 'user'):
+            if not request.user.is_staff:
+                self.fields.pop('is_active', None)
+
+        
+
+        
+
 
     def validate(self, data):
 

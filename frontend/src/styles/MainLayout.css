@@ -21,7 +21,11 @@
 }
 
 /* --- ESTRUCTURA GENERAL --- */
-
+.MainContainer{
+    margin: 0;
+    padding: 20px;
+    height: 100%;
+}
 .layout-root {
     display: flex;
     min-height: 100vh;
@@ -32,7 +36,6 @@
 
 .layout-content {
     flex-grow: 1;
-    padding: 32px;
     background-color: var(--bg-app);
     color: var(--text-primary);
     overflow-y: auto;

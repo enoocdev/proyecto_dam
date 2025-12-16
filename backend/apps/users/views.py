@@ -1,5 +1,5 @@
 from  rest_framework import viewsets
-from rest_framework.permissions import IsAdminUser , IsAuthenticated
+from rest_framework.permissions import IsAdminUser , IsAuthenticated, DjangoModelPermissions
 from ..users.permissions import IsOwnerOrAdmin, StrictDjangoModelPermissions
 from .serializers import UserPermisionsSerializer, GroupSerializer, UserSerializer, CustomTokenObtainPairSerializer
 from django.contrib.auth.models import Permission, Group
@@ -19,7 +19,7 @@ class CustomTokenObtainPairView(TokenObtainPairView):
 class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
-    permission_classes = [IsAuthenticated,StrictDjangoModelPermissions, IsOwnerOrAdmin]
+    permission_classes = [IsAuthenticated, IsOwnerOrAdmin , DjangoModelPermissions]
 
     def get_queryset(self):
         user = self.request.user

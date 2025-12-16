@@ -24,6 +24,7 @@ const useEndpointPermission = (endpoint) => {
 
             setPermissions(
                 {
+                    canRead : allow.includes("GET"),
                     canCreate : allow.includes("POST"),
                     canUpdate : allow.includes("PUT") || allow.includes("PATCH"),
                     canDelete : allow.includes("DELETE"),

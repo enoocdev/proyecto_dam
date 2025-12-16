@@ -1,0 +1,217 @@
+/* src/pages/Profile.css */
+
+/* --- CONTENEDOR DE LA PÁGINA (Centrado Absoluto) --- */
+.profile-container {
+    height: 100vh;
+    width: 100%;
+    background-color: var(--bg-app, #121212); /* Fondo oscuro de la app */
+    display: flex;
+    align-items: center; /* Centrar verticalmente */
+    justify-content: center; /* Centrar horizontalmente */
+    padding: 2rem;
+    box-sizing: border-box;
+}
+
+/* --- LA TARJETA ÚNICA (Layout Principal) --- */
+.main-card {
+    width: 100%;
+    max-width: 1400px; /* Muy ancho */
+    height: 85vh; /* Ocupa el 85% del alto de la pantalla */
+    background-color: #1e1e1e !important;
+    border: 1px solid #333;
+    border-radius: 24px !important;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6) !important;
+    display: flex;
+    overflow: hidden; /* Para que nada se salga de los bordes redondeados */
+}
+
+/* --- COLUMNA IZQUIERDA (Avatar y Resumen) --- */
+.left-pane {
+    width: 350px; /* Ancho fijo para la izquierda */
+    background-color: #171717; /* Un poco más oscuro para diferenciar */
+    border-right: 1px solid #333;
+    padding: 2.5rem 2rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start; /* IMPORTANTE: Todo arriba */
+    flex-shrink: 0;
+}
+
+/* Avatar pegado arriba */
+.profile-avatar {
+    border: 4px solid #1e1e1e;
+    box-shadow: 0 0 25px rgba(139, 92, 246, 0.2);
+    margin-bottom: 1.5rem;
+    transition: transform 0.3s ease;
+}
+
+.profile-avatar:hover {
+    transform: scale(1.05);
+}
+
+/* --- COLUMNA DERECHA (Formulario) --- */
+.right-pane {
+    flex-grow: 1; /* Ocupa el resto del ancho */
+    padding: 3rem;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    overflow-y: auto; /* Scroll si la pantalla es muy bajita */
+}
+
+/* Área de inputs */
+.form-content {
+    flex-grow: 1; /* Empuja el botón hacia abajo */
+}
+
+/* Área del botón (Pegado abajo) */
+.form-actions {
+    margin-top: auto; /* Magia de Flexbox: empuja esto al final */
+    display: flex;
+    justify-content: flex-end; /* Botón a la derecha */
+    padding-top: 2rem;
+    border-top: 1px solid #333;
+}
+
+/* --- ESTILOS DE TEXTO E INPUTS (Blanco forzado) --- */
+.section-title {
+    color: #8b5cf6;
+    font-weight: 600 !important;
+    margin-bottom: 1.5rem !important;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 1.2rem !important;
+}
+
+.white-text {
+    color: #ffffff !important;
+}
+
+.grey-text {
+    color: #a1a1aa !important;
+}
+
+/* Chips Personalizados */
+.status-chip {
+    width: 100%;
+    margin-top: 1rem !important;
+    background-color: rgba(16, 185, 129, 0.1) !important;
+    color: #34d399 !important;
+    border: 1px solid rgba(16, 185, 129, 0.2) !important;
+    font-weight: bold !important;
+}
+
+.group-chip {
+    background-color: rgba(139, 92, 246, 0.1) !important;
+    color: #c4b5fd !important;
+    border: 1px solid rgba(139, 92, 246, 0.2) !important;
+}
+
+/* Inputs Material UI Dark Mode */
+.profile-input .MuiInputBase-root {
+    color: #ffffff !important;
+    background-color: #262626; /* Fondo input ligeramente más claro que el card */
+    border-radius: 8px;
+}
+.profile-input .MuiInputLabel-root { color: #888 !important; }
+.profile-input .MuiInputLabel-root.Mui-focused { color: #8b5cf6 !important; }
+.profile-input .MuiOutlinedInput-notchedOutline { border-color: #444 !important; }
+.profile-input:hover .MuiOutlinedInput-notchedOutline { border-color: #666 !important; }
+
+/* Responsive para móvil */
+@media (max-width: 900px) {
+    .main-card {
+        flex-direction: column;
+        height: auto;
+        overflow: visible;
+    }
+    .left-pane {
+        width: 100%;
+        border-right: none;
+        border-bottom: 1px solid #333;
+    }
+    .profile-container {
+        height: auto;
+        padding: 1rem;
+        display: block;
+    }
+}
+
+
+
+
+/* --- GOD MODE STYLES --- */
+
+/* 1. Definimos la animación */
+@keyframes godPulse {
+    0% { box-shadow: 0 0 10px #FFD700; }
+    50% { box-shadow: 0 0 25px #FFD700, 0 0 10px #ffffff; } /* Pico brillante */
+    100% { box-shadow: 0 0 10px #FFD700; }
+}
+
+/* 2. Definimos la clase del Chip */
+.god-mode-chip {
+    background: linear-gradient(45deg, #FFD700 30%, #FF8C00 90%) !important;
+    color: #000 !important;
+    font-weight: 900 !important; /* Extra bold */
+    border: 2px solid #FFFF00 !important;
+    padding: 0 5px !important;
+    height: 32px !important;
+    margin-top: 30px; /* Separación si lo pones bajo el nombre */
+    
+    /* Aquí aplicamos la animación definida arriba */
+    animation: godPulse 2s infinite ease-in-out !important;
+}
+
+/* Ajuste para el icono del rayo dentro del chip */
+.god-mode-chip .MuiChip-icon {
+    color: #000 !important;
+    font-size: 1.5rem !important;
+}
+
+.god-mode-chip .MuiChip-label {
+    padding-left: 8px !important;
+    padding-right: 12px !important;
+    letter-spacing: 1px !important;
+}
+
+
+
+
+/* --- TARJETA DE ERROR (Añadir al final de Profile.css) --- */
+.error-card {
+    /* Mismo fondo que la tarjeta principal y la barra lateral */
+    background-color: var(--bg-sidebar, #1e1e1e) !important;
+    
+    /* Borde rojo para indicar error */
+    border: 2px solid #692828; 
+    
+    /* Mismo redondeo que la tarjeta principal */
+    border-radius: 24px !important;
+    
+    /* Espaciado interno generoso */
+    padding: 4rem 3rem;
+    
+    /* Centrado del contenido */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    
+    /* Sombra roja suave (en lugar de la violeta normal) */
+    box-shadow: 0 10px 40px rgba(239, 68, 68, 0.2) !important;
+    
+    /* Tamaño */
+    max-width: 450px;
+    width: 90%;
+    /* Animación de entrada suave (opcional) */
+    animation: fadeIn 0.5s ease-out;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
