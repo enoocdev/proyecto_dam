@@ -1,0 +1,38 @@
+/* src/pages/Groups.css */
+
+.groups-container {
+    padding: 3rem;
+    background-color: var(--bg-app, #121212);
+    color: #ffffff;
+    overflow-y: auto;
+}
+
+.groups-header {
+    margin-bottom: 2rem;
+    border-bottom: 1px solid #333;
+    padding-bottom: 1rem;
+}
+
+/* --- FILA DE GRUPO (ESTILO LINEAL) --- */
+.group-row {
+    background-color: #1e1e1e !important;
+    border: 1px solid #333;
+    border-radius: 8px !important; /* Bordes un poco menos redondos para listas */
+    padding: 1rem 1.5rem; /* Padding reducido para que sea más estrecho */
+    margin-bottom: 0.8rem;
+    
+    /* MAGIA PARA UNA SOLA LÍNEA */
+    display: flex;
+    align-items: center; /* Centrar verticalmente */
+    justify-content: space-between; /* Separar Nombre de Icono/Chips */
+    gap: 20px;
+    
+    transition: all 0.2s ease-in-out;
+    cursor: pointer;
+}
+
+.group-row:hover {
+    border-color: #8b5cf6;
+    background-color: #252525 !important; /* Ligero cambio de fondo */
+}
+

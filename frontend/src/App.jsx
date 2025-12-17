@@ -5,6 +5,7 @@ import Profile from "./pages/Profile";
 import ProtectedRoute from "./components/ProtecterRoute";
 import MainLayout from "./pages/MainLayout";
 import "./App.css"
+import UserGroups from "./pages/UserGroups";
 
 function App() {
 
@@ -19,7 +20,7 @@ function App() {
           <Route path="/network-device" element={<div>network-device ...</div>} />
           <Route path="/profile" element={<Profile/>} />
           <Route path="/users" element={<div>users ...</div>} />
-          <Route path="/users-groups" element={<div>users-groups ...</div>} />
+          <Route path="/users-groups" element={<UserGroups/>} />
           <Route path="/permissions" element={<div>permissions ...</div>} />
         </Route>
       </Routes>

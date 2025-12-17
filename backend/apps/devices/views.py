@@ -8,17 +8,17 @@ from .permissions import StrictDjangoModelPermissions
 
 class DevicesViewSet(viewsets.ModelViewSet):
     queryset = Device.objects.all()
-    permission_classes = [IsAuthenticated, StrictDjangoModelPermissions]
+    permission_classes = [StrictDjangoModelPermissions, IsAuthenticated ]
     serializer_class = DeviceSerializer
 
 class NetworkDevicViewSet(viewsets.ModelViewSet):
     queryset = NetworkDevice.objects.all()
-    permission_classes = [IsAuthenticated, StrictDjangoModelPermissions]
+    permission_classes = [StrictDjangoModelPermissions, IsAuthenticated]
     serializer_class = NetworkDeviceSerializer
 
 class ClassroomViewSet(viewsets.ModelViewSet):
     queryset = Classroom.objects.all()
-    permission_classes = [IsAuthenticated, StrictDjangoModelPermissions]
+    permission_classes = [StrictDjangoModelPermissions, IsAuthenticated ]
     serializer_class = ClassroomSerializer
 
 

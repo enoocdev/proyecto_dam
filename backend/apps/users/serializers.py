@@ -88,6 +88,7 @@ class UserPermisionsSerializer(serializers.ModelSerializer):
 class GroupSerializer(serializers.ModelSerializer):
     class Meta:
         model = Group
+        depth = 1
         fields = "__all__"
 
 
