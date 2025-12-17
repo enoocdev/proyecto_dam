@@ -6,31 +6,36 @@ import {
     ListItemText,
 } from "@mui/material";
 import "../styles/MainLayout.css";
-import api from "../api";
+import useEndpointPermission from "../hooks/useEndpointPermissions";
 import { useEffect, useState } from "react";
+import { ACCESS_TOKEN } from "../constants";
 
 function  ProtecterMenuItem ({ item }){
     const location = useLocation()
-    const [mostrar, setMostrar] = useState(true)
+    const token = localStorage.getItem(ACCESS_TOKEN)
+    const {is_superuser} = token
+    // const [mostrar, setMostrar] = useState(true)
+    const { canRead } = useEndpointPermission(item.apiPath)
     
-    useEffect(()=>{
-        const fetch = async() =>{
-        try{
-            await api.get(item.apiPath)
+    
+    
+    // useEffect(()=>{
+    //     const fetch = async() =>{
+    //     try{
+    //         await api.get(item.apiPath)
 
-        }catch(ex){
-            console.log(`Ocultando ${item.text} por error:`, ex.response?.status);
-            setMostrar(false)
-        }
+    //     }catch(ex){
+    //         console.log(`Ocultando ${item.text} por error:`, ex.response?.status);
+    //         setMostrar(false)
+    //     }
         
-        }
+    //     }
 
-        fetch()
-    },[item.apiPath])
-    
+    //     fetch()
+    // },[item.apiPath])
     
 
-    if (!mostrar) return null;
+    if (!canRead && !is_superuser) return null;
 
     return (
         <ListItem disablePadding>

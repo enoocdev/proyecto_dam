@@ -32,7 +32,7 @@ function MainLayout() {
         { text: "Classroom", icon: <SchoolIcon />, path: "/classroom", apiPath : "/devices/classroom/"},
         { text: "Switchs / routers", icon: <RouterIcon />, path: "/network-device",apiPath : "/devices/network-device/"},
         { text: "Usuarios", icon: <PeopleIcon />, path: "/users",apiPath : "/users/"},
-        { text: "Grupos", icon: <GroupsIcon />, path: "/users-groups",apiPath : "/users-groups/"},
+        { text: "Grupos", icon: <GroupsIcon />, path: "/users-groups", apiPath : "/users-groups/"},
         { text: "Permisos", icon: <VpnKeyIcon />, path: "/permissions",apiPath : "/permissions/"}
         
         
