@@ -33,11 +33,11 @@ class UserViewSet(viewsets.ModelViewSet):
 class UserPermissionsView(viewsets.ModelViewSet):
     queryset = Permission.objects.all()
     serializer_class = UserPermisionsSerializer
-    permission_classes = [StrictDjangoModelPermissions,IsAdminUser]
+    permission_classes = [StrictDjangoModelPermissions, IsAdminUser]
 
 class UserGroupView(viewsets.ModelViewSet):
     queryset = Group.objects.all()
     serializer_class = GroupSerializer
-    permission_classes = [StrictDjangoModelPermissions,IsAdminUser]
+    permission_classes = [StrictDjangoModelPermissions, IsAdminUser]
 
 

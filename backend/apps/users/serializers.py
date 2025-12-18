@@ -10,11 +10,18 @@ class UserSerializer(serializers.ModelSerializer):
     password_validator = serializers.CharField(write_only=True, required=False)
     class Meta:
         model = User
-        fields = ["id", "email", "first_name", "last_name" ,"username", "password", "password_validator", "is_active", "groups"]
+        fields = ["id", "email", "first_name", "last_name" ,"username", "password", "password_validator", "is_active", "is_staff", "groups"]
         extra_kwargs = {
             'password': {'write_only': True},
             'groups': {'required': False}, 
         }
+    
+    def to_representation(self, instance):
+        response = super().to_representation(instance)
+        
+        response['groups'] = GroupSimpleSerializer(instance.groups.all(), many=True).data
+        
+        return response
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -23,6 +30,7 @@ class UserSerializer(serializers.ModelSerializer):
         if request and hasattr(request, 'user'):
             if not request.user.is_staff:
                 self.fields.pop('is_active', None)
+                self.fields.pop('is_staff', None)
 
         
 
@@ -86,10 +94,23 @@ class UserPermisionsSerializer(serializers.ModelSerializer):
 
 
 class GroupSerializer(serializers.ModelSerializer):
+
+
     class Meta:
         model = Group
-        depth = 1
-        fields = "__all__"
+        fields = ["id", "name", "permissions"]
+
+    def to_representation(self, instance):
+        response = super().to_representation(instance)
+        
+        response['permissions'] = UserPermisionsSerializer(instance.permissions.all(), many=True).data
+        
+        return response
+        
+class GroupSimpleSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Group
+        fields = ['id', 'name']
 
 
 
@@ -101,7 +122,7 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
         token = super().get_token(user)
 
         
-        token['username'] = user.username
+        token['is_staff'] = user.is_staff
         token['is_superuser'] = user.is_superuser
         return token
 
@@ -109,7 +130,8 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
 
         data = super().validate(attrs)
         data['is_superuser'] = self.user.is_superuser
+        data['is_staff'] = self.user.is_staff
         data['permissions'] = list(self.user.get_all_permissions())
-        data['username'] = self.user.username
+        
 
         return data

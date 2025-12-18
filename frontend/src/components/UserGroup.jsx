@@ -1,16 +1,16 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 
 import {
     Box, Typography, Paper, Chip, Dialog, DialogTitle, 
-    DialogContent, DialogActions, Button, TextField, IconButton
+    DialogContent, DialogActions, Button, TextField, IconButton,Menu 
 } from '@mui/material';
 
-import SecurityIcon from '@mui/icons-material/Security';
+
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
+import AddIcon from '@mui/icons-material/Add';
 
 import CloseIcon from '@mui/icons-material/Close';
-import "../styles/UserGroup.css"
 
 
 function UserGroup({group}){
@@ -23,7 +23,10 @@ function UserGroup({group}){
             permissions : group.permissions
         }
     )
-    const[permissionsName, setPermisionsName]= useState()
+    const [anchorEl, setAnchorEl] = useState(null);
+
+    const handleOpenMenu = (event) => setAnchorEl(event.currentTarget);
+    const handleCloseMenu = () => setAnchorEl(null);
 
     const handleOpenGroup = () => {
         setOpen(true);
@@ -60,10 +63,10 @@ function UserGroup({group}){
 
                     {/* 2. PERMISOS (Centro/Derecha - Scrollable horizontalmente) */}
                     <div className="permissions-container">
-                        {localGroup.permissions.map((perm, idx) => (
+                        {localGroup.permissions.map((perm) => (
                             <Chip 
-                                key={idx} 
-                                label={perm} 
+                                key={perm.id} 
+                                label={perm.name} 
                                 className="permission-chip" 
                                 size="small"    
                             />
@@ -96,9 +99,37 @@ function UserGroup({group}){
                             <Box>
                                 <Typography variant="caption" sx={{ color: '#8b5cf6', mb: 1, display: 'block' }}>PERMISOS</Typography>
                                 <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
-                                    {localGroup.permissions.map((perm, idx) => (
-                                        <Chip key={idx} label={perm} className="permission-chip" />
+                                    {localGroup.permissions.map((perm) => (
+                                        <Chip 
+                                            key={perm.id} 
+                                            label={perm.name} 
+                                            className="permission-chip" 
+                                            size="small" 
+                                            onDelete={() => handleDeletePermission(perm.id)}
+                                            sx={{
+                                                backgroundColor: 'rgba(139, 92, 246, 0.15)',
+                                                color: '#a78bfa',
+                                                border: '1px solid rgba(139, 92, 246, 0.3)',
+                                                '& .MuiChip-deleteIcon': {
+                                                    color: '#a78bfa',
+                                                    '&:hover': { color: '#ff4d4d' }
+                                                }
+                                            }}
+                                        />
                                     ))}
+                                    <IconButton
+                                    onClick={(handleOpenMenu)}
+                                    size="small"
+                                    sx={{
+                                        bgcolor: '#2b2d31',
+                                        color: '#8b5cf6',
+                                        border: '1px dashed #555',
+                                        width: 32, height: 32,
+                                        '&:hover': { bgcolor: '#8b5cf6', color: '#fff', borderColor: '#8b5cf6' }
+                                    }}
+                                    >
+                                        <AddIcon fontSize="small" />
+                                    </IconButton>
                                 </Box>
                             </Box>
                         </Box>
@@ -107,6 +138,37 @@ function UserGroup({group}){
                         <Button startIcon={<DeleteIcon />} color="error" onClick={handleDeleteGroup}>Eliminar</Button>
                         <Button variant="contained" onClick={handleSaveChanges} sx={{ bgcolor: '#8b5cf6', '&:hover': { bgcolor: '#7c3aed' } }}>Guardar</Button>
                     </DialogActions>
+                    <Menu
+                        anchorEl={anchorEl}
+                        open={Boolean(anchorEl)}
+                        onClose={handleCloseMenu}
+                        PaperProps={{
+                            sx: {
+                                bgcolor: '#1e1e1e', color: '#fff', border: '1px solid #333',
+                                minWidth: 200, maxHeight: 300, mt: 1
+                            }
+                        }}
+                    >
+                        {/* {avaliablePermissions.length > 0 ? (
+                            avaliablePermissions.map((perm) => (
+                                <MenuItem
+                                    key={perm.id}
+                                    onClick={() => handleAddPermission(perm)}
+                                    sx={{ '&:hover': { bgcolor: '#333' }, gap: 1, fontSize: '0.9rem' }}
+                                >
+                                    <Box sx={{ width: 8, height: 8, borderRadius: '50%', bgcolor: '#8b5cf6' }} />
+                                    {perm.name}
+                                </MenuItem>
+                            ))
+                        ) : (
+                            <Typography variant="caption" sx={{ p: 2, display: 'block', textAlign: 'center', color: '#666' }}>
+                                No hay permisos disponibles
+                            </Typography>
+                        )} */}
+                        <Typography variant="caption" sx={{ p: 2, display: 'block', textAlign: 'center', color: '#666' }}>
+                                No hay permisos disponibles
+                        </Typography>
+                    </Menu>
                 </Dialog>
         </div>
     )

@@ -1,38 +1,136 @@
-/* src/pages/Groups.css */
+/* =========================================
+   1. LAYOUT PRINCIPAL (PÁGINA)
+   ========================================= */
 
 .groups-container {
     padding: 3rem;
+    height: 100vh; /* Ocupa toda la altura */
+    width: 100%;
     background-color: var(--bg-app, #121212);
     color: #ffffff;
-    overflow-y: auto;
+    overflow-y: auto; /* Scroll para la página entera si hace falta */
+    box-sizing: border-box;
 }
 
 .groups-header {
     margin-bottom: 2rem;
     border-bottom: 1px solid #333;
     padding-bottom: 1rem;
+    
+    /* Mejora: Alineación perfecta entre título y botón */
+    display: flex;
+    justify-content: space-between;
+    align-items: center; 
 }
 
-/* --- FILA DE GRUPO (ESTILO LINEAL) --- */
+/* =========================================
+   2. COMPONENTE FILA (TARJETA DE GRUPO)
+   ========================================= */
+
 .group-row {
     background-color: #1e1e1e !important;
     border: 1px solid #333;
-    border-radius: 8px !important; /* Bordes un poco menos redondos para listas */
-    padding: 1rem 1.5rem; /* Padding reducido para que sea más estrecho */
-    margin-bottom: 0.8rem;
+    border-radius: 12px !important; /* Bordes un poco más suaves */
+    padding: 1rem 1.5rem;
+    margin-bottom: 12px; /* Espacio constante entre filas */
     
-    /* MAGIA PARA UNA SOLA LÍNEA */
+    /* DISEÑO LINEAL (FLEXBOX) */
     display: flex;
-    align-items: center; /* Centrar verticalmente */
-    justify-content: space-between; /* Separar Nombre de Icono/Chips */
+    align-items: center; 
+    justify-content: space-between;
     gap: 20px;
     
-    transition: all 0.2s ease-in-out;
+    /* Animaciones suaves */
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
     cursor: pointer;
+    position: relative;
 }
 
+/* Efectos al pasar el ratón (Hover) */
 .group-row:hover {
-    border-color: #8b5cf6;
-    background-color: #252525 !important; /* Ligero cambio de fondo */
+    border-color: #8b5cf6; /* Borde violeta */
+    background-color: #252525 !important;
+    transform: translateY(-2px); /* Se levanta sutilmente */
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3); /* Sombra de profundidad */
 }
 
+/* El nombre del grupo no debe romperse en dos líneas */
+.group-row .group-name {
+    min-width: 150px;
+    font-weight: bold;
+    color: #fff;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* =========================================
+   3. SECCIÓN DE PERMISOS (SCROLL HORIZONTAL)
+   ========================================= */
+
+.permissions-container {
+    display: flex;
+    gap: 8px;
+    flex-grow: 1; /* Ocupa todo el espacio central disponible */
+    justify-content: flex-end; /* Alinea los chips hacia la derecha */
+    align-items: center;
+    
+    /* Scroll horizontal invisible */
+    overflow-x: auto;
+    white-space: nowrap;
+    padding-right: 16px; /* Margen para no pegarse al icono de editar */
+    
+    /* Ocultar barra de scroll (Firefox/IE) */
+    scrollbar-width: none; 
+    -ms-overflow-style: none;
+    
+    /* Comportamiento de scroll suave */
+    scroll-behavior: smooth;
+    
+    /* Máscara de desvanecimiento opcional (avanzado) */
+    mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent);
+    -webkit-mask-image: linear-gradient(to right, transparent, black 5%, black 100%);
+}
+
+/* Ocultar scrollbar en Chrome/Safari */
+.permissions-container::-webkit-scrollbar {
+    display: none;
+}
+
+/* =========================================
+   4. CHIPS (ESTILO DISCORD/MODERNO)
+   ========================================= */
+
+.permission-chip {
+    background-color: rgba(139, 92, 246, 0.1) !important; /* Violeta transparente */
+    color: #a78bfa !important; /* Texto violeta claro */
+    border: 1px solid rgba(139, 92, 246, 0.25) !important;
+    
+    font-weight: 600 !important;
+    font-size: 0.75rem !important;
+    height: 26px !important;
+    border-radius: 6px !important; /* Menos redondo, más tech */
+    
+    cursor: default; /* Cursor normal, no de texto */
+    user-select: none; /* No seleccionable */
+    transition: background-color 0.2s ease;
+}
+
+/* Hover suave en el chip individual */
+.permission-chip:hover {
+    background-color: rgba(139, 92, 246, 0.2) !important;
+    border-color: rgba(139, 92, 246, 0.4) !important;
+}
+
+/* =========================================
+   5. MODAL (DIALOG)
+   ========================================= */
+
+.group-dialog-paper {
+    background-color: #1e1e1e !important;
+    color: #ffffff !important;
+    border: 1px solid #444;
+    border-radius: 16px !important;
+    min-width: 450px !important;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.4) !important; /* Sombra profunda */
+}

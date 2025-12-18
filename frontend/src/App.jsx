@@ -21,7 +21,6 @@ function App() {
           <Route path="/profile" element={<Profile/>} />
           <Route path="/users" element={<div>users ...</div>} />
           <Route path="/users-groups" element={<UserGroups/>} />
-          <Route path="/permissions" element={<div>permissions ...</div>} />
         </Route>
       </Routes>
     </BrowserRouter>

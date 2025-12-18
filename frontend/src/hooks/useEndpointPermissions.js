@@ -20,10 +20,10 @@ const useEndpointPermission = (endpoint) => {
             try {
                 const response = await api.options(endpoint);
                 
-                console.log(endpoint)
-                console.log(response)
+                // console.log(endpoint)
+                // console.log(response)
                 const {allow} =  response.headers
-                console.log(allow)
+                // console.log(allow)
                 const actions = response.data?.actions;
 
                 if (actions) {
@@ -45,7 +45,7 @@ const useEndpointPermission = (endpoint) => {
                 
                 
             } catch (err) {
-                console.log(err)
+                // console.log(err)
                 setPermissions({
                     canRead: false,
                     canCreate: false,
@@ -54,7 +54,7 @@ const useEndpointPermission = (endpoint) => {
                 });
             }
 
-            console.log(permissions)
+            // console.log(permissions)
             
         }
 

@@ -29,10 +29,11 @@ function Login() {
             localStorage.setItem(REFRESH_TOKEN, res.data.refresh);
             const userData = {
                 is_superuser: res.data.is_superuser,
+                is_staff: res.data.is_staff,
                 permissions: res.data.permissions,
-                username: res.data.username
+                
             }
-            localStorage.setItem(USER_PERMISSIONS, userData)
+            localStorage.setItem(USER_PERMISSIONS, JSON.stringify(userData))
             navigate("/");
         } catch (err) {
             if (err.response && err.response.status === 401) {

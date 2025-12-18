@@ -19,6 +19,7 @@ import {
 } from '@mui/material';
 
 // Iconos
+import LocalPoliceIcon from '@mui/icons-material/LocalPolice';
 import SaveIcon from '@mui/icons-material/Save';
 import VerifiedUserIcon from '@mui/icons-material/VerifiedUser';
 import BadgeIcon from '@mui/icons-material/Badge';
@@ -36,7 +37,7 @@ import { ACCESS_TOKEN } from "../constants"
 const Profile = () => {
 
     const token = localStorage.getItem(ACCESS_TOKEN)
-    const {user_id, is_superuser} = jwtDecode(token);
+    const {user_id, is_superuser, is_staff} = jwtDecode(token);
     // Estados
     const [notification, setNotification] = useState({ open: false, message: '', severity: 'success' });
     const [confirmOpen, setConfirmOpen] = useState(false);
@@ -50,6 +51,7 @@ const Profile = () => {
         email: '',
         is_active: true,
         is_superuser: false,
+        is_staff: false,
         groups: [],
         password : "",
         password_validator: ""
@@ -68,7 +70,8 @@ const Profile = () => {
                         email:  userData.data["email"],
                         is_active:  userData.data["is_active"],
                         is_superuser: is_superuser,
-                        groups:  userData.data["groups"],
+                        is_staff: is_staff,
+                        groups: [...userData.data["groups"]],
                         password : "",
                         password_validator: ""
                     }
@@ -117,6 +120,7 @@ const Profile = () => {
             delete patchUser.groups; 
             delete patchUser.is_active;
             delete patchUser.is_superuser;
+            delete patchUser.is_staff;
             if(!patchUser.password) delete patchUser.password
             if(!patchUser.password_validator) delete patchUser.password_validator
 
@@ -214,6 +218,16 @@ const Profile = () => {
                             className="god-mode-chip"
                         />
                     )}
+                    {
+                        User.is_staff &&(
+                            <Chip
+                                icon={<LocalPoliceIcon />} 
+                                label="STAFF" 
+                                className="staff-mode-chip"
+                                size="small" // Opcional: para que no sea gigante
+                            />
+                        )
+                    }
 
                     <Box sx={{ width: '100%', mt: 4 }}>
                         <Typography variant="caption" sx={{ color: '#8b5cf6', letterSpacing: 1 }}>
@@ -221,7 +235,7 @@ const Profile = () => {
                         </Typography>
                         <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, mt: 1 }}>
                             {User.groups.map((group, idx) => (
-                                <Chip key={idx} label={group} size="small" className="group-chip" />
+                                <Chip key={idx} label={group.name} size="small" className="group-chip" />
                             ))}
                         </Box>
                     </Box>
