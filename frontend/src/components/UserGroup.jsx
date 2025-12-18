@@ -2,19 +2,22 @@ import React, { useEffect, useState } from 'react';
 
 import {
     Box, Typography, Paper, Chip, Dialog, DialogTitle, 
-    DialogContent, DialogActions, Button, TextField, IconButton,Menu 
+    DialogContent, DialogActions, Button, TextField, IconButton,Menu ,MenuItem 
 } from '@mui/material';
 
 
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import AddIcon from '@mui/icons-material/Add';
-
 import CloseIcon from '@mui/icons-material/Close';
 
+import api from '../api';
 
-function UserGroup({group}){
+const API_PATH_USER_GROUPS = "/users-groups/"
 
+function UserGroup({group , allPermissions, onGroupUpdated, onGroupDelete, setNotification}){
+
+    const PERMISSIONS = allPermissions
     const [open, setOpen] = useState(false);
     const [localGroup, setLocalGroup] = useState(
         {
@@ -24,9 +27,24 @@ function UserGroup({group}){
         }
     )
     const [anchorEl, setAnchorEl] = useState(null);
+    const [avaliablePermissions, setAvaliablePermissions] = useState([]);
+    const [newName, setNewName] = useState(group.name);
+    const [permissions, setPermisions] = useState([]);
 
     const handleOpenMenu = (event) => setAnchorEl(event.currentTarget);
     const handleCloseMenu = () => setAnchorEl(null);
+
+    useEffect(() => {
+        setLocalGroup({
+            id: group.id,
+            name: group.name,
+            permissions: group.permissions
+        });
+        setPermisions([...localGroup.permissions])
+    }, [group]);
+
+
+    
 
     const handleOpenGroup = () => {
         setOpen(true);
@@ -38,15 +56,95 @@ function UserGroup({group}){
     }
 
     const handleSaveChanges = () => {
+        const newGroup  = {
+            id: group.id,
+            name: newName,
+            permissions : [...permissions.map((p)=>p.id)]
+        }
+
+        const updateGroup = async () =>{
+            
+            try{
+
+                const {status} = await api.patch(API_PATH_USER_GROUPS+`${newGroup.id}/`, newGroup)
+                console.log(newGroup)
+
+                if(status < 300){
+                    setNotification({ open: true, message: 'Grupo actualizado correctamente', severity: 'success' })
+                    onGroupUpdated({
+                        ...newGroup,
+                        permissions : permissions
+                    })
+                    setOpen(false)
+                }else{
+                    throw new Error()
+                }
+
+            }catch(err){
+                console.log(err)
+                setNotification({ open: true, message: 'No se ha podido actualizado el grupo', severity: 'error' })
+            }
+        }
+
+        
+        updateGroup()
         handleClose()    
     };
 
     const handleDeleteGroup = () => {
+        const deleteGroup = async () =>{
+            
+            try{
+                const idGrupo = localGroup.id
+                const {status} = await api.delete(API_PATH_USER_GROUPS+`${localGroup.id}/`)
 
+                if(status < 300){
+                    setNotification({ open: true, message: 'Grupo eliminado correctamente', severity: 'success' })
+                    onGroupDelete(idGrupo)
+                }else{
+                    throw new Error()
+                }
+
+            }catch(err){
+                console.log(err)
+                setNotification({ open: true, message: 'No se pudo eliminar el grupo', severity: 'error' })
+            }
+        }
+
+        deleteGroup()
         handleClose()
-
     };
     
+
+    //gestion del meno du los permisos
+        // añadir un permisos al nuevo  grupo
+        const handleAddPermission = (perm) => {
+            setPermisions(
+                [
+                    ...permissions,
+                    perm
+                ]
+            )
+        }
+        // eliminar un permisos al nuevo  grupo
+        const handleDeletePermission   = (perm) => {
+            setPermisions(
+                [
+                    ...permissions.filter((permission) => permission.id !=  perm)
+                ]
+            )
+        }
+    
+        // Ir modificando la lista de los permisos disponibles cada vez que cambia los permisos del grupo
+        useEffect(() => {
+            const currentIds = permissions.map(p => p.id);
+            setAvaliablePermissions(
+                [
+                    ...PERMISSIONS.filter((p) => !currentIds.includes(p.id))
+                ]
+            )
+            
+        }, [permissions])
 
     return(
         <div>
@@ -88,7 +186,7 @@ function UserGroup({group}){
                     <DialogContent sx={{ pt: 3 }}>
                         <Box sx={{ mt: 2, display: 'flex', flexDirection: 'column', gap: 3 }}>
                             <TextField
-                                label="Nombre" fullWidth value={localGroup.name} onChange={(e) => setLocalGroup({ ...localGroup, name: e.target.value })}
+                                label="Nombre" fullWidth value={newName} onChange={(e) => setNewName(e.target.value)}
                                 sx={{
                                     '& .MuiInputBase-root': { color: '#fff' },
                                     '& .MuiInputLabel-root': { color: '#aaa' },
@@ -99,7 +197,7 @@ function UserGroup({group}){
                             <Box>
                                 <Typography variant="caption" sx={{ color: '#8b5cf6', mb: 1, display: 'block' }}>PERMISOS</Typography>
                                 <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
-                                    {localGroup.permissions.map((perm) => (
+                                    {permissions.map((perm) => (
                                         <Chip 
                                             key={perm.id} 
                                             label={perm.name} 
@@ -149,7 +247,7 @@ function UserGroup({group}){
                             }
                         }}
                     >
-                        {/* {avaliablePermissions.length > 0 ? (
+                        {avaliablePermissions.length > 0 ? (
                             avaliablePermissions.map((perm) => (
                                 <MenuItem
                                     key={perm.id}
@@ -164,10 +262,7 @@ function UserGroup({group}){
                             <Typography variant="caption" sx={{ p: 2, display: 'block', textAlign: 'center', color: '#666' }}>
                                 No hay permisos disponibles
                             </Typography>
-                        )} */}
-                        <Typography variant="caption" sx={{ p: 2, display: 'block', textAlign: 'center', color: '#666' }}>
-                                No hay permisos disponibles
-                        </Typography>
+                        )}
                     </Menu>
                 </Dialog>
         </div>

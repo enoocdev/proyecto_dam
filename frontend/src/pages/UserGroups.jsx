@@ -42,7 +42,6 @@ const UserGroups = () => {
     const [anchorEl, setAnchorEl] = useState(null);
 
     const fetchUserGroups = async () => {
-            setloading(true)
             try {
                 const { data, status } = await api.get(API_PATH_USER_GROUPS)
                 if (status === 200) {
@@ -57,14 +56,13 @@ const UserGroups = () => {
                 setNotification({ open: true, message: 'Error al cargar los grupos', severity: 'error' })
             }
 
-
-            setloading(false)
         }
 
     useEffect(() => {
 
         const fetchPermissions = async () => {
             try {
+                setloading(true)
                 const { data, status } = await api.get(API_PATH_PERMISIONS)
                 if (status === 200) {
                     setAllPermissions(
@@ -79,19 +77,21 @@ const UserGroups = () => {
                         ]
                     )
 
-
+                    
                 }
             } catch (err) {
                 setNotification({ open: true, message: 'Error al cargar los permisos', severity: 'warning' })
             }
-
+            fetchUserGroups()
+            setloading(false)
         }
 
 
         
-
-        fetchUserGroups()
+        
+        
         fetchPermissions()
+        
 
     }, [])
 
@@ -111,7 +111,7 @@ const UserGroups = () => {
         )
     }
     // eliminar un permisos al nuevo  grupo
-    const handleDeletePermission   = (perm) => {
+    const handleDeletePermission  = (perm) => {
         setNewGroupPermisions(
             [
             ...newGroupPermisions.filter((permission) => permission.id !=  perm)
@@ -129,6 +129,19 @@ const UserGroups = () => {
         
     }, [newGroupPermisions])
 
+    const handleGroupUpdated = (updatedGroup) => {
+        
+        console.log(updatedGroup)
+        const newList = groups.map(g => 
+            g.id === updatedGroup.id ? updatedGroup : g
+        );
+        console.log(newList)
+        setGroups(newList);
+    };
+
+    const handleGroupDeleted = (idDeleted) => {
+        setGroups(prevGroups => prevGroups.filter(g => g.id !== idDeleted));
+    };
 
     const handleOpenGroup = () => {
         setOpen(true);
@@ -151,12 +164,13 @@ const UserGroups = () => {
 
         console.log(newGroup)
         const createGroup = async () =>{
+            
             try{
 
                 const {status} = await api.post(API_PATH_USER_GROUPS, newGroup)
 
                 if(status < 300){
-                    setNotification({ open: true, message: 'Grupo creado correctamente', severity: 'information' })
+                    setNotification({ open: true, message: 'Grupo creado correctamente', severity: 'success' })
                     fetchUserGroups()
                 }else{
                     throw new Error()
@@ -171,7 +185,7 @@ const UserGroups = () => {
         handleClose()
     };
 
-    const handleChangeGroup = (event) => {
+    const handleChangeName = (event) => {
         let name  = event.target.value
         setNewName(name)
     }
@@ -219,7 +233,7 @@ const UserGroups = () => {
                         </Box>
                         <div className="groups-list">
                             {groups.map((group, idx) => (
-                                <UserGroup key={idx} group={group} />
+                                <UserGroup key={idx} group={group} allPermissions={allPermissions} onGroupUpdated={handleGroupUpdated} onGroupDelete={handleGroupDeleted} setNotification={setNotification}/>
                             ))}
                         </div>
                         <Dialog open={open} onClose={handleClose} classes={{ paper: 'group-dialog-paper' }}>
@@ -233,7 +247,7 @@ const UserGroups = () => {
                                         label="Nombre del Grupo"
                                         fullWidth
                                         value={newName}
-                                        onChange={handleChangeGroup}
+                                        onChange={handleChangeName}
                                         sx={{
                                             '& .MuiInputBase-root': { color: '#fff' },
                                             '& .MuiInputLabel-root': { color: '#aaa' },
