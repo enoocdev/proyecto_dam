@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'; // Corregido: 'use' sobraba
+import React, { useEffect, useState } from 'react'; 
 import {
     Box, Typography, CircularProgress, Snackbar, Alert, Button, Dialog, 
     DialogTitle, IconButton, DialogContent, DialogActions, TextField, Chip
@@ -42,7 +42,7 @@ const UserGroups = () => {
         try {
             const { data, status } = await api.get(API_PATH_USER_GROUPS);
             if (status === 200) {
-                setGroups([...data]);
+                setGroups([...data.results]);
             }
         } catch (err) {
             setNotification({ open: true, message: 'Error al cargar los grupos', severity: 'error' });

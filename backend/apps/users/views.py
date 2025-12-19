@@ -17,7 +17,7 @@ class CustomTokenObtainPairView(TokenObtainPairView):
     serializer_class = CustomTokenObtainPairSerializer
 
 class UserViewSet(viewsets.ModelViewSet):
-    queryset = User.objects.all()
+    queryset = User.objects.all().order_by('id')
     serializer_class = UserSerializer
     permission_classes = [IsAuthenticated, IsOwnerOrAdmin , DjangoModelPermissions]
 
@@ -34,6 +34,7 @@ class UserPermissionsView(viewsets.ReadOnlyModelViewSet):
     # queryset = Permission.objects.all()
     serializer_class = UserPermisionsSerializer
     permission_classes = [StrictDjangoModelPermissions, IsAdminUser]
+    pagination_class = None
 
     # queryset filtrado para que no muestre permisos no necesarios como los permisos de sesiones ...
     def get_queryset(self):
@@ -46,7 +47,7 @@ class UserPermissionsView(viewsets.ReadOnlyModelViewSet):
         ).order_by('id')
 
 class UserGroupView(viewsets.ModelViewSet):
-    queryset = Group.objects.all()
+    queryset = Group.objects.all().order_by('id')
     serializer_class = GroupSerializer
     permission_classes = [StrictDjangoModelPermissions, IsAdminUser]
 

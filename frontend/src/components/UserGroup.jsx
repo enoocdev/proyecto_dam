@@ -111,7 +111,6 @@ function UserGroup({ group, allPermissions, onGroupUpdated, onGroupDelete, setNo
             ...permissions,
             perm
         ]);
-        handleCloseMenu(); // Cerramos el menú al seleccionar
     };
 
     const handleDeletePermission = (permId) => {
