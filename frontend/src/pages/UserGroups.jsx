@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react'; 
 import {
     Box, Typography, CircularProgress, Snackbar, Alert, Button, Dialog, 
-    DialogTitle, IconButton, DialogContent, DialogActions, TextField, Chip
+    DialogTitle, IconButton, DialogContent, DialogActions, TextField, Chip,
+    Pagination // <--- 1. IMPORTADO PAGINATION
 } from '@mui/material';
 
 import GroupIcon from '@mui/icons-material/Group';
@@ -18,15 +19,20 @@ import '../styles/UserGroups.css';
 
 const API_PATH_USER_GROUPS = "/users-groups/";
 const API_PATH_PERMISIONS = "/permissions/";
+const PAGE_SIZE = 10;
 
 const UserGroups = () => {
-    // Manejo seguro del localStorage por si es null
     const storedUser = localStorage.getItem(USER_PERMISSIONS);
     const user = storedUser ? JSON.parse(storedUser) : { permissions: [], is_superuser: false };
 
     const [loading, setloading] = useState(false);
     const [groups, setGroups] = useState([]);
     const [notification, setNotification] = useState({ open: false, message: '', severity: 'success' });
+    
+    //ESTADOS PARA PAGINACION
+    const [page, setPage] = useState(1);
+    const [totalPages, setTotalPages] = useState(1);
+
     const [allPermissions, setAllPermissions] = useState([]);
     const [avaliablePermissions, setAvaliablePermissions] = useState([]);
     
@@ -38,21 +44,31 @@ const UserGroups = () => {
     // Menu desplegable
     const [anchorEl, setAnchorEl] = useState(null);
 
-    const fetchUserGroups = async () => {
+    const fetchUserGroups = async (pageNumber = page) => {
         try {
-            const { data, status } = await api.get(API_PATH_USER_GROUPS);
+            setloading(true);
+            const { data, status } = await api.get(API_PATH_USER_GROUPS, {
+                params: { page: pageNumber }
+            });
+
             if (status === 200) {
-                setGroups([...data.results]);
+
+                setGroups(data.results);
+                
+                const total = data.count;
+                setTotalPages(Math.ceil(total / PAGE_SIZE));
             }
         } catch (err) {
+            console.error(err);
             setNotification({ open: true, message: 'Error al cargar los grupos', severity: 'error' });
+        } finally {
+            setloading(false);
         }
     };
 
     useEffect(() => {
         const fetchPermissions = async () => {
             try {
-                setloading(true);
                 const { data, status } = await api.get(API_PATH_PERMISIONS);
                 if (status === 200) {
                     setAllPermissions([...data]);
@@ -61,46 +77,45 @@ const UserGroups = () => {
             } catch (err) {
                 setNotification({ open: true, message: 'Error al cargar los permisos', severity: 'warning' });
             }
-            // Llamamos a los grupos después o en paralelo
-            await fetchUserGroups();
-            setloading(false);
         };
 
         fetchPermissions();
     }, []);
 
-    // --- Manejo del Menú ---
+    useEffect(() => {
+        fetchUserGroups(page);
+    }, [page]); 
+
+    const handlePageChange = (event, value) => {
+        setPage(value);
+    };
+
     const handleOpenMenu = (event) => setAnchorEl(event.currentTarget);
     const handleCloseMenu = () => setAnchorEl(null);
 
-    // Añadir permiso al grupo temporal
     const handleAddPermission = (perm) => {
         setNewGroupPermisions([...newGroupPermisions, perm]);
-        // handleCloseMenu(); 
     };
 
-    // Eliminar permiso del grupo temporal
     const handleDeletePermission = (permId) => {
         setNewGroupPermisions(newGroupPermisions.filter((p) => p.id !== permId));
     };
 
-    // Actualizar lista de disponibles cuando seleccionamos uno nuevo
     useEffect(() => {
-        // Filtramos usando IDs para mayor precisión
         const currentIds = newGroupPermisions.map(p => p.id);
         const available = allPermissions.filter(p => !currentIds.includes(p.id));
         setAvaliablePermissions(available);
     }, [newGroupPermisions, allPermissions]);
 
 
-    // --- Manejo de Grupos (CRUD) ---
     const handleGroupUpdated = (updatedGroup) => {
         const newList = groups.map(g => g.id === updatedGroup.id ? updatedGroup : g);
         setGroups(newList);
     };
 
     const handleGroupDeleted = (idDeleted) => {
-        setGroups(prevGroups => prevGroups.filter(g => g.id !== idDeleted));
+        //setGroups(prevGroups => prevGroups.filter(g => g.id !== idDeleted));
+        fetchUserGroups(page); 
     };
 
     const handleOpenGroup = () => setOpen(true);
@@ -121,7 +136,7 @@ const UserGroups = () => {
             const { status } = await api.post(API_PATH_USER_GROUPS, newGroup);
             if (status < 300) {
                 setNotification({ open: true, message: 'Grupo creado correctamente', severity: 'success' });
-                fetchUserGroups();
+                fetchUserGroups(page);
                 handleClose();
             } else {
                 throw new Error();
@@ -133,7 +148,8 @@ const UserGroups = () => {
 
     return (
         <div className="groups-container">
-            {loading && (
+            
+            {loading && groups.length === 0 && (
                 <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%' }}>
                     <CircularProgress sx={{ color: '#8b5cf6' }} />
                 </Box>
@@ -143,7 +159,7 @@ const UserGroups = () => {
                 <RestrictedAccess />
             )}
 
-            {!loading && (user.is_superuser || user.permissions.includes("auth.view_group")) && (
+            {(user.is_superuser || user.permissions.includes("auth.view_group")) && (
                 <>
                     <Box className="groups-header">
                         <Typography variant="h5" sx={{ fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: 1 }}>
@@ -168,6 +184,8 @@ const UserGroups = () => {
                     </Box>
 
                     <div className="groups-list">
+                        {loading && groups.length > 0 && <CircularProgress sx={{ color: '#8b5cf6' }} />}
+                        
                         {groups.map((group, idx) => (
                             <UserGroup 
                                 key={group.id || idx} 
@@ -180,7 +198,26 @@ const UserGroups = () => {
                         ))}
                     </div>
 
-                    {/* --- DIALOG CREAR GRUPO --- */}
+                    <Box sx={{ display: 'flex', justifyContent: 'center', mt: 3, pb: 2 }}>
+                        <Pagination 
+                            count={totalPages} 
+                            page={page} 
+                            onChange={handlePageChange}
+                            variant="outlined"
+                            shape="rounded"
+                            sx={{
+                                '& .MuiPaginationItem-root': { color: '#fff', borderColor: '#555' },
+                                '& .Mui-selected': { 
+                                    backgroundColor: '#8b5cf6 !important', 
+                                    borderColor: '#8b5cf6',
+                                    fontWeight: 'bold' 
+                                },
+                                '& .MuiPaginationItem-root:hover': { backgroundColor: 'rgba(139, 92, 246, 0.2)' }
+                            }}
+                        />
+                    </Box>
+
+                    {/*DIALOG CREAR GRUPO*/}
                     <Dialog open={open} onClose={handleClose} classes={{ paper: 'group-dialog-paper' }}>
                         <DialogTitle sx={{ borderBottom: '1px solid #333', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                             Crear Grupo
@@ -203,7 +240,6 @@ const UserGroups = () => {
                                 />
                                 <Box>
                                     <Typography variant="caption" sx={{ color: '#8b5cf6', mb: 1, display: 'block' }}>PERMISOS</Typography>
-
                                     <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
                                         {newGroupPermisions.map((perm) => (
                                             <Chip
@@ -221,8 +257,6 @@ const UserGroups = () => {
                                                 }}
                                             />
                                         ))}
-
-                                        {/* BOTÓN + PARA ABRIR EL MENÚ */}
                                         <IconButton
                                             onClick={handleOpenMenu}
                                             size="small"

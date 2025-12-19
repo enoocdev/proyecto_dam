@@ -4,12 +4,15 @@
 
 .groups-container {
     padding: 3rem;
-    height: 100vh; /* Ocupa toda la altura */
+    height: 100vh; /* Altura fija de la ventana */
     width: 100%;
+    display: flex;      /* Activamos Flexbox */
+    flex-direction: column; /* Dirección vertical */
     background-color: var(--bg-app, #121212);
     color: #ffffff;
-    overflow-y: auto; /* Scroll para la página entera si hace falta */
+    padding: 2rem; 
     box-sizing: border-box;
+    overflow: hidden;
 }
 
 .groups-header {
@@ -62,6 +65,11 @@
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+}
+
+.groups-list {
+    flex-grow: 1; 
+    padding-right: 10px; 
 }
 
 /* =========================================
