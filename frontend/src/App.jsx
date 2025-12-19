@@ -6,6 +6,7 @@ import ProtectedRoute from "./components/ProtecterRoute";
 import MainLayout from "./pages/MainLayout";
 import "./App.css"
 import UserGroups from "./pages/UserGroups";
+import Users from "./pages/Users";
 
 function App() {
 
@@ -18,9 +19,9 @@ function App() {
           <Route path="/" element={<div>Dashboard ...</div>} />
           <Route path="/classroom" element={<div>classrooms ...</div>} />
           <Route path="/network-device" element={<div>network-device ...</div>} />
-          <Route path="/profile" element={<Profile/>} />
-          <Route path="/users" element={<div>users ...</div>} />
+          <Route path="/users" element={<Users/>} />
           <Route path="/users-groups" element={<UserGroups/>} />
+          <Route path="/profile" element={<Profile/>} />
         </Route>
       </Routes>
     </BrowserRouter>

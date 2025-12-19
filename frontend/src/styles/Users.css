@@ -1,0 +1,269 @@
+/* UserManagement.css */
+
+/* --- LAYOUT PRINCIPAL (Contenedor que ocupa toda la pantalla) --- */
+.users-layout {
+    height: 100vh;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    background-color: #121212; /* Fondo muy oscuro */
+    color: #ffffff;
+    overflow: hidden; /* Evita que la ventana entera haga scroll */
+    font-family: 'Roboto', sans-serif;
+}
+
+/* --- CABECERA (Fija arriba) --- */
+.users-header {
+    padding: 1.5rem 2rem;
+    border-bottom: 1px solid #333;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: #121212;
+    flex-shrink: 0; /* No permitimos que se encoja */
+}
+
+.header-actions {
+    display: flex;
+    gap: 15px;
+    align-items: center;
+}
+
+/* --- LISTA DE USUARIOS (Parte central con Scroll) --- */
+.users-list-container {
+    flex-grow: 1; /* Ocupa todo el espacio disponible */
+    overflow-y: auto; /* Scroll vertical */
+    padding: 1rem 2rem;
+    position: relative;
+}
+
+/* Personalización del Scrollbar (Estilo moderno) */
+.users-list-container::-webkit-scrollbar {
+    width: 8px;
+}
+.users-list-container::-webkit-scrollbar-track {
+    background: #1e1e1e;
+}
+.users-list-container::-webkit-scrollbar-thumb {
+    background: #444;
+    border-radius: 4px;
+}
+.users-list-container::-webkit-scrollbar-thumb:hover {
+    background: #555;
+}
+
+/* --- TARJETA DE USUARIO (Fila) --- */
+.user-card {
+    background-color: #1e1e1e;
+    border: 1px solid #333;
+    border-radius: 12px;
+    padding: 1rem 1.5rem;
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    transition: transform 0.2s ease, border-color 0.2s ease;
+}
+
+.user-card:hover {
+    transform: translateY(-2px);
+    border-color: #8b5cf6; /* Violeta al pasar el ratón */
+    background-color: #232323;
+}
+
+/* Información del usuario (Izquierda) */
+.user-info {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    min-width: 250px;
+}
+
+.user-names h4 {
+    margin: 0;
+    font-size: 1rem;
+    color: #fff;
+}
+.user-names span {
+    font-size: 0.85rem;
+    color: #a1a1aa;
+}
+
+/* Roles y Chips (Centro) */
+.user-roles {
+    display: flex;
+    gap: 8px;
+    flex-grow: 1;
+    justify-content: flex-start; /* Alineados a la izquierda del centro */
+    padding-left: 20px;
+    overflow-x: auto;
+    white-space: nowrap;
+    
+    /* Ocultar scroll horizontal */
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+}
+.user-roles::-webkit-scrollbar {
+    display: none;
+}
+
+.role-chip {
+    background-color: rgba(139, 92, 246, 0.1);
+    color: #a78bfa;
+    border: 1px solid rgba(139, 92, 246, 0.3);
+    padding: 4px 12px;
+    border-radius: 6px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+/* Variaciones de color para Admin y Staff */
+.role-chip.admin {
+    background-color: rgba(245, 158, 11, 0.15);
+    color: #fbbf24;
+    border-color: rgba(245, 158, 11, 0.3);
+}
+.role-chip.staff {
+    background-color: rgba(59, 130, 246, 0.15);
+    color: #60a5fa;
+    border-color: rgba(59, 130, 246, 0.3);
+}
+
+/* --- PIE DE PÁGINA (Paginación Fija) --- */
+.users-footer {
+    padding: 1rem 2rem;
+    border-top: 1px solid #333;
+    background-color: #121212;
+    display: flex;
+    justify-content: flex-end;
+    flex-shrink: 0;
+}
+
+/* Overrides para Material UI Pagination en modo oscuro */
+.pagination-dark .MuiPaginationItem-root {
+    color: #a1a1aa;
+    border-color: #333;
+}
+.pagination-dark .MuiPaginationItem-root.Mui-selected {
+    background-color: rgba(139, 92, 246, 0.2);
+    border-color: #8b5cf6;
+    color: #fff;
+}
+.pagination-dark .MuiPaginationItem-root:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+/* --- ESTILOS DE INPUT BUSCADOR --- */
+.search-input-dark .MuiOutlinedInput-root {
+    background-color: #1e1e1e;
+    border-radius: 8px;
+    color: white;
+    width: 280px;
+}
+.search-input-dark .MuiOutlinedInput-notchedOutline {
+    border-color: #444;
+}
+.search-input-dark .MuiOutlinedInput-root:hover .MuiOutlinedInput-notchedOutline {
+    border-color: #777;
+}
+.search-input-dark .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline {
+    border-color: #8b5cf6;
+}
+.search-input-dark .MuiSvgIcon-root {
+    color: #666;
+}
+
+/* --- NUEVOS ESTILOS AÑADIDOS --- */
+
+.users-header-title {
+    font-weight: bold;
+    color: #8b5cf6;
+}
+
+.users-header-actions {
+    display: flex;
+    gap: 15px;
+}
+
+/* 
+  Para asegurar que el color de fondo personalizado anule los estilos
+  predeterminados de Material UI para un botón "contained", usamos una
+  especificidad mayor apuntando al elemento button con la clase.
+*/
+button.new-user-button {
+    background-color: #8b5cf6;
+    font-weight: bold;
+    text-transform: none;
+}
+
+button.new-user-button:hover {
+    background-color: #7c3aed;
+}
+
+.loading-spinner-container {
+    display: flex;
+    justify-content: center;
+    margin-top: 2.5rem; /* mt: 5 in MUI theme (5 * 8px) / 16px = 2.5rem */
+}
+
+.loading-spinner {
+    color: #8b5cf6;
+}
+
+.user-info-container {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.user-avatar {
+    background-color: #333;
+    width: 45px;
+    height: 45px;
+}
+
+.user-avatar-superuser {
+    background-color: #f59e0b;
+    width: 45px;
+    height: 45px;
+}
+
+.user-action-buttons {
+    display: flex;
+    gap: 5px;
+}
+
+.action-button-edit, 
+.action-button-edit .MuiSvgIcon-root {
+    color: #a1a1aa;
+    transition: background-color 0.2s, color 0.2s;
+}
+
+.action-button-edit:hover {
+    color: #fff;
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+.action-button-delete,
+.action-button-delete .MuiSvgIcon-root {
+    color: #ef4444;
+    transition: background-color 0.2s, color 0.2s;
+}
+
+.action-button-delete:hover {
+    color: #dc2626;
+    background-color: rgba(239, 68, 68, 0.1);
+}
+
+.no-users-message {
+    text-align: center;
+    color: #666;
+    margin-top: 2rem; /* mt: 4 in MUI theme (4 * 8px) / 16px = 2rem */
+}
+
+.confirm-delete-button {
+    color: red;
+}
