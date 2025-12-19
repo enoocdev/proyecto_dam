@@ -134,3 +134,48 @@
     min-width: 450px !important;
     box-shadow: 0 20px 40px rgba(0,0,0,0.4) !important; /* Sombra profunda */
 }
+
+
+/* --- 1. CONTENEDOR STICKY --- */
+.permission-search-box {
+    /* Aseguramos que el fondo sea el mismo oscuro del modal/tarjeta */
+    background-color: #1e1e1e !important; 
+    border-bottom: 1px solid #333; /* Una línea sutil abajo */
+    padding-bottom: 12px !important; /* Un poco de aire */
+}
+
+/* --- 2. EL TEXTFIELD (INPUT) --- */
+.permission-search-input .MuiOutlinedInput-root {
+    background-color: #121212; /* Fondo más oscuro dentro del input */
+    border-radius: 8px !important; /* Bordes redondeados */
+    color: #ffffff !important; /* Texto blanco */
+    transition: all 0.3s ease;
+}
+
+/* El Borde (normal) */
+.permission-search-input .MuiOutlinedInput-notchedOutline {
+    border-color: #333 !important; /* Gris oscuro */
+}
+
+/* El Borde (Hover - al pasar el ratón) */
+.permission-search-input .MuiOutlinedInput-root:hover .MuiOutlinedInput-notchedOutline {
+    border-color: #666 !important;
+}
+
+/* ESTADO FOCUSED (Cuando escribes) - AQUÍ ESTÁ LA MAGIA */
+.permission-search-input .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline {
+    border-color: #8b5cf6 !important; /* Borde Violeta */
+    border-width: 1px !important;
+    box-shadow: 0 0 10px rgba(139, 92, 246, 0.3); /* Resplandor */
+}
+
+/* --- 3. EL ICONO (LUPA) --- */
+.permission-search-input .MuiSvgIcon-root {
+    color: #555; /* Color apagado inicial */
+    transition: color 0.3s ease;
+}
+
+/* Cuando el input tiene foco, el icono se ilumina */
+.permission-search-input:focus-within .MuiSvgIcon-root {
+    color: #8b5cf6 !important; /* Icono Violeta */
+}

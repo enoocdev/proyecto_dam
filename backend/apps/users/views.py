@@ -30,10 +30,20 @@ class UserViewSet(viewsets.ModelViewSet):
 
 
 
-class UserPermissionsView(viewsets.ModelViewSet):
-    queryset = Permission.objects.all()
+class UserPermissionsView(viewsets.ReadOnlyModelViewSet):
+    # queryset = Permission.objects.all()
     serializer_class = UserPermisionsSerializer
     permission_classes = [StrictDjangoModelPermissions, IsAdminUser]
+
+    # queryset filtrado para que no muestre permisos no necesarios como los permisos de sesiones ...
+    def get_queryset(self):
+        return Permission.objects.filter(
+            content_type__app_label__in=[
+            'users',
+            'devices',
+            'auth',
+        ]  
+        ).order_by('id')
 
 class UserGroupView(viewsets.ModelViewSet):
     queryset = Group.objects.all()
