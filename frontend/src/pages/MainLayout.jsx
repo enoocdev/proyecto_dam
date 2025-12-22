@@ -1,5 +1,5 @@
 import { Outlet, Link, useLocation } from "react-router-dom"; 
-import ProtecterMenuItem from "../components/ProtecterMenuitem";
+import ProtecterMenuItem from "../components/ProtecterMenuItem";
 import {
     Box,
     Drawer,

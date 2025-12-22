@@ -30,6 +30,7 @@ import SecurityIcon from '@mui/icons-material/Security';
 import api from "../api"; 
 import '../styles/Users.css'; 
 import UserCard from '../components/UserCard';
+import UserModal from '../components/UserModal';
 
 const API_PATH_USERS = "/users/";
 const API_PATH_USER_GROUPS = "/users-groups-without-pagination/";
@@ -107,14 +108,14 @@ const Users = () => {
     const handleSaveUser = async (userData, userId) => {
         try {
             if (userId) {
-                await api.put(`/users/${userId}/`, userData);
+                await api.patch(`/users/${userId}/`, userData);
             } else {
                 await api.post('/users/', userData);
             }
             fetchUsers(page); 
             handleCloseModal();
         } catch (err) {
-            console.log("Error guardando el usuario:", err.response || err);
+            setNotification({ open: true, message: 'No se ha podido actualizar o gruadar el usuario', severity: 'warning' });
 
         }
     };
@@ -132,12 +133,10 @@ const Users = () => {
     const handleConfirmDelete = async () => {
         try {
             await api.delete(`/users/${userToDelete.id}/`);
-            fetchUsers(page); // Recargar lista
+            fetchUsers(page); 
             handleCloseDeleteDialog();
         } catch (error) {
-            console.error("Error eliminando el usuario:", error.response || error);
-            const errorMsg = error.response?.data?.detail || "Ocurrió un error inesperado.";
-            alert(`Error al eliminar: ${errorMsg}`);
+            setNotification({ open: true, message: 'No se ha podido eliminar el usuario', severity: 'warning' });
         }
     };
 
@@ -217,6 +216,13 @@ const Users = () => {
                 />
             </div>
 
+            <UserModal
+                onSave={handleSaveUser}
+                open={isModalOpen}
+                user={selectedUser}
+                onClose={handleCloseModal}
+                availableGroups={allUserGroups}
+            />
         
 
             <Dialog
