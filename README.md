@@ -68,7 +68,7 @@ El sistema utiliza una arquitectura distribuida orientada a eventos. La comunica
 
 ### **1. Clonar el Repositorio**
 ```bash
-git clone [https://github.com/tu-usuario/proyecto-monitorizacion.git](https://github.com/tu-usuario/proyecto-monitorizacion.git)
+git clone [https://github.com/enoocdev/proyecto_dam](https://github.com/enoocdev/proyecto_dam)
 cd proyecto-monitorizacion
 ```
 

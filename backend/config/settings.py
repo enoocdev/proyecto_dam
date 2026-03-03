@@ -166,3 +166,16 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 CORS_ALLOW_ALL_ORIGINS = True
 CORS_ALLOWS_CREDENTIALS = True
 CORS_EXPOSE_HEADERS = ['Allow', 'Content-Type']
+
+# ─── Channel Layers (Redis) para WebSockets en tiempo real ──────────────────
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "channels_redis.core.RedisChannelLayer",
+        "CONFIG": {
+            "hosts": [(
+                os.getenv("REDIS_HOST", "127.0.0.1"),
+                int(os.getenv("REDIS_PORT", 6379)),
+            )],
+        },
+    },
+}

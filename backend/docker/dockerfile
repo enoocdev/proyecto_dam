@@ -15,9 +15,4 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 COPY . /app/
 
-COPY docker/init.sh /init.sh
-RUN chmod +x /init.sh
-
 EXPOSE 8000
-
-ENTRYPOINT ["/init.sh"]
