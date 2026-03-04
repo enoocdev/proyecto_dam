@@ -1,0 +1,46 @@
+
+.dashboard-layout {
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.dashboard-header {
+    padding: 1.5rem 2rem;
+    border-bottom: 1px solid #333;
+    flex-shrink: 0;
+}
+
+.dashboard-header__title {
+    font-weight: bold !important;
+    color: #8b5cf6 !important;
+}
+
+.dashboard-header__subtitle {
+    color: #a1a1aa !important;
+    margin-top: 4px !important;
+}
+
+.dashboard-content {
+    flex-grow: 1;
+    overflow-y: auto;
+    padding: 1.5rem 2rem;
+}
+
+.dashboard-loader {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 60vh;
+}
+
+.dashboard-loader .MuiCircularProgress-root {
+    color: #8b5cf6 !important;
+}
+
+.devices-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 20px;
+}

@@ -1,0 +1,13 @@
+# Ignorar logs y archivos temporales
+*.log
+__pycache__/
+*.pyc
+*.pyo
+.git/
+.gitignore
+docker/
+*.bat
+README.md
+install_service.py
+windows_service.py
+client_config.json

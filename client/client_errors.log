@@ -1,0 +1,120 @@
+2026-03-04 09:30:44,755 [INFO] client.boot: === Cliente iniciando (PID 69642, cwd=/home/enooc/Repositorios/proyecto_dam/client) ===
+2026-03-04 09:30:44,755 [INFO] client.boot: Python: /home/enooc/Repositorios/proyecto_dam/client/.venv/bin/python
+2026-03-04 09:30:44,791 [INFO] client: Configuracion cargada correctamente. Log level=INFO
+2026-03-04 09:30:44,795 [INFO] client: Conectando a ws://127.0.0.1:8000/ws/client/ ...
+2026-03-04 09:30:44,812 [INFO] client: Conexion WebSocket establecida con ws://127.0.0.1:8000/ws/client/
+2026-03-04 09:30:45,816 [INFO] client: ENVIADO al servidor   -> type=startup  contenido={"type": "startup", "timestamp": "2026-03-04T09:30:45.816100", "data": {"mac": "04:7C:16:3A:5C:DB", "ip": "10.106.228.165", "hostname": "archlinux", "os": "Linux 6.17.8-arch1-1 (x86_64)", "cpu_percent": 6.3, "memory": {"total_gb": 15.32, "used_gb": 9.74, "percent": 63.6}, "disk": {"total_gb": 467.4,
+2026-03-04 09:30:49,737 [INFO] client: Senal de cierre recibida.
+2026-03-04 09:30:49,738 [INFO] client: ENVIADO al servidor   -> type=shutdown_notice  contenido={"type": "shutdown_notice", "timestamp": "2026-03-04T09:30:49.737802", "data": {"mac": "04:7C:16:3A:5C:DB", "message": "El equipo se esta apagando."}}
+2026-03-04 09:30:49,742 [INFO] client: Desconexion limpia completada.
+2026-03-04 09:31:15,828 [WARNING] client: Conexion cerrada durante heartbeat.
+2026-03-04 09:32:17,741 [INFO] client.boot: === Cliente iniciando (PID 71912, cwd=/home/enooc/Repositorios/proyecto_dam/client) ===
+2026-03-04 09:32:17,741 [INFO] client.boot: Python: /home/enooc/Repositorios/proyecto_dam/client/.venv/bin/python
+2026-03-04 09:32:17,774 [INFO] client: Configuracion cargada correctamente. Log level=INFO
+2026-03-04 09:32:17,776 [INFO] client: Conectando a ws://127.0.0.1:8000/ws/client/ ...
+2026-03-04 09:32:17,793 [INFO] client: Conexion WebSocket establecida con ws://127.0.0.1:8000/ws/client/
+2026-03-04 09:32:18,797 [INFO] client: ENVIADO al servidor   -> type=startup  contenido={"type": "startup", "timestamp": "2026-03-04T09:32:18.796459", "data": {"mac": "04:7C:16:3A:5C:DB", "ip": "10.106.228.165", "hostname": "archlinux", "os": "Linux 6.17.8-arch1-1 (x86_64)", "cpu_percent": 5.1, "memory": {"total_gb": 15.32, "used_gb": 9.65, "percent": 63.0}, "disk": {"total_gb": 467.4,
+2026-03-04 09:32:22,723 [INFO] client: Senal de cierre recibida.
+2026-03-04 09:32:22,724 [INFO] client: ENVIADO al servidor   -> type=shutdown_notice  contenido={"type": "shutdown_notice", "timestamp": "2026-03-04T09:32:22.723987", "data": {"mac": "04:7C:16:3A:5C:DB", "message": "El equipo se esta apagando."}}
+2026-03-04 09:32:22,728 [INFO] client: Desconexion limpia completada.
+2026-03-04 09:32:48,802 [WARNING] client: Conexion cerrada durante heartbeat.
+2026-03-04 10:27:26,733 [INFO] client.boot: === Cliente iniciando (PID 153739, cwd=/home/enooc/Repositorios/proyecto_dam/client) ===
+2026-03-04 10:27:26,733 [INFO] client.boot: Python: /home/enooc/Repositorios/proyecto_dam/client/.venv/bin/python
+2026-03-04 10:27:26,791 [INFO] client: Configuracion cargada correctamente. Log level=INFO
+2026-03-04 10:27:26,797 [INFO] client: Conectando a ws://127.0.0.1:8000/ws/client/ ...
+2026-03-04 10:27:26,834 [INFO] client: Conexion WebSocket establecida con ws://127.0.0.1:8000/ws/client/
+2026-03-04 10:27:27,837 [INFO] client: ENVIADO al servidor   -> type=startup  contenido={"type": "startup", "timestamp": "2026-03-04T10:27:27.837290", "data": {"mac": "04:7C:16:3A:5C:DB", "ip": "10.106.228.165", "hostname": "archlinux", "os": "Linux 6.17.8-arch1-1 (x86_64)", "cpu_percent": 10.2, "memory": {"total_gb": 15.32, "used_gb": 11.36, "percent": 74.1}, "disk": {"total_gb": 467.
+2026-03-04 10:27:31,714 [INFO] client: Senal de cierre recibida.
+2026-03-04 10:27:31,715 [INFO] client: ENVIADO al servidor   -> type=shutdown_notice  contenido={"type": "shutdown_notice", "timestamp": "2026-03-04T10:27:31.714980", "data": {"mac": "04:7C:16:3A:5C:DB", "message": "El equipo se esta apagando."}}
+2026-03-04 10:27:31,718 [INFO] client: Desconexion limpia completada.
+2026-03-04 10:27:50,065 [INFO] client.boot: === Cliente iniciando (PID 154360, cwd=/home/enooc/Repositorios/proyecto_dam/client) ===
+2026-03-04 10:27:50,065 [INFO] client.boot: Python: /home/enooc/Repositorios/proyecto_dam/client/.venv/bin/python
+2026-03-04 10:27:50,104 [INFO] client: Configuracion cargada correctamente. Log level=INFO
+2026-03-04 10:27:50,106 [INFO] client: Conectando a ws://127.0.0.1:8000/ws/client/ ...
+2026-03-04 10:27:50,124 [INFO] client: Conexion WebSocket establecida con ws://127.0.0.1:8000/ws/client/
+2026-03-04 10:27:51,129 [INFO] client: ENVIADO al servidor   -> type=startup  contenido={"type": "startup", "timestamp": "2026-03-04T10:27:51.128961", "data": {"mac": "04:7C:16:3A:5C:DB", "ip": "10.106.228.165", "hostname": "archlinux", "os": "Linux 6.17.8-arch1-1 (x86_64)", "cpu_percent": 5.5, "memory": {"total_gb": 15.32, "used_gb": 11.16, "percent": 72.9}, "disk": {"total_gb": 467.4
+2026-03-04 10:27:55,044 [INFO] client: Senal de cierre recibida.
+2026-03-04 10:27:55,045 [INFO] client: ENVIADO al servidor   -> type=shutdown_notice  contenido={"type": "shutdown_notice", "timestamp": "2026-03-04T10:27:55.045258", "data": {"mac": "04:7C:16:3A:5C:DB", "message": "El equipo se esta apagando."}}
+2026-03-04 10:27:55,048 [INFO] client: Desconexion limpia completada.
+2026-03-04 10:27:57,865 [WARNING] client: Conexion cerrada durante heartbeat.
+2026-03-04 10:28:18,970 [INFO] client.boot: === Cliente iniciando (PID 155332, cwd=/home/enooc/Repositorios/proyecto_dam/client) ===
+2026-03-04 10:28:18,970 [INFO] client.boot: Python: /home/enooc/Repositorios/proyecto_dam/client/.venv/bin/python
+2026-03-04 10:28:19,005 [INFO] client: Configuracion cargada correctamente. Log level=INFO
+2026-03-04 10:28:19,007 [INFO] client: Conectando a ws://127.0.0.1:8000/ws/client/ ...
+2026-03-04 10:28:19,026 [INFO] client: Conexion WebSocket establecida con ws://127.0.0.1:8000/ws/client/
+2026-03-04 10:28:20,029 [INFO] client: ENVIADO al servidor   -> type=startup  contenido={"type": "startup", "timestamp": "2026-03-04T10:28:20.029213", "data": {"mac": "04:7C:16:3A:5C:DB", "ip": "10.106.228.165", "hostname": "archlinux", "os": "Linux 6.17.8-arch1-1 (x86_64)", "cpu_percent": 14.0, "memory": {"total_gb": 15.32, "used_gb": 11.16, "percent": 72.9}, "disk": {"total_gb": 467.
+2026-03-04 10:28:21,157 [WARNING] client: Conexion cerrada durante heartbeat.
+2026-03-04 10:28:23,953 [INFO] client: Senal de cierre recibida.
+2026-03-04 10:28:23,954 [INFO] client: ENVIADO al servidor   -> type=shutdown_notice  contenido={"type": "shutdown_notice", "timestamp": "2026-03-04T10:28:23.953669", "data": {"mac": "04:7C:16:3A:5C:DB", "message": "El equipo se esta apagando."}}
+2026-03-04 10:28:23,957 [INFO] client: Desconexion limpia completada.
+2026-03-04 10:28:28,899 [INFO] client.boot: === Cliente iniciando (PID 155706, cwd=/home/enooc/Repositorios/proyecto_dam/client) ===
+2026-03-04 10:28:28,899 [INFO] client.boot: Python: /home/enooc/Repositorios/proyecto_dam/client/.venv/bin/python
+2026-03-04 10:28:28,934 [INFO] client: Configuracion cargada correctamente. Log level=INFO
+2026-03-04 10:28:28,936 [INFO] client: Conectando a ws://127.0.0.1:8000/ws/client/ ...
+2026-03-04 10:28:28,955 [INFO] client: Conexion WebSocket establecida con ws://127.0.0.1:8000/ws/client/
+2026-03-04 10:28:29,959 [INFO] client: ENVIADO al servidor   -> type=startup  contenido={"type": "startup", "timestamp": "2026-03-04T10:28:29.958501", "data": {"mac": "04:7C:16:3A:5C:DB", "ip": "10.106.228.165", "hostname": "archlinux", "os": "Linux 6.17.8-arch1-1 (x86_64)", "cpu_percent": 8.5, "memory": {"total_gb": 15.32, "used_gb": 11.14, "percent": 72.7}, "disk": {"total_gb": 467.4
+2026-03-04 10:28:33,880 [INFO] client: Senal de cierre recibida.
+2026-03-04 10:28:33,881 [INFO] client: ENVIADO al servidor   -> type=shutdown_notice  contenido={"type": "shutdown_notice", "timestamp": "2026-03-04T10:28:33.880945", "data": {"mac": "04:7C:16:3A:5C:DB", "message": "El equipo se esta apagando."}}
+2026-03-04 10:28:33,885 [INFO] client: Desconexion limpia completada.
+2026-03-04 10:28:50,057 [WARNING] client: Conexion cerrada durante heartbeat.
+2026-03-04 10:28:59,973 [WARNING] client: Conexion cerrada durante heartbeat.
+2026-03-04 10:31:01,807 [INFO] client.boot: === Cliente iniciando (PID 159530, cwd=/home/enooc/Repositorios/proyecto_dam/client) ===
+2026-03-04 10:31:01,807 [INFO] client.boot: Python: /home/enooc/Repositorios/proyecto_dam/client/.venv/bin/python
+2026-03-04 10:31:01,841 [INFO] client: Configuracion cargada correctamente. Log level=INFO
+2026-03-04 10:31:01,843 [INFO] client: Conectando a ws://127.0.0.1:8000/ws/client/ ...
+2026-03-04 10:31:01,859 [INFO] client: Conexion WebSocket establecida con ws://127.0.0.1:8000/ws/client/
+2026-03-04 10:31:02,862 [INFO] client: ENVIADO al servidor   -> type=startup  contenido={"type": "startup", "timestamp": "2026-03-04T10:31:02.861851", "data": {"mac": "04:7C:16:3A:5C:DB", "ip": "10.106.228.165", "hostname": "archlinux", "os": "Linux 6.17.8-arch1-1 (x86_64)", "cpu_percent": 11.6, "memory": {"total_gb": 15.32, "used_gb": 11.21, "percent": 73.2}, "disk": {"total_gb": 467.
+2026-03-04 10:31:06,789 [INFO] client: Senal de cierre recibida.
+2026-03-04 10:31:06,790 [INFO] client: ENVIADO al servidor   -> type=shutdown_notice  contenido={"type": "shutdown_notice", "timestamp": "2026-03-04T10:31:06.789898", "data": {"mac": "04:7C:16:3A:5C:DB", "message": "El equipo se esta apagando."}}
+2026-03-04 10:31:06,796 [INFO] client: Desconexion limpia completada.
+2026-03-04 10:31:32,885 [WARNING] client: Conexion cerrada durante heartbeat.
+2026-03-04 10:36:38,305 [INFO] client.boot: === Cliente iniciando (PID 167814, cwd=/home/enooc/Repositorios/proyecto_dam/client) ===
+2026-03-04 10:36:38,305 [INFO] client.boot: Python: /home/enooc/Repositorios/proyecto_dam/client/.venv/bin/python
+2026-03-04 10:36:38,339 [INFO] client: Configuracion cargada correctamente. Log level=INFO
+2026-03-04 10:36:38,341 [INFO] client: Conectando a ws://127.0.0.1:8000/ws/client/ ...
+2026-03-04 10:36:38,357 [INFO] client: Conexion WebSocket establecida con ws://127.0.0.1:8000/ws/client/
+2026-03-04 10:36:39,361 [INFO] client: ENVIADO al servidor   -> type=startup  contenido={"type": "startup", "timestamp": "2026-03-04T10:36:39.360989", "data": {"mac": "04:7C:16:3A:5C:DB", "ip": "10.106.228.165", "hostname": "archlinux", "os": "Linux 6.17.8-arch1-1 (x86_64)", "cpu_percent": 6.2, "memory": {"total_gb": 15.32, "used_gb": 11.15, "percent": 72.8}, "disk": {"total_gb": 467.4
+2026-03-04 10:36:43,286 [INFO] client: Senal de cierre recibida.
+2026-03-04 10:36:43,287 [INFO] client: ENVIADO al servidor   -> type=shutdown_notice  contenido={"type": "shutdown_notice", "timestamp": "2026-03-04T10:36:43.286660", "data": {"mac": "04:7C:16:3A:5C:DB", "message": "El equipo se esta apagando."}}
+2026-03-04 10:36:43,292 [INFO] client: Desconexion limpia completada.
+2026-03-04 10:37:06,468 [INFO] client.boot: === Cliente iniciando (PID 168530, cwd=/home/enooc/Repositorios/proyecto_dam/client) ===
+2026-03-04 10:37:06,468 [INFO] client.boot: Python: /home/enooc/Repositorios/proyecto_dam/client/.venv/bin/python
+2026-03-04 10:37:06,505 [INFO] client: Configuracion cargada correctamente. Log level=INFO
+2026-03-04 10:37:06,506 [INFO] client: Conectando a ws://127.0.0.1:8000/ws/client/ ...
+2026-03-04 10:37:06,525 [INFO] client: Conexion WebSocket establecida con ws://127.0.0.1:8000/ws/client/
+2026-03-04 10:37:07,529 [INFO] client: ENVIADO al servidor   -> type=startup  contenido={"type": "startup", "timestamp": "2026-03-04T10:37:07.528600", "data": {"mac": "04:7C:16:3A:5C:DB", "ip": "10.106.228.165", "hostname": "archlinux", "os": "Linux 6.17.8-arch1-1 (x86_64)", "cpu_percent": 7.2, "memory": {"total_gb": 15.32, "used_gb": 11.15, "percent": 72.8}, "disk": {"total_gb": 467.4
+2026-03-04 10:37:09,365 [WARNING] client: Conexion cerrada durante heartbeat.
+2026-03-04 10:37:11,449 [INFO] client: Senal de cierre recibida.
+2026-03-04 10:37:11,451 [INFO] client: ENVIADO al servidor   -> type=shutdown_notice  contenido={"type": "shutdown_notice", "timestamp": "2026-03-04T10:37:11.450367", "data": {"mac": "04:7C:16:3A:5C:DB", "message": "El equipo se esta apagando."}}
+2026-03-04 10:37:11,456 [INFO] client: Desconexion limpia completada.
+2026-03-04 10:37:37,539 [WARNING] client: Conexion cerrada durante heartbeat.
+2026-03-04 10:46:08,279 [INFO] client.boot: === Cliente iniciando (PID 181594, cwd=/home/enooc/Repositorios/proyecto_dam/client) ===
+2026-03-04 10:46:08,279 [INFO] client.boot: Python: /home/enooc/Repositorios/proyecto_dam/client/.venv/bin/python
+2026-03-04 10:46:08,316 [INFO] client: Configuracion cargada correctamente. Log level=INFO
+2026-03-04 10:46:08,318 [INFO] client: Conectando a ws://127.0.0.1:8000/ws/client/ ...
+2026-03-04 10:46:08,336 [INFO] client: Conexion WebSocket establecida con ws://127.0.0.1:8000/ws/client/
+2026-03-04 10:46:09,339 [INFO] client: ENVIADO al servidor   -> type=startup  contenido={"type": "startup", "timestamp": "2026-03-04T10:46:09.339168", "data": {"mac": "04:7C:16:3A:5C:DB", "ip": "10.106.228.165", "hostname": "archlinux", "os": "Linux 6.17.8-arch1-1 (x86_64)", "cpu_percent": 11.1, "memory": {"total_gb": 15.32, "used_gb": 11.37, "percent": 74.2}, "disk": {"total_gb": 467.
+2026-03-04 10:46:13,262 [INFO] client: Senal de cierre recibida.
+2026-03-04 10:46:13,263 [INFO] client: ENVIADO al servidor   -> type=shutdown_notice  contenido={"type": "shutdown_notice", "timestamp": "2026-03-04T10:46:13.262734", "data": {"mac": "04:7C:16:3A:5C:DB", "message": "El equipo se esta apagando."}}
+2026-03-04 10:46:13,266 [INFO] client: Desconexion limpia completada.
+2026-03-04 10:46:22,603 [INFO] client.boot: === Cliente iniciando (PID 181998, cwd=/home/enooc/Repositorios/proyecto_dam/client) ===
+2026-03-04 10:46:22,603 [INFO] client.boot: Python: /home/enooc/Repositorios/proyecto_dam/client/.venv/bin/python
+2026-03-04 10:46:22,638 [INFO] client: Configuracion cargada correctamente. Log level=INFO
+2026-03-04 10:46:22,640 [INFO] client: Conectando a ws://127.0.0.1:8000/ws/client/ ...
+2026-03-04 10:46:22,658 [INFO] client: Conexion WebSocket establecida con ws://127.0.0.1:8000/ws/client/
+2026-03-04 10:46:23,659 [INFO] client: ENVIADO al servidor   -> type=startup  contenido={"type": "startup", "timestamp": "2026-03-04T10:46:23.659650", "data": {"mac": "04:7C:16:3A:5C:DB", "ip": "10.106.228.165", "hostname": "archlinux", "os": "Linux 6.17.8-arch1-1 (x86_64)", "cpu_percent": 11.9, "memory": {"total_gb": 15.32, "used_gb": 11.25, "percent": 73.5}, "disk": {"total_gb": 467.
+2026-03-04 10:46:27,584 [INFO] client: Senal de cierre recibida.
+2026-03-04 10:46:27,585 [INFO] client: ENVIADO al servidor   -> type=shutdown_notice  contenido={"type": "shutdown_notice", "timestamp": "2026-03-04T10:46:27.584863", "data": {"mac": "04:7C:16:3A:5C:DB", "message": "El equipo se esta apagando."}}
+2026-03-04 10:46:27,589 [INFO] client: Desconexion limpia completada.
+2026-03-04 10:46:32,148 [INFO] client.boot: === Cliente iniciando (PID 182321, cwd=/home/enooc/Repositorios/proyecto_dam/client) ===
+2026-03-04 10:46:32,148 [INFO] client.boot: Python: /home/enooc/Repositorios/proyecto_dam/client/.venv/bin/python
+2026-03-04 10:46:32,184 [INFO] client: Configuracion cargada correctamente. Log level=INFO
+2026-03-04 10:46:32,186 [INFO] client: Conectando a ws://127.0.0.1:8000/ws/client/ ...
+2026-03-04 10:46:32,205 [INFO] client: Conexion WebSocket establecida con ws://127.0.0.1:8000/ws/client/
+2026-03-04 10:46:33,209 [INFO] client: ENVIADO al servidor   -> type=startup  contenido={"type": "startup", "timestamp": "2026-03-04T10:46:33.208983", "data": {"mac": "04:7C:16:3A:5C:DB", "ip": "10.106.228.165", "hostname": "archlinux", "os": "Linux 6.17.8-arch1-1 (x86_64)", "cpu_percent": 9.0, "memory": {"total_gb": 15.32, "used_gb": 11.28, "percent": 73.6}, "disk": {"total_gb": 467.4
+2026-03-04 10:46:37,130 [INFO] client: Senal de cierre recibida.
+2026-03-04 10:46:37,131 [INFO] client: ENVIADO al servidor   -> type=shutdown_notice  contenido={"type": "shutdown_notice", "timestamp": "2026-03-04T10:46:37.131096", "data": {"mac": "04:7C:16:3A:5C:DB", "message": "El equipo se esta apagando."}}
+2026-03-04 10:46:37,134 [INFO] client: Desconexion limpia completada.
+2026-03-04 10:46:39,368 [WARNING] client: Conexion cerrada durante heartbeat.
+2026-03-04 10:46:53,687 [WARNING] client: Conexion cerrada durante heartbeat.
+2026-03-04 10:47:03,237 [WARNING] client: Conexion cerrada durante heartbeat.

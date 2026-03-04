@@ -1,0 +1,30 @@
+services:
+  cliente-dam:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+    container_name: proyecto-dam-client
+    restart: always
+    environment:
+      # URL del servidor WebSocket — ajustar segun tu entorno:
+      #   - Desde Docker en Linux:  ws://host.docker.internal:8000/ws/client/
+      #   - Si el server esta en otro host: ws://<IP_DEL_SERVER>:8000/ws/client/
+      - CLIENT_WS_URL=ws://host.docker.internal:8000/ws/client/
+      - CLIENT_HEARTBEAT_INTERVAL=30
+      - CLIENT_RECONNECT_DELAY=5
+      - CLIENT_MAX_RECONNECT_ATTEMPTS=0
+      - CLIENT_LOG_LEVEL=INFO
+      - CLIENT_LOG_FILE=/app/logs/client_errors.log
+    volumes:
+      # Persistir logs fuera del contenedor
+      - client-logs:/app/logs
+    # Permitir acceso al host desde el contenedor (Linux)
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    # Acceso a info del sistema del host (opcional, mejora la info reportada)
+    # Descomentar si quieres que el cliente reporte info real del host:
+    # privileged: true
+    # pid: "host"
+
+volumes:
+  client-logs:

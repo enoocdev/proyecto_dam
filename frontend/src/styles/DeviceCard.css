@@ -1,0 +1,233 @@
+
+.device-card {
+    background-color: #1e1e1e;
+    border: 1px solid #333;
+    border-radius: 16px;
+    overflow: hidden;
+}
+
+.device-card--online {
+    border-left: 3px solid #22c55e;
+}
+
+.device-card--offline {
+    border-left: 3px solid #555;
+}
+
+.device-card__action-area {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: stretch !important;
+}
+
+/* ── Placeholder imagen ── */
+.device-card__preview {
+    background-color: #0a0a0a;
+    height: 160px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.device-card__preview-icon {
+    font-size: 56px !important;
+    color: #2a2a2a !important;
+}
+
+.device-card__body {
+    padding: 14px 16px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.device-card__hostname {
+    font-weight: 700 !important;
+    color: #fff !important;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.device-card__ip {
+    color: #71717a !important;
+    font-family: 'Roboto Mono', monospace !important;
+}
+
+.device-card__badges {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-top: 4px;
+}
+
+.device-badge {
+    font-weight: 600 !important;
+    font-size: 0.72rem !important;
+    height: 24px !important;
+}
+
+.device-badge .MuiChip-icon {
+    margin-left: 6px !important;
+}
+
+/* Online */
+.badge--online {
+    background-color: rgba(34, 197, 94, 0.12) !important;
+    color: #4ade80 !important;
+    border: 1px solid rgba(34, 197, 94, 0.25) !important;
+}
+
+.badge--online .badge-dot {
+    color: #22c55e !important;
+    font-size: 10px !important;
+    animation: pulse-dot 2s ease-in-out infinite;
+}
+
+/* Offline */
+.badge--offline {
+    background-color: rgba(113, 113, 122, 0.12) !important;
+    color: #a1a1aa !important;
+    border: 1px solid rgba(113, 113, 122, 0.25) !important;
+}
+
+.badge--offline .badge-dot {
+    color: #a1a1aa !important;
+    font-size: 10px !important;
+}
+
+/* Internet activo */
+.badge--internet {
+    background-color: rgba(59, 130, 246, 0.12) !important;
+    color: #60a5fa !important;
+    border: 1px solid rgba(59, 130, 246, 0.25) !important;
+}
+
+.badge--internet .badge-icon {
+    color: #60a5fa !important;
+    font-size: 14px !important;
+}
+
+/* Internet bloqueado */
+.badge--blocked {
+    background-color: rgba(239, 68, 68, 0.12) !important;
+    color: #f87171 !important;
+    border: 1px solid rgba(239, 68, 68, 0.25) !important;
+}
+
+.badge--blocked .badge-icon {
+    color: #f87171 !important;
+    font-size: 14px !important;
+}
+
+@keyframes pulse-dot {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.4; }
+}
+
+/* Drawer */
+
+.action-sheet .MuiDrawer-paper {
+    background-color: #1e1e1e !important;
+    border-top: 1px solid #333 !important;
+    border-top-left-radius: 20px !important;
+    border-top-right-radius: 20px !important;
+    max-width: 480px !important;
+    margin: 0 auto !important;
+    padding: 12px 24px 28px !important;
+}
+
+.action-sheet .MuiBackdrop-root {
+    background-color: rgba(0, 0, 0, 0.55) !important;
+}
+
+.action-sheet__handle {
+    width: 40px;
+    height: 4px;
+    border-radius: 4px;
+    background-color: #444;
+    margin: 0 auto 16px;
+}
+
+.action-sheet__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 20px;
+}
+
+.action-sheet__device-info {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.action-sheet__device-icon {
+    color: #8b5cf6 !important;
+    font-size: 28px !important;
+}
+
+.action-sheet__title {
+    font-weight: 700 !important;
+    color: #fff !important;
+}
+
+.action-sheet__subtitle {
+    color: #71717a !important;
+    font-family: 'Roboto Mono', monospace !important;
+}
+
+.action-sheet__close {
+    border: 1px solid #444 !important;
+    border-radius: 8px !important;
+    color: #a1a1aa !important;
+}
+
+.action-sheet__close:hover {
+    background-color: rgba(255, 255, 255, 0.08) !important;
+    color: #fff !important;
+    border-color: #666 !important;
+}
+
+.action-sheet__divider {
+    border-color: #333 !important;
+    margin-bottom: 20px !important;
+}
+
+.action-sheet__actions {
+    display: flex;
+    gap: 12px;
+}
+
+/* Botones de accion */
+.action-btn {
+    border-radius: 12px !important;
+    padding: 12px 16px !important;
+    font-weight: 600 !important;
+    text-transform: none !important;
+    font-size: 0.88rem !important;
+}
+
+.action-btn--shutdown {
+    background-color: rgba(239, 68, 68, 0.12) !important;
+    color: #f87171 !important;
+    border-color: rgba(239, 68, 68, 0.25) !important;
+}
+
+.action-btn--shutdown:hover {
+    background-color: rgba(239, 68, 68, 0.25) !important;
+    border-color: #f87171 !important;
+    color: #fca5a5 !important;
+}
+
+.action-btn--block {
+    background-color: rgba(245, 158, 11, 0.12) !important;
+    color: #fbbf24 !important;
+    border-color: rgba(245, 158, 11, 0.25) !important;
+}
+
+.action-btn--block:hover {
+    background-color: rgba(245, 158, 11, 0.25) !important;
+    border-color: #fbbf24 !important;
+    color: #fde68a !important;
+}

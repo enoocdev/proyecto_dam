@@ -7,6 +7,8 @@ import MainLayout from "./pages/MainLayout";
 import "./App.css"
 import UserGroups from "./pages/UserGroups";
 import Users from "./pages/Users";
+import { Dashboard } from "@mui/icons-material";
+import DashboardPage from "./pages/Dashboard";
 
 function App() {
 
@@ -16,7 +18,7 @@ function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/logout" element={<Logout />} />
         <Route element={<ProtectedRoute><MainLayout/></ProtectedRoute>} >
-          <Route path="/" element={<div>Dashboard ...</div>} />
+          <Route path="/" element={<DashboardPage/>} />
           <Route path="/classroom" element={<div>classrooms ...</div>} />
           <Route path="/network-device" element={<div>network-device ...</div>} />
           <Route path="/users" element={<Users/>} />
