@@ -8,10 +8,39 @@ class ClassroomSerializer(serializers.ModelSerializer):
             lookup_field='pk',
             read_only=True
     )
+    devices = serializers.PrimaryKeyRelatedField(
+        source='device_set',
+        many=True,
+        queryset=Device.objects.all(),
+        required=False,
+    )
 
     class Meta:
         model = Classroom
-        fields = ["url", 'id' , 'name']
+        fields = ["url", 'id', 'name', 'devices']
+
+    def create(self, validated_data):
+        devices = validated_data.pop('device_set', [])
+        classroom = Classroom.objects.create(**validated_data)
+        for device in devices:
+            device.classroom = classroom
+            device.save()
+        return classroom
+
+    def update(self, instance, validated_data):
+        devices = validated_data.pop('device_set', None)
+        instance.name = validated_data.get('name', instance.name)
+        instance.save()
+
+        if devices is not None:
+            # Desasignar los dispositivos que ya no pertenecen a esta clase
+            instance.device_set.exclude(pk__in=[d.pk for d in devices]).update(classroom=None)
+            # Asignar los nuevos dispositivos a esta clase
+            for device in devices:
+                device.classroom = instance
+                device.save()
+
+        return instance
 
 
 class NetworkDeviceSerializer(serializers.ModelSerializer):
@@ -65,3 +94,8 @@ class DeviceSerializer(serializers.ModelSerializer):
             'switch_port': {'read_only': False}, 
         }
         
+
+class DeviceSimpleSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Device
+        fields = ['id', 'hostname']

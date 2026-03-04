@@ -1,7 +1,7 @@
 
 import React, { useEffect, useState, useCallback } from 'react'; 
 import {
-    Box, Typography, CircularProgress,
+    Box, Typography, CircularProgress,Snackbar ,Alert
 } from '@mui/material';
 
 import api from '../api';
@@ -20,6 +20,8 @@ function DashboardPage() {
     const [page, setPage] = useState(1)
     const [totalPages, setTotalPages] = useState(1);
     const pageSize = 10;
+
+    const [notification, setNotification] = useState({ open: false, message: '', severity: 'success' });
 
 
     useEffect(() => {
@@ -62,7 +64,7 @@ function DashboardPage() {
             setTotalPages(Math.ceil(count / pageSize));
 
         } catch (err) {
-            setNotification({ open: true, message: 'Error al cargar los usuarios', severity: 'error' });
+            setNotification({ open: true, message: 'Error al cargar los Equipos', severity: 'error' });
         }
         setLoading(false);
     };
@@ -100,6 +102,16 @@ function DashboardPage() {
                     ))}
                 </div>
             </div>
+            <Snackbar
+                open={notification.open}
+                autoHideDuration={4000}
+                onClose={() => setNotification({ ...notification, open: false })}
+                anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+            >
+                <Alert severity={notification.severity} variant="filled" sx={{ width: '100%' }}>
+                    {notification.message}
+                </Alert>
+            </Snackbar>
         </div>
     )
 

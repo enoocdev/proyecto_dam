@@ -9,6 +9,7 @@ import UserGroups from "./pages/UserGroups";
 import Users from "./pages/Users";
 import { Dashboard } from "@mui/icons-material";
 import DashboardPage from "./pages/Dashboard";
+import Classroom from "./pages/Classrooms";
 
 function App() {
 
@@ -19,7 +20,7 @@ function App() {
         <Route path="/logout" element={<Logout />} />
         <Route element={<ProtectedRoute><MainLayout/></ProtectedRoute>} >
           <Route path="/" element={<DashboardPage/>} />
-          <Route path="/classroom" element={<div>classrooms ...</div>} />
+          <Route path="/classroom" element={<Classroom></Classroom>} />
           <Route path="/network-device" element={<div>network-device ...</div>} />
           <Route path="/users" element={<Users/>} />
           <Route path="/users-groups" element={<UserGroups/>} />

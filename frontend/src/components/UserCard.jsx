@@ -84,7 +84,7 @@ const UserCard = ({ user, onEdit, onDelete }) => {
 
                 <Tooltip title="Eliminar Usuario">
                     <IconButton 
-                        onClick={() => onDelete(user.id)}
+                        onClick={() => onDelete(user)}
                         sx={{ color: '#ef4444', '&:hover':{ color: '#dc2626', bgcolor: 'rgba(239,68,68,0.1)'} }}
                     >
                         <DeleteIcon />

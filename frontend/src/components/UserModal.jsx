@@ -118,18 +118,36 @@ const UserModal = ({ open, onClose, onSave, user, availableGroups = [] }) => {
 
 
     const handleSave = () => {
-        if (!isEditMode || (formData.password || formData.password_validator)) {
+        // Validar contraseñas si se están estableciendo
+        const isChangingPassword = formData.password || formData.password_validator;
+
+        if (!isEditMode && !formData.password) {
+            setPasswordError('La contraseña es obligatoria');
+            return;
+        }
+
+        if (isChangingPassword) {
             if (formData.password !== formData.password_validator) {
                 setPasswordError('Las contraseñas no coinciden');
                 return;
             }
         }
 
-        const dataToSave = { ...formData };
+        // Construir payload para la API
+        const dataToSave = {
+            username: formData.username,
+            email: formData.email,
+            first_name: formData.first_name,
+            last_name: formData.last_name,
+            is_active: formData.is_active,
+            is_staff: formData.is_staff,
+            groups: formData.groups.map(g => g.id),
+        };
 
-        if (isEditMode && !dataToSave.password && !dataToSave.password_validator) {
-            delete dataToSave.password;
-            delete dataToSave.password_validator;
+        // Solo incluir password + password_validator si se están cambiando
+        if (isChangingPassword) {
+            dataToSave.password = formData.password;
+            dataToSave.password_validator = formData.password_validator;
         }
 
         const userId = user ? user.id : null;

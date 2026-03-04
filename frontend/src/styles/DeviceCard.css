@@ -1,8 +1,8 @@
 
-.device-card {
-    background-color: #1e1e1e;
+.device-card{
+    background-color: #1e1e1e !important;
     border: 1px solid #333;
-    border-radius: 16px;
+    border-radius: 16px !important;
     overflow: hidden;
 }
 

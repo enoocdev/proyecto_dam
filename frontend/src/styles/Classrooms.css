@@ -1,0 +1,244 @@
+/* =========================================
+   CLASSROOMS - Layout Principal
+   ========================================= */
+
+.classrooms-container {
+    padding: 2rem;
+    height: 100vh;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    background-color: #121212;
+    color: #ffffff;
+    box-sizing: border-box;
+    overflow: hidden;
+}
+
+/* =========================================
+   Header
+   ========================================= */
+
+.classrooms-header {
+    margin-bottom: 2rem;
+    border-bottom: 1px solid #333;
+    padding-bottom: 1rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.classrooms-header-title {
+    font-weight: bold !important;
+    color: #fff !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 10px !important;
+}
+
+.classrooms-header-actions {
+    display: flex;
+    gap: 15px;
+    align-items: center;
+}
+
+button.new-classroom-button {
+    background-color: #8b5cf6 !important;
+    font-weight: bold;
+    text-transform: none !important;
+    border-radius: 10px !important;
+    padding: 5px 14px;
+}
+
+button.new-classroom-button:hover {
+    background-color: #7c3aed !important;
+}
+
+/* =========================================
+   Lista de Aulas (scroll)
+   ========================================= */
+
+.classrooms-list {
+    flex-grow: 1;
+    overflow-y: auto;
+    padding-right: 10px;
+}
+
+.classrooms-list::-webkit-scrollbar {
+    width: 8px;
+}
+
+.classrooms-list::-webkit-scrollbar-track {
+    background: #1e1e1e;
+}
+
+.classrooms-list::-webkit-scrollbar-thumb {
+    background: #444;
+    border-radius: 4px;
+}
+
+.classrooms-list::-webkit-scrollbar-thumb:hover {
+    background: #555;
+}
+
+/* =========================================
+   Tarjeta de Aula (ClassroomCard)
+   ========================================= */
+
+.classroom-card {
+    background-color: #1e1e1e;
+    border: 1px solid #333;
+    border-radius: 12px;
+    padding: 1rem 1.5rem;
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    transition: border-color 0.2s ease, background-color 0.2s ease;
+}
+
+.classroom-card:hover {
+    border-color: #8b5cf6;
+    background-color: #232323;
+}
+
+/* Info izquierda */
+.classroom-info {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    min-width: 220px;
+}
+
+.classroom-icon {
+    width: 45px;
+    height: 45px;
+    border-radius: 10px;
+    background-color: rgba(139, 92, 246, 0.12);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.classroom-names h4 {
+    margin: 0;
+    font-size: 1rem;
+    color: #fff;
+}
+
+.classroom-names span {
+    font-size: 0.8rem;
+    color: #a1a1aa;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+/* Chips de dispositivos (centro) */
+.classroom-devices-chips {
+    display: flex;
+    gap: 8px;
+    flex-grow: 1;
+    justify-content: flex-start;
+    padding-left: 20px;
+    overflow-x: auto;
+    white-space: nowrap;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+}
+
+.classroom-devices-chips::-webkit-scrollbar {
+    display: none;
+}
+
+.device-chip {
+    background-color: rgba(139, 92, 246, 0.1) !important;
+    color: #a78bfa !important;
+    border: 1px solid rgba(139, 92, 246, 0.25) !important;
+    font-weight: 600 !important;
+    font-size: 0.75rem !important;
+    height: 26px !important;
+    border-radius: 6px !important;
+}
+
+.device-chip:hover {
+    background-color: rgba(139, 92, 246, 0.2) !important;
+    border-color: rgba(139, 92, 246, 0.4) !important;
+}
+
+.device-chip--extra {
+    background-color: rgba(255, 255, 255, 0.05) !important;
+    color: #71717a !important;
+    border-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+.no-devices-text {
+    font-size: 0.8rem;
+    color: #555;
+    font-style: italic;
+}
+
+/* Botones de acción */
+.classroom-actions {
+    display: flex;
+    gap: 5px;
+}
+
+/* =========================================
+   Paginación
+   ========================================= */
+
+.classrooms-pagination {
+    padding: 1rem 0;
+    display: flex;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.classrooms-pagination .MuiPaginationItem-root {
+    color: #fff;
+    border-color: #555;
+}
+
+.classrooms-pagination .Mui-selected {
+    background-color: #8b5cf6 !important;
+    border-color: #8b5cf6 !important;
+    font-weight: bold;
+}
+
+.classrooms-pagination .MuiPaginationItem-root:hover {
+    background-color: rgba(139, 92, 246, 0.2);
+}
+
+/* =========================================
+   Mensajes vacíos y spinner
+   ========================================= */
+
+.no-classrooms-message {
+    text-align: center;
+    color: #666;
+    margin-top: 2rem;
+}
+
+.loading-spinner-container {
+    display: flex;
+    justify-content: center;
+    margin-top: 2.5rem;
+}
+
+.loading-spinner {
+    color: #8b5cf6 !important;
+}
+
+/* =========================================
+   Botón eliminar (dialog)
+   ========================================= */
+
+.confirm-delete-button {
+    color: #ef4444 !important;
+}
+
+/* =========================================
+   Reutiliza estilos de UserModal.css para
+   ClassroomModal (.modal-paper, .dark-input,
+   .groups-section, .chips-container, etc.)
+   ========================================= */

@@ -154,7 +154,7 @@ const Users = () => {
                 
                 <div className="users-header-actions">
                     <div className="permission-search-input">
-                         <TextField
+                        <TextField
                             size="small"
                             placeholder="Buscar usuario..."
                             value={searchTerm}
@@ -228,16 +228,17 @@ const Users = () => {
             <Dialog
                 open={isDeleteDialogOpen}
                 onClose={handleCloseDeleteDialog}
+                PaperProps={{ className: "modal-paper" }}
             >
-                <DialogTitle>Confirmar Eliminación</DialogTitle>
+                <DialogTitle sx={{ color: '#fff' }}>Confirmar Eliminación</DialogTitle>
                 <DialogContent>
-                    <DialogContentText>
+                    <DialogContentText sx={{ color: '#ccc' }}>
                         ¿Estás seguro de que quieres eliminar al usuario "{userToDelete?.username}"? Esta acción no se puede deshacer.
                     </DialogContentText>
                 </DialogContent>
                 <DialogActions>
-                    <Button onClick={handleCloseDeleteDialog}>Cancelar</Button>
-                    <Button onClick={handleConfirmDelete} className="confirm-delete-button" autoFocus>
+                    <Button onClick={handleCloseDeleteDialog} sx={{ color: '#aaa' }}>Cancelar</Button>
+                    <Button onClick={handleConfirmDelete} sx={{ color: '#ef4444' }} autoFocus>
                         Eliminar
                     </Button>
                 </DialogActions>
