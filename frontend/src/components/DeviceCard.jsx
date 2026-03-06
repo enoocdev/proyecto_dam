@@ -16,10 +16,12 @@ import PublicIcon from "@mui/icons-material/Public";
 import PublicOffIcon from "@mui/icons-material/PublicOff";
 import PowerSettingsNewIcon from "@mui/icons-material/PowerSettingsNew";
 import WifiOffIcon from "@mui/icons-material/WifiOff";
+import WifiIcon from "@mui/icons-material/Wifi";
+import DeleteIcon from "@mui/icons-material/Delete";
 import CloseIcon from "@mui/icons-material/Close";
 import "../styles/DeviceCard.css";
 
-function DeviceCard({ device, onShutdown, onBlockInternet }) {
+function DeviceCard({ device, onShutdown, onBlockInternet, onUnblockInternet, onDelete }) {
     const [sheetOpen, setSheetOpen] = useState(false);
 
     const handleCardClick = () => setSheetOpen(true);
@@ -30,8 +32,17 @@ function DeviceCard({ device, onShutdown, onBlockInternet }) {
         handleClose();
     };
 
-    const handleBlock = () => {
-        onBlockInternet?.(device);
+    const handleToggleInternet = () => {
+        if (device.is_internet_blocked) {
+            onUnblockInternet?.(device);
+        } else {
+            onBlockInternet?.(device);
+        }
+        handleClose();
+    };
+
+    const handleDelete = () => {
+        onDelete?.(device);
         handleClose();
     };
 
@@ -41,7 +52,7 @@ function DeviceCard({ device, onShutdown, onBlockInternet }) {
             <Card className={`device-card ${device.is_online ? "device-card--online" : "device-card--offline"}`}>
                 <CardActionArea onClick={handleCardClick} className="device-card__action-area">
 
-                    {/* En un futura imagen de pantalla del equi[p*/}
+                    {/* En un futura imagen de pantalla del equipo */}
                     <Box className="device-card__preview">
                         <ComputerIcon className="device-card__preview-icon" />
                     </Box>
@@ -123,11 +134,21 @@ function DeviceCard({ device, onShutdown, onBlockInternet }) {
                     <Button
                         fullWidth
                         variant="outlined"
-                        startIcon={<WifiOffIcon />}
-                        onClick={handleBlock}
-                        className="action-btn action-btn--block"
+                        startIcon={device.is_internet_blocked ? <WifiIcon /> : <WifiOffIcon />}
+                        onClick={handleToggleInternet}
+                        className={`action-btn ${device.is_internet_blocked ? "action-btn--unblock" : "action-btn--block"}`}
                     >
-                        Cortar conexión
+                        {device.is_internet_blocked ? "Activar conexión" : "Cortar conexión"}
+                    </Button>
+
+                    <Button
+                        fullWidth
+                        variant="outlined"
+                        startIcon={<DeleteIcon />}
+                        onClick={handleDelete}
+                        className="action-btn action-btn--delete"
+                    >
+                        Eliminar equipo
                     </Button>
                 </div>
             </Drawer>

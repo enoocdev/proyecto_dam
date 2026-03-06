@@ -6,36 +6,27 @@ import {
     ListItemText,
 } from "@mui/material";
 import "../styles/MainLayout.css";
-import useEndpointPermission from "../hooks/useEndpointPermissions";
-import { useEffect, useState } from "react";
-import { ACCESS_TOKEN } from "../constants";
+import useAuth from "../hooks/useAuth";
 
-function  ProtecterMenuItem ({ item }){
-    const location = useLocation()
-    const token = localStorage.getItem(ACCESS_TOKEN)
-    const {is_superuser} = token
-    // const [mostrar, setMostrar] = useState(true)
-    const { canRead } = useEndpointPermission(item.apiPath)
-    
-    
-    
-    // useEffect(()=>{
-    //     const fetch = async() =>{
-    //     try{
-    //         await api.get(item.apiPath)
+/**
+ * Muestra u oculta un elemento del menú según los permisos del usuario.
+ *
+ * Props esperadas en `item`:
+ *   - requiredPermission: codename del permiso necesario (ej. "view_device")
+ *   - requireStaff:       si true, el usuario debe ser staff
+ */
+function ProtecterMenuItem({ item }) {
+    const location = useLocation();
+    const { hasPermission, isStaff, isSuperuser } = useAuth();
 
-    //     }catch(ex){
-    //         console.log(`Ocultando ${item.text} por error:`, ex.response?.status);
-    //         setMostrar(false)
-    //     }
-        
-    //     }
+    // Superusuarios ven todo
+    if (!isSuperuser) {
+        // Comprobar si requiere staff
+        if (item.requireStaff && !isStaff) return null;
 
-    //     fetch()
-    // },[item.apiPath])
-    
-
-    if (!canRead && !is_superuser) return null;
+        // Comprobar permiso concreto
+        if (item.requiredPermission && !hasPermission(item.requiredPermission)) return null;
+    }
 
     return (
         <ListItem disablePadding>
@@ -54,4 +45,4 @@ function  ProtecterMenuItem ({ item }){
     );
 }
 
-export default ProtecterMenuItem
+export default ProtecterMenuItem;

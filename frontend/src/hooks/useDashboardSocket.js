@@ -38,7 +38,7 @@ export default function useDashboardSocket({ onDeviceStatus } = {}) {
         onMessage: (event) => {
             try {
                 const payload = JSON.parse(event.data);
-                console.log("[WebSocket] Mensaje recibido:", payload);
+                console.log(payload);
                 onDeviceStatus?.(payload);
             } catch {
                 console.warn("[useDashboardSocket] payload no válido:", event.data);

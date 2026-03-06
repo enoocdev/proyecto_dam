@@ -19,11 +19,11 @@ function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/logout" element={<Logout />} />
         <Route element={<ProtectedRoute><MainLayout/></ProtectedRoute>} >
-          <Route path="/" element={<DashboardPage/>} />
-          <Route path="/classroom" element={<Classroom></Classroom>} />
-          <Route path="/network-device" element={<div>network-device ...</div>} />
-          <Route path="/users" element={<Users/>} />
-          <Route path="/users-groups" element={<UserGroups/>} />
+          <Route path="/" element={<ProtectedRoute requiredPermission="view_device"><DashboardPage/></ProtectedRoute>} />
+          <Route path="/classroom" element={<ProtectedRoute requiredPermission="view_classroom"><Classroom/></ProtectedRoute>} />
+          <Route path="/network-device" element={<ProtectedRoute requiredPermission="view_networkdevice"><div>network-device ...</div></ProtectedRoute>} />
+          <Route path="/users" element={<ProtectedRoute requiredPermission="view_user" requireStaff><Users/></ProtectedRoute>} />
+          <Route path="/users-groups" element={<ProtectedRoute requiredPermission="view_group" requireStaff><UserGroups/></ProtectedRoute>} />
           <Route path="/profile" element={<Profile/>} />
         </Route>
       </Routes>

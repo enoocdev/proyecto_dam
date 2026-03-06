@@ -17,7 +17,6 @@ import SchoolIcon from '@mui/icons-material/School';
 import RouterIcon from '@mui/icons-material/Router';
 import PeopleIcon from '@mui/icons-material/People';
 import GroupsIcon from '@mui/icons-material/Groups';
-import VpnKeyIcon from '@mui/icons-material/VpnKey';
 import LightModeIcon from '@mui/icons-material/LightMode';
 import DarkModeIcon from '@mui/icons-material/DarkMode';
 
@@ -32,12 +31,11 @@ function MainLayout() {
     const { theme, toggleTheme, isDark } = useTheme();
 
     const menuOptions = [
-        { text: "Dashboard", icon: <DashboardIcon />, path: "/", apiPath : "/devices/devices/"},
-        { text: "Classroom", icon: <SchoolIcon />, path: "/classroom", apiPath : "/devices/classroom/"},
-        { text: "Switchs / routers", icon: <RouterIcon />, path: "/network-device",apiPath : "/devices/network-device/"},
-        { text: "Usuarios", icon: <PeopleIcon />, path: "/users",apiPath : "/users/"},
-        { text: "Grupos", icon: <GroupsIcon />, path: "/users-groups", apiPath : "/users-groups/"},
-        
+        { text: "Dashboard", icon: <DashboardIcon />, path: "/", requiredPermission: "view_device" },
+        { text: "Classroom", icon: <SchoolIcon />, path: "/classroom", requiredPermission: "view_classroom" },
+        { text: "Switchs / routers", icon: <RouterIcon />, path: "/network-device", requiredPermission: "view_networkdevice" },
+        { text: "Usuarios", icon: <PeopleIcon />, path: "/users", requiredPermission: "view_user", requireStaff: true },
+        { text: "Grupos", icon: <GroupsIcon />, path: "/users-groups", requiredPermission: "view_group", requireStaff: true },
     ];
 
     return (
