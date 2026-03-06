@@ -1,0 +1,137 @@
+/* =========================================
+   TEMA GLOBAL - Variables CSS
+   =========================================
+   Se aplica con data-theme="dark" o data-theme="light"
+   en el elemento <html>.
+   :root actúa como fallback (dark por defecto).
+   ========================================= */
+
+:root,
+[data-theme="dark"] {
+    /* Fondos */
+    --bg-app: #121212;
+    --bg-sidebar: #1e1e1e;
+    --bg-card: #1e1e1e;
+    --bg-card-darker: #171717;
+    --bg-card-hover: #232323;
+    --bg-input: #262626;
+    --bg-input-alt: #2b2b2b;
+    --bg-preview: #0a0a0a;
+    --hover-bg: rgba(255, 255, 255, 0.05);
+    --hover-bg-strong: rgba(255, 255, 255, 0.1);
+
+    /* Texto */
+    --text-primary: #ffffff;
+    --text-secondary: #a1a1aa;
+    --text-muted: #888888;
+    --text-dim: #666666;
+    --text-light: #cccccc;
+    --text-on-accent: #ffffff;
+
+    /* Bordes */
+    --border-color: #333333;
+    --border-light: #444444;
+    --border-lighter: #555555;
+
+    /* Acento (Violeta) */
+    --accent-color: #8b5cf6;
+    --accent-hover: #7c3aed;
+    --accent-light: #c4b5fd;
+    --accent-medium: #a78bfa;
+    --accent-bg: rgba(139, 92, 246, 0.15);
+    --accent-bg-soft: rgba(139, 92, 246, 0.1);
+    --accent-border: rgba(139, 92, 246, 0.25);
+    --accent-border-strong: rgba(139, 92, 246, 0.3);
+
+    /* Peligro / Rojo */
+    --danger-color: #ef4444;
+    --danger-hover: #dc2626;
+    --danger-bg: rgba(239, 68, 68, 0.1);
+
+    /* Enlaces */
+    --link-color: #90caf9;
+
+    /* Scrollbar */
+    --scrollbar-track: #1e1e1e;
+    --scrollbar-thumb: #444444;
+    --scrollbar-thumb-hover: #555555;
+
+    /* Sombras */
+    --shadow-color: rgba(0, 0, 0, 0.6);
+    --shadow-strong: rgba(0, 0, 0, 0.4);
+    --shadow-glow: rgba(139, 92, 246, 0.2);
+
+    /* Modal overlay */
+    --overlay-bg: rgba(0, 0, 0, 0.55);
+}
+
+[data-theme="light"] {
+    /* Fondos */
+    --bg-app: #f4f4f8;
+    --bg-sidebar: #ffffff;
+    --bg-card: #ffffff;
+    --bg-card-darker: #f0f0f4;
+    --bg-card-hover: #f5f5fa;
+    --bg-input: #f0f0f4;
+    --bg-input-alt: #e8e8ee;
+    --bg-preview: #e4e4ea;
+    --hover-bg: rgba(0, 0, 0, 0.04);
+    --hover-bg-strong: rgba(0, 0, 0, 0.08);
+
+    /* Texto */
+    --text-primary: #1a1a2e;
+    --text-secondary: #64748b;
+    --text-muted: #94a3b8;
+    --text-dim: #94a3b8;
+    --text-light: #475569;
+    --text-on-accent: #ffffff;
+
+    /* Bordes */
+    --border-color: #e2e8f0;
+    --border-light: #cbd5e1;
+    --border-lighter: #b0b8c4;
+
+    /* Acento (Violeta - ligeramente más saturado para legibilidad) */
+    --accent-color: #7c3aed;
+    --accent-hover: #6d28d9;
+    --accent-light: #a78bfa;
+    --accent-medium: #8b5cf6;
+    --accent-bg: rgba(124, 58, 237, 0.08);
+    --accent-bg-soft: rgba(124, 58, 237, 0.06);
+    --accent-border: rgba(124, 58, 237, 0.2);
+    --accent-border-strong: rgba(124, 58, 237, 0.3);
+
+    /* Peligro / Rojo */
+    --danger-color: #ef4444;
+    --danger-hover: #dc2626;
+    --danger-bg: rgba(239, 68, 68, 0.06);
+
+    /* Enlaces */
+    --link-color: #3b82f6;
+
+    /* Scrollbar */
+    --scrollbar-track: #f0f0f0;
+    --scrollbar-thumb: #c4c4c4;
+    --scrollbar-thumb-hover: #a0a0a0;
+
+    /* Sombras */
+    --shadow-color: rgba(0, 0, 0, 0.08);
+    --shadow-strong: rgba(0, 0, 0, 0.12);
+    --shadow-glow: rgba(124, 58, 237, 0.1);
+
+    /* Modal overlay */
+    --overlay-bg: rgba(0, 0, 0, 0.3);
+}
+
+/* =========================================
+   Transición suave global al cambiar tema
+   ========================================= */
+html {
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+html body {
+    background-color: var(--bg-app);
+    color: var(--text-primary);
+    transition: background-color 0.3s ease, color 0.3s ease;
+}

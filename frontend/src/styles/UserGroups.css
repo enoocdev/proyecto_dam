@@ -4,20 +4,21 @@
 
 .groups-container {
     padding: 3rem;
-    height: 100vh; /* Altura fija de la ventana */
+    height: 100vh;
     width: 100%;
-    display: flex;      /* Activamos Flexbox */
-    flex-direction: column; /* Dirección vertical */
-    background-color: var(--bg-app, #121212);
-    color: #ffffff;
+    display: flex;
+    flex-direction: column;
+    background-color: var(--bg-app);
+    color: var(--text-primary);
     padding: 2rem; 
     box-sizing: border-box;
     overflow: hidden;
+    transition: background-color 0.3s ease;
 }
 
 .groups-header {
     margin-bottom: 2rem;
-    border-bottom: 1px solid #333;
+    border-bottom: 1px solid var(--border-color);
     padding-bottom: 1rem;
     
     /* Mejora: Alineación perfecta entre título y botón */
@@ -31,37 +32,32 @@
    ========================================= */
 
 .group-row {
-    background-color: #1e1e1e !important;
-    border: 1px solid #333;
-    border-radius: 12px !important; /* Bordes un poco más suaves */
+    background-color: var(--bg-card) !important;
+    border: 1px solid var(--border-color);
+    border-radius: 12px !important;
     padding: 1rem 1.5rem;
-    margin-bottom: 12px; /* Espacio constante entre filas */
-    
-    /* DISEÑO LINEAL (FLEXBOX) */
+    margin-bottom: 12px;
     display: flex;
     align-items: center; 
     justify-content: space-between;
     gap: 20px;
-    
-    /* Animaciones suaves */
     transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
     cursor: pointer;
     position: relative;
 }
 
-/* Efectos al pasar el ratón (Hover) */
 .group-row:hover {
-    border-color: #8b5cf6; /* Borde violeta */
-    background-color: #252525 !important;
-    transform: translateY(-2px); /* Se levanta sutilmente */
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3); /* Sombra de profundidad */
+    border-color: var(--accent-color);
+    background-color: var(--bg-card-hover) !important;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
 }
 
 /* El nombre del grupo no debe romperse en dos líneas */
 .group-row .group-name {
     min-width: 150px;
     font-weight: bold;
-    color: #fff;
+    color: var(--text-primary);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -110,24 +106,23 @@
    ========================================= */
 
 .permission-chip {
-    background-color: rgba(139, 92, 246, 0.1) !important; /* Violeta transparente */
-    color: #a78bfa !important; /* Texto violeta claro */
-    border: 1px solid rgba(139, 92, 246, 0.25) !important;
+    background-color: var(--accent-bg-soft) !important;
+    color: var(--accent-medium) !important;
+    border: 1px solid var(--accent-border) !important;
     
     font-weight: 600 !important;
     font-size: 0.75rem !important;
     height: 26px !important;
-    border-radius: 6px !important; /* Menos redondo, más tech */
+    border-radius: 6px !important;
     
-    cursor: default; /* Cursor normal, no de texto */
-    user-select: none; /* No seleccionable */
+    cursor: default;
+    user-select: none;
     transition: background-color 0.2s ease;
 }
 
-/* Hover suave en el chip individual */
 .permission-chip:hover {
-    background-color: rgba(139, 92, 246, 0.2) !important;
-    border-color: rgba(139, 92, 246, 0.4) !important;
+    background-color: var(--accent-bg) !important;
+    border-color: var(--accent-border-strong) !important;
 }
 
 /* =========================================
@@ -135,55 +130,50 @@
    ========================================= */
 
 .group-dialog-paper {
-    background-color: #1e1e1e !important;
-    color: #ffffff !important;
-    border: 1px solid #444;
+    background-color: var(--bg-card) !important;
+    color: var(--text-primary) !important;
+    border: 1px solid var(--border-light);
     border-radius: 16px !important;
     min-width: 450px !important;
-    box-shadow: 0 20px 40px rgba(0,0,0,0.4) !important; /* Sombra profunda */
+    box-shadow: 0 20px 40px var(--shadow-strong) !important;
 }
 
 
 /* --- 1. CONTENEDOR STICKY --- */
 .permission-search-box {
-    /* Aseguramos que el fondo sea el mismo oscuro del modal/tarjeta */
-    background-color: #1e1e1e !important; 
-    border-bottom: 1px solid #333; /* Una línea sutil abajo */
-    padding-bottom: 12px !important; /* Un poco de aire */
+    background-color: var(--bg-card) !important; 
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: 12px !important;
 }
 
 /* --- 2. EL TEXTFIELD (INPUT) --- */
 .permission-search-input .MuiOutlinedInput-root {
-    background-color: #121212; /* Fondo más oscuro dentro del input */
-    border-radius: 8px !important; /* Bordes redondeados */
-    color: #ffffff !important; /* Texto blanco */
+    background-color: var(--bg-app);
+    border-radius: 8px !important;
+    color: var(--text-primary) !important;
     transition: all 0.3s ease;
 }
 
-/* El Borde (normal) */
 .permission-search-input .MuiOutlinedInput-notchedOutline {
-    border-color: #333 !important; /* Gris oscuro */
+    border-color: var(--border-color) !important;
 }
 
-/* El Borde (Hover - al pasar el ratón) */
 .permission-search-input .MuiOutlinedInput-root:hover .MuiOutlinedInput-notchedOutline {
-    border-color: #666 !important;
+    border-color: var(--border-lighter) !important;
 }
 
-/* ESTADO FOCUSED (Cuando escribes) - AQUÍ ESTÁ LA MAGIA */
 .permission-search-input .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline {
-    border-color: #8b5cf6 !important; /* Borde Violeta */
+    border-color: var(--accent-color) !important;
     border-width: 1px !important;
-    box-shadow: 0 0 10px rgba(139, 92, 246, 0.3); /* Resplandor */
+    box-shadow: 0 0 10px var(--shadow-glow);
 }
 
 /* --- 3. EL ICONO (LUPA) --- */
 .permission-search-input .MuiSvgIcon-root {
-    color: #555; /* Color apagado inicial */
+    color: var(--border-lighter);
     transition: color 0.3s ease;
 }
 
-/* Cuando el input tiene foco, el icono se ilumina */
 .permission-search-input:focus-within .MuiSvgIcon-root {
-    color: #8b5cf6 !important; /* Icono Violeta */
+    color: var(--accent-color) !important;
 }

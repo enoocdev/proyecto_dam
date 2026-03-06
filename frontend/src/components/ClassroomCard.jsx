@@ -16,7 +16,7 @@ const ClassroomCard = ({ classroom, allDevices = [], onEdit, onDelete }) => {
         <div className="classroom-card">
             <div className="classroom-info">
                 <div className="classroom-icon">
-                    <MeetingRoomIcon sx={{ fontSize: 28, color: '#8b5cf6' }} />
+                    <MeetingRoomIcon sx={{ fontSize: 28, color: 'var(--accent-color)' }} />
                 </div>
                 <div className="classroom-names">
                     <h4>{classroom.name}</h4>

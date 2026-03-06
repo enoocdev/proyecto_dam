@@ -18,7 +18,10 @@ import RouterIcon from '@mui/icons-material/Router';
 import PeopleIcon from '@mui/icons-material/People';
 import GroupsIcon from '@mui/icons-material/Groups';
 import VpnKeyIcon from '@mui/icons-material/VpnKey';
+import LightModeIcon from '@mui/icons-material/LightMode';
+import DarkModeIcon from '@mui/icons-material/DarkMode';
 
+import { useTheme } from '../context/ThemeContext';
 import "../styles/MainLayout.css";
 
 const drawerWidth = 260;
@@ -26,6 +29,7 @@ const drawerWidth = 260;
 function MainLayout() {
 
     const location = useLocation(); 
+    const { theme, toggleTheme, isDark } = useTheme();
 
     const menuOptions = [
         { text: "Dashboard", icon: <DashboardIcon />, path: "/", apiPath : "/devices/devices/"},
@@ -52,10 +56,10 @@ function MainLayout() {
                 }}
             >
                 <Box className="sidebar-header">
-                    <Typography variant="h6" sx={{ fontWeight: 'bold', color: 'white' }}>
+                    <Typography variant="h6" sx={{ fontWeight: 'bold', color: 'var(--text-primary)' }}>
                         Monitorización
                     </Typography>
-                    <Typography variant="caption" sx={{ color: '#aaa' }}>
+                    <Typography variant="caption" sx={{ color: 'var(--text-secondary)' }}>
                         Panel de Administración
                     </Typography>
                 </Box>
@@ -71,6 +75,18 @@ function MainLayout() {
 
                 <Box sx={{ mb: 2 }}>
                     <List>
+                        <ListItem disablePadding>
+                            <ListItemButton 
+                                className="menu-item-btn theme-toggle-btn"
+                                onClick={toggleTheme}
+                            >
+                                <ListItemIcon>
+                                    {isDark ? <LightModeIcon /> : <DarkModeIcon />}
+                                </ListItemIcon>
+                                <ListItemText primary={isDark ? 'Modo Claro' : 'Modo Oscuro'} />
+                            </ListItemButton>
+                        </ListItem>
+
                         <ListItem disablePadding>
                             <ListItemButton 
                                 className="menu-item-btn"

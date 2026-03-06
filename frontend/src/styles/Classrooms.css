@@ -8,10 +8,11 @@
     width: 100%;
     display: flex;
     flex-direction: column;
-    background-color: #121212;
-    color: #ffffff;
+    background-color: var(--bg-app);
+    color: var(--text-primary);
     box-sizing: border-box;
     overflow: hidden;
+    transition: background-color 0.3s ease;
 }
 
 /* =========================================
@@ -20,7 +21,7 @@
 
 .classrooms-header {
     margin-bottom: 2rem;
-    border-bottom: 1px solid #333;
+    border-bottom: 1px solid var(--border-color);
     padding-bottom: 1rem;
     display: flex;
     justify-content: space-between;
@@ -29,7 +30,7 @@
 
 .classrooms-header-title {
     font-weight: bold !important;
-    color: #fff !important;
+    color: var(--text-primary) !important;
     display: flex !important;
     align-items: center !important;
     gap: 10px !important;
@@ -42,7 +43,7 @@
 }
 
 button.new-classroom-button {
-    background-color: #8b5cf6 !important;
+    background-color: var(--accent-color) !important;
     font-weight: bold;
     text-transform: none !important;
     border-radius: 10px !important;
@@ -50,7 +51,7 @@ button.new-classroom-button {
 }
 
 button.new-classroom-button:hover {
-    background-color: #7c3aed !important;
+    background-color: var(--accent-hover) !important;
 }
 
 /* =========================================
@@ -68,16 +69,16 @@ button.new-classroom-button:hover {
 }
 
 .classrooms-list::-webkit-scrollbar-track {
-    background: #1e1e1e;
+    background: var(--scrollbar-track);
 }
 
 .classrooms-list::-webkit-scrollbar-thumb {
-    background: #444;
+    background: var(--scrollbar-thumb);
     border-radius: 4px;
 }
 
 .classrooms-list::-webkit-scrollbar-thumb:hover {
-    background: #555;
+    background: var(--scrollbar-thumb-hover);
 }
 
 /* =========================================
@@ -85,8 +86,8 @@ button.new-classroom-button:hover {
    ========================================= */
 
 .classroom-card {
-    background-color: #1e1e1e;
-    border: 1px solid #333;
+    background-color: var(--bg-card);
+    border: 1px solid var(--border-color);
     border-radius: 12px;
     padding: 1rem 1.5rem;
     margin-bottom: 12px;
@@ -97,8 +98,8 @@ button.new-classroom-button:hover {
 }
 
 .classroom-card:hover {
-    border-color: #8b5cf6;
-    background-color: #232323;
+    border-color: var(--accent-color);
+    background-color: var(--bg-card-hover);
 }
 
 /* Info izquierda */
@@ -122,12 +123,12 @@ button.new-classroom-button:hover {
 .classroom-names h4 {
     margin: 0;
     font-size: 1rem;
-    color: #fff;
+    color: var(--text-primary);
 }
 
 .classroom-names span {
     font-size: 0.8rem;
-    color: #a1a1aa;
+    color: var(--text-secondary);
     display: flex;
     align-items: center;
     gap: 4px;
@@ -151,9 +152,9 @@ button.new-classroom-button:hover {
 }
 
 .device-chip {
-    background-color: rgba(139, 92, 246, 0.1) !important;
-    color: #a78bfa !important;
-    border: 1px solid rgba(139, 92, 246, 0.25) !important;
+    background-color: var(--accent-bg-soft) !important;
+    color: var(--accent-medium) !important;
+    border: 1px solid var(--accent-border) !important;
     font-weight: 600 !important;
     font-size: 0.75rem !important;
     height: 26px !important;
@@ -166,14 +167,14 @@ button.new-classroom-button:hover {
 }
 
 .device-chip--extra {
-    background-color: rgba(255, 255, 255, 0.05) !important;
-    color: #71717a !important;
-    border-color: rgba(255, 255, 255, 0.1) !important;
+    background-color: var(--hover-bg) !important;
+    color: var(--text-muted) !important;
+    border-color: var(--hover-bg-strong) !important;
 }
 
 .no-devices-text {
     font-size: 0.8rem;
-    color: #555;
+    color: var(--text-dim);
     font-style: italic;
 }
 
@@ -195,18 +196,18 @@ button.new-classroom-button:hover {
 }
 
 .classrooms-pagination .MuiPaginationItem-root {
-    color: #fff;
-    border-color: #555;
+    color: var(--text-primary);
+    border-color: var(--border-lighter);
 }
 
 .classrooms-pagination .Mui-selected {
-    background-color: #8b5cf6 !important;
-    border-color: #8b5cf6 !important;
+    background-color: var(--accent-color) !important;
+    border-color: var(--accent-color) !important;
     font-weight: bold;
 }
 
 .classrooms-pagination .MuiPaginationItem-root:hover {
-    background-color: rgba(139, 92, 246, 0.2);
+    background-color: var(--accent-bg);
 }
 
 /* =========================================
@@ -215,7 +216,7 @@ button.new-classroom-button:hover {
 
 .no-classrooms-message {
     text-align: center;
-    color: #666;
+    color: var(--text-dim);
     margin-top: 2rem;
 }
 
@@ -226,7 +227,7 @@ button.new-classroom-button:hover {
 }
 
 .loading-spinner {
-    color: #8b5cf6 !important;
+    color: var(--accent-color) !important;
 }
 
 /* =========================================
@@ -234,7 +235,7 @@ button.new-classroom-button:hover {
    ========================================= */
 
 .confirm-delete-button {
-    color: #ef4444 !important;
+    color: var(--danger-color) !important;
 }
 
 /* =========================================

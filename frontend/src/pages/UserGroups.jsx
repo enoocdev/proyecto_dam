@@ -149,7 +149,7 @@ const UserGroups = () => {
             
             {loading && groups.length === 0 && (
                 <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%' }}>
-                    <CircularProgress sx={{ color: '#8b5cf6' }} />
+                    <CircularProgress sx={{ color: 'var(--accent-color)' }} />
                 </Box>
             )}
 
@@ -161,7 +161,7 @@ const UserGroups = () => {
                 <>
                     <Box className="groups-header">
                         <Typography variant="h5" sx={{ fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: 1 }}>
-                            <GroupIcon sx={{ color: '#8b5cf6' }} />
+                            <GroupIcon sx={{ color: 'var(--accent-color)' }} />
                             Grupos
                         </Typography>
                         <Button
@@ -169,8 +169,8 @@ const UserGroups = () => {
                             startIcon={<AddIcon />}
                             onClick={handleOpenGroup}
                             sx={{
-                                backgroundColor: '#8b5cf6',
-                                color: '#fff',
+                                backgroundColor: 'var(--accent-color)',
+                                color: 'var(--text-on-accent)',
                                 fontWeight: 'bold',
                                 textTransform: 'none',
                                 borderRadius: '10px',
@@ -182,7 +182,7 @@ const UserGroups = () => {
                     </Box>
 
                     <div className="groups-list">
-                        {loading && groups.length > 0 && <CircularProgress sx={{ color: '#8b5cf6' }} />}
+                        {loading && groups.length > 0 && <CircularProgress sx={{ color: 'var(--accent-color)' }} />}
                         
                         {groups.map((group, idx) => (
                             <UserGroup 
@@ -204,22 +204,22 @@ const UserGroups = () => {
                             variant="outlined"
                             shape="rounded"
                             sx={{
-                                '& .MuiPaginationItem-root': { color: '#fff', borderColor: '#555' },
+                                '& .MuiPaginationItem-root': { color: 'var(--text-primary)', borderColor: 'var(--border-lighter)' },
                                 '& .Mui-selected': { 
-                                    backgroundColor: '#8b5cf6 !important', 
-                                    borderColor: '#8b5cf6',
+                                    backgroundColor: 'var(--accent-color) !important', 
+                                    borderColor: 'var(--accent-color)',
                                     fontWeight: 'bold' 
                                 },
-                                '& .MuiPaginationItem-root:hover': { backgroundColor: 'rgba(139, 92, 246, 0.2)' }
+                                '& .MuiPaginationItem-root:hover': { backgroundColor: 'var(--accent-bg)' }
                             }}
                         />
                     </Box>
 
                     {/*DIALOG CREAR GRUPO*/}
                     <Dialog open={open} onClose={handleClose} classes={{ paper: 'group-dialog-paper' }}>
-                        <DialogTitle sx={{ borderBottom: '1px solid #333', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <DialogTitle sx={{ borderBottom: '1px solid var(--border-color)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                             Crear Grupo
-                            <IconButton onClick={handleClose} sx={{ color: '#aaa' }}><CloseIcon /></IconButton>
+                            <IconButton onClick={handleClose} sx={{ color: 'var(--text-secondary)' }}><CloseIcon /></IconButton>
                         </DialogTitle>
                         <DialogContent sx={{ pt: 3 }}>
                             <Box sx={{ mt: 2, display: 'flex', flexDirection: 'column', gap: 3 }}>
@@ -229,15 +229,15 @@ const UserGroups = () => {
                                     value={newName}
                                     onChange={(e) => setNewName(e.target.value)}
                                     sx={{
-                                        '& .MuiInputBase-root': { color: '#fff' },
-                                        '& .MuiInputLabel-root': { color: '#aaa' },
-                                        '& .MuiOutlinedInput-notchedOutline': { borderColor: '#555' },
-                                        '&:hover .MuiOutlinedInput-notchedOutline': { borderColor: '#8b5cf6' },
-                                        '&.Mui-focused .MuiOutlinedInput-notchedOutline': { borderColor: '#8b5cf6' },
+                                        '& .MuiInputBase-root': { color: 'var(--text-primary)' },
+                                        '& .MuiInputLabel-root': { color: 'var(--text-secondary)' },
+                                        '& .MuiOutlinedInput-notchedOutline': { borderColor: 'var(--border-lighter)' },
+                                        '&:hover .MuiOutlinedInput-notchedOutline': { borderColor: 'var(--accent-color)' },
+                                        '&.Mui-focused .MuiOutlinedInput-notchedOutline': { borderColor: 'var(--accent-color)' },
                                     }}
                                 />
                                 <Box>
-                                    <Typography variant="caption" sx={{ color: '#8b5cf6', mb: 1, display: 'block' }}>PERMISOS</Typography>
+                                    <Typography variant="caption" sx={{ color: 'var(--accent-color)', mb: 1, display: 'block' }}>PERMISOS</Typography>
                                     <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
                                         {newGroupPermisions.map((perm) => (
                                             <Chip
@@ -245,12 +245,12 @@ const UserGroups = () => {
                                                 label={perm.name}
                                                 onDelete={() => handleDeletePermission(perm.id)}
                                                 sx={{
-                                                    backgroundColor: 'rgba(139, 92, 246, 0.15)',
-                                                    color: '#a78bfa',
-                                                    border: '1px solid rgba(139, 92, 246, 0.3)',
+                                                    backgroundColor: 'var(--accent-bg)',
+                                                    color: 'var(--accent-medium)',
+                                                    border: '1px solid var(--accent-border-strong)',
                                                     '& .MuiChip-deleteIcon': {
-                                                        color: '#a78bfa',
-                                                        '&:hover': { color: '#ff4d4d' }
+                                                        color: 'var(--accent-medium)',
+                                                        '&:hover': { color: 'var(--danger-color)' }
                                                     }
                                                 }}
                                             />
@@ -259,11 +259,11 @@ const UserGroups = () => {
                                             onClick={handleOpenMenu}
                                             size="small"
                                             sx={{
-                                                bgcolor: '#2b2d31',
-                                                color: '#8b5cf6',
-                                                border: '1px dashed #555',
+                                                bgcolor: 'var(--bg-input)',
+                                                color: 'var(--accent-color)',
+                                                border: '1px dashed var(--border-lighter)',
                                                 width: 32, height: 32,
-                                                '&:hover': { bgcolor: '#8b5cf6', color: '#fff', borderColor: '#8b5cf6' }
+                                                '&:hover': { bgcolor: 'var(--accent-color)', color: 'var(--text-on-accent)', borderColor: 'var(--accent-color)' }
                                             }}
                                         >
                                             <AddIcon fontSize="small" />
@@ -272,8 +272,8 @@ const UserGroups = () => {
                                 </Box>
                             </Box>
                         </DialogContent>
-                        <DialogActions sx={{ p: 3, borderTop: '1px solid #333' }}>
-                            <Button variant="contained" onClick={handleSaveChanges} sx={{ bgcolor: '#8b5cf6', '&:hover': { bgcolor: '#7c3aed' } }}>Crear Grupo</Button>
+                        <DialogActions sx={{ p: 3, borderTop: '1px solid var(--border-color)' }}>
+                            <Button variant="contained" onClick={handleSaveChanges} sx={{ bgcolor: 'var(--accent-color)', '&:hover': { bgcolor: 'var(--accent-hover)' } }}>Crear Grupo</Button>
                         </DialogActions>
 
                         <PermissionsMenu 

@@ -126,7 +126,7 @@ const ClassroomModal = ({ open, onClose, onSave, classroom, availableDevices = [
                                     label={device.hostname || device.name || `#${device.id}`}
                                     onDelete={() => handleRemoveDevice(device.id)}
                                     className="permission-chip"
-                                    deleteIcon={<Close style={{ color: '#a985ff', fontSize: 16 }} />}
+                                    deleteIcon={<Close style={{ color: 'var(--accent-light)', fontSize: 16 }} />}
                                 />
                             ))}
 

@@ -306,7 +306,7 @@ const UserModal = ({ open, onClose, onSave, user, availableGroups = [] }) => {
                                     label={group.name}
                                     onDelete={() => handleRemoveGroup(group.id)}
                                     className="permission-chip" // Estilo morado
-                                    deleteIcon={<Close style={{ color: '#a985ff', fontSize: 16 }} />}
+                                    deleteIcon={<Close style={{ color: 'var(--accent-light)', fontSize: 16 }} />}
                                 />
                             ))}
 

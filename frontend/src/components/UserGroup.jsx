@@ -135,7 +135,7 @@ function UserGroup({ group, allPermissions, onGroupUpdated, onGroupDelete, setNo
                 onClick={() => handleOpenGroup()}
             >
                 {/* 1. NOMBRE DEL GRUPO */}
-                <Typography variant="body1" sx={{ fontWeight: 'bold', minWidth: '150px', color: '#fff' }}>
+                <Typography variant="body1" sx={{ fontWeight: 'bold', minWidth: '150px', color: 'var(--text-primary)' }}>
                     {localGroup.name}
                 </Typography>
 
@@ -152,14 +152,14 @@ function UserGroup({ group, allPermissions, onGroupUpdated, onGroupDelete, setNo
                 </div>
 
                 {/* 3. ICONO EDITAR */}
-                <EditIcon sx={{ color: '#555', fontSize: '1.1rem', minWidth: '24px' }} />
+                <EditIcon sx={{ color: 'var(--border-lighter)', fontSize: '1.1rem', minWidth: '24px' }} />
             </Paper>
 
             {/* --- MODAL DE EDICIÓN --- */}
             <Dialog open={open} onClose={handleClose} classes={{ paper: 'group-dialog-paper' }}>
-                <DialogTitle sx={{ borderBottom: '1px solid #333', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <DialogTitle sx={{ borderBottom: '1px solid var(--border-color)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     Editar {localGroup.name}
-                    <IconButton onClick={handleClose} sx={{ color: '#aaa' }}><CloseIcon /></IconButton>
+                    <IconButton onClick={handleClose} sx={{ color: 'var(--text-secondary)' }}><CloseIcon /></IconButton>
                 </DialogTitle>
                 <DialogContent sx={{ pt: 3 }}>
                     <Box sx={{ mt: 2, display: 'flex', flexDirection: 'column', gap: 3 }}>
@@ -168,16 +168,16 @@ function UserGroup({ group, allPermissions, onGroupUpdated, onGroupDelete, setNo
                         <TextField
                             label="Nombre" fullWidth value={newName} onChange={(e) => setNewName(e.target.value)}
                             sx={{
-                                '& .MuiInputBase-root': { color: '#fff' },
-                                '& .MuiInputLabel-root': { color: '#aaa' },
-                                '& .MuiOutlinedInput-notchedOutline': { borderColor: '#555' },
-                                '&:hover .MuiOutlinedInput-notchedOutline': { borderColor: '#8b5cf6' },
+                                '& .MuiInputBase-root': { color: 'var(--text-primary)' },
+                                '& .MuiInputLabel-root': { color: 'var(--text-secondary)' },
+                                '& .MuiOutlinedInput-notchedOutline': { borderColor: 'var(--border-lighter)' },
+                                '&:hover .MuiOutlinedInput-notchedOutline': { borderColor: 'var(--accent-color)' },
                             }}
                         />
 
                         {/* LISTA DE PERMISOS DENTRO DEL MODAL */}
                         <Box>
-                            <Typography variant="caption" sx={{ color: '#8b5cf6', mb: 1, display: 'block' }}>PERMISOS</Typography>
+                            <Typography variant="caption" sx={{ color: 'var(--accent-color)', mb: 1, display: 'block' }}>PERMISOS</Typography>
                             <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
                                 {permissions.map((perm) => (
                                     <Chip
@@ -187,12 +187,12 @@ function UserGroup({ group, allPermissions, onGroupUpdated, onGroupDelete, setNo
                                         size="small"
                                         onDelete={() => handleDeletePermission(perm.id)}
                                         sx={{
-                                            backgroundColor: 'rgba(139, 92, 246, 0.15)',
-                                            color: '#a78bfa',
-                                            border: '1px solid rgba(139, 92, 246, 0.3)',
+                                            backgroundColor: 'var(--accent-bg)',
+                                            color: 'var(--accent-medium)',
+                                            border: '1px solid var(--accent-border-strong)',
                                             '& .MuiChip-deleteIcon': {
-                                                color: '#a78bfa',
-                                                '&:hover': { color: '#ff4d4d' }
+                                                color: 'var(--accent-medium)',
+                                                '&:hover': { color: 'var(--danger-color)' }
                                             }
                                         }}
                                     />
@@ -203,8 +203,8 @@ function UserGroup({ group, allPermissions, onGroupUpdated, onGroupDelete, setNo
                                     onClick={handleOpenMenu}
                                     size="small"
                                     sx={{
-                                        bgcolor: '#2b2d31', color: '#8b5cf6', border: '1px dashed #555', width: 32, height: 32,
-                                        '&:hover': { bgcolor: '#8b5cf6', color: '#fff', borderColor: '#8b5cf6' }
+                                        bgcolor: 'var(--bg-input)', color: 'var(--accent-color)', border: '1px dashed var(--border-lighter)', width: 32, height: 32,
+                                        '&:hover': { bgcolor: 'var(--accent-color)', color: 'var(--text-on-accent)', borderColor: 'var(--accent-color)' }
                                     }}
                                 >
                                     <AddIcon fontSize="small" />
@@ -214,9 +214,9 @@ function UserGroup({ group, allPermissions, onGroupUpdated, onGroupDelete, setNo
                     </Box>
                 </DialogContent>
                 
-                <DialogActions sx={{ p: 3, borderTop: '1px solid #333', justifyContent: 'space-between' }}>
+                <DialogActions sx={{ p: 3, borderTop: '1px solid var(--border-color)', justifyContent: 'space-between' }}>
                     <Button startIcon={<DeleteIcon />} color="error" onClick={handleDeleteGroup}>Eliminar</Button>
-                    <Button variant="contained" onClick={handleSaveChanges} sx={{ bgcolor: '#8b5cf6', '&:hover': { bgcolor: '#7c3aed' } }}>Guardar</Button>
+                    <Button variant="contained" onClick={handleSaveChanges} sx={{ bgcolor: 'var(--accent-color)', '&:hover': { bgcolor: 'var(--accent-hover)' } }}>Guardar</Button>
                 </DialogActions>
 
                 <PermissionsMenu 

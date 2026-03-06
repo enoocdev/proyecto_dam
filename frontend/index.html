@@ -7,6 +7,12 @@
     <title>frontend</title>
   </head>
   <body>
+    <script>
+      (function() {
+        var theme = localStorage.getItem('app-theme') || 'dark';
+        document.documentElement.setAttribute('data-theme', theme);
+      })();
+    </script>
     <div id="root"></div>
     <script type="module" src="/src/main.jsx"></script>
   </body>

@@ -6,21 +6,22 @@
     width: 100%;
     display: flex;
     flex-direction: column;
-    background-color: #121212; /* Fondo muy oscuro */
-    color: #ffffff;
-    overflow: hidden; /* Evita que la ventana entera haga scroll */
+    background-color: var(--bg-app);
+    color: var(--text-primary);
+    overflow: hidden;
     font-family: 'Roboto', sans-serif;
+    transition: background-color 0.3s ease;
 }
 
 /* --- CABECERA (Fija arriba) --- */
 .users-header {
     padding: 1.5rem 2rem;
-    border-bottom: 1px solid #333;
+    border-bottom: 1px solid var(--border-color);
     display: flex;
     justify-content: space-between;
     align-items: center;
-    background-color: #121212;
-    flex-shrink: 0; /* No permitimos que se encoja */
+    background-color: var(--bg-app);
+    flex-shrink: 0;
 }
 
 .header-actions {
@@ -42,33 +43,33 @@
     width: 8px;
 }
 .users-list-container::-webkit-scrollbar-track {
-    background: #1e1e1e;
+    background: var(--scrollbar-track);
 }
 .users-list-container::-webkit-scrollbar-thumb {
-    background: #444;
+    background: var(--scrollbar-thumb);
     border-radius: 4px;
 }
 .users-list-container::-webkit-scrollbar-thumb:hover {
-    background: #555;
+    background: var(--scrollbar-thumb-hover);
 }
 
 /* --- TARJETA DE USUARIO (Fila) --- */
 .user-card {
-    background-color: #1e1e1e;
-    border: 1px solid #333;
+    background-color: var(--bg-card);
+    border: 1px solid var(--border-color);
     border-radius: 12px;
     padding: 1rem 1.5rem;
     margin-bottom: 12px;
     display: flex;
     align-items: center;
     justify-content: space-between;
-    transition: transform 0.2s ease, border-color 0.2s ease;
+    transition: transform 0.2s ease, border-color 0.2s ease, background-color 0.3s ease;
 }
 
 .user-card:hover {
     transform: translateY(-2px);
-    border-color: #8b5cf6; /* Violeta al pasar el ratón */
-    background-color: #232323;
+    border-color: var(--accent-color);
+    background-color: var(--bg-card-hover);
 }
 
 /* Información del usuario (Izquierda) */
@@ -82,11 +83,11 @@
 .user-names h4 {
     margin: 0;
     font-size: 1rem;
-    color: #fff;
+    color: var(--text-primary);
 }
 .user-names span {
     font-size: 0.85rem;
-    color: #a1a1aa;
+    color: var(--text-secondary);
 }
 
 /* Roles y Chips (Centro) */
@@ -108,9 +109,9 @@
 }
 
 .role-chip {
-    background-color: rgba(139, 92, 246, 0.1);
-    color: #a78bfa;
-    border: 1px solid rgba(139, 92, 246, 0.3);
+    background-color: var(--accent-bg-soft);
+    color: var(--accent-medium);
+    border: 1px solid var(--accent-border-strong);
     padding: 4px 12px;
     border-radius: 6px;
     font-size: 0.75rem;
@@ -135,8 +136,8 @@
 /* --- PIE DE PÁGINA (Paginación Fija) --- */
 .users-footer {
     padding: 1rem 2rem;
-    border-top: 1px solid #333;
-    background-color: #121212;
+    border-top: 1px solid var(--border-color);
+    background-color: var(--bg-app);
     display: flex;
     justify-content: flex-end;
     flex-shrink: 0;
@@ -144,43 +145,43 @@
 
 /* Overrides para Material UI Pagination en modo oscuro */
 .pagination-dark .MuiPaginationItem-root {
-    color: #a1a1aa;
-    border-color: #333;
+    color: var(--text-secondary);
+    border-color: var(--border-color);
 }
 .pagination-dark .MuiPaginationItem-root.Mui-selected {
-    background-color: rgba(139, 92, 246, 0.2);
-    border-color: #8b5cf6;
-    color: #fff;
+    background-color: var(--accent-bg);
+    border-color: var(--accent-color);
+    color: var(--text-primary);
 }
 .pagination-dark .MuiPaginationItem-root:hover {
-    background-color: rgba(255, 255, 255, 0.1);
+    background-color: var(--hover-bg-strong);
 }
 
 /* --- ESTILOS DE INPUT BUSCADOR --- */
 .search-input-dark .MuiOutlinedInput-root {
-    background-color: #1e1e1e;
+    background-color: var(--bg-card);
     border-radius: 8px;
-    color: white;
+    color: var(--text-primary);
     width: 280px;
 }
 .search-input-dark .MuiOutlinedInput-notchedOutline {
-    border-color: #444;
+    border-color: var(--border-light);
 }
 .search-input-dark .MuiOutlinedInput-root:hover .MuiOutlinedInput-notchedOutline {
-    border-color: #777;
+    border-color: var(--border-lighter);
 }
 .search-input-dark .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline {
-    border-color: #8b5cf6;
+    border-color: var(--accent-color);
 }
 .search-input-dark .MuiSvgIcon-root {
-    color: #666;
+    color: var(--text-dim);
 }
 
 /* --- NUEVOS ESTILOS AÑADIDOS --- */
 
 .users-header-title {
     font-weight: bold;
-    color: #8b5cf6;
+    color: var(--accent-color);
 }
 
 .users-header-actions {
@@ -194,13 +195,13 @@
   especificidad mayor apuntando al elemento button con la clase.
 */
 button.new-user-button {
-    background-color: #8b5cf6;
+    background-color: var(--accent-color);
     font-weight: bold;
     text-transform: none;
 }
 
 button.new-user-button:hover {
-    background-color: #7c3aed;
+    background-color: var(--accent-hover);
 }
 
 .loading-spinner-container {
@@ -210,7 +211,7 @@ button.new-user-button:hover {
 }
 
 .loading-spinner {
-    color: #8b5cf6;
+    color: var(--accent-color);
 }
 
 .user-info-container {
@@ -220,7 +221,7 @@ button.new-user-button:hover {
 }
 
 .user-avatar {
-    background-color: #333;
+    background-color: var(--border-color);
     width: 45px;
     height: 45px;
 }
@@ -238,30 +239,30 @@ button.new-user-button:hover {
 
 .action-button-edit, 
 .action-button-edit .MuiSvgIcon-root {
-    color: #a1a1aa;
+    color: var(--text-secondary);
     transition: background-color 0.2s, color 0.2s;
 }
 
 .action-button-edit:hover {
-    color: #fff;
-    background-color: rgba(255, 255, 255, 0.1);
+    color: var(--text-primary);
+    background-color: var(--hover-bg-strong);
 }
 
 .action-button-delete,
 .action-button-delete .MuiSvgIcon-root {
-    color: #ef4444;
+    color: var(--danger-color);
     transition: background-color 0.2s, color 0.2s;
 }
 
 .action-button-delete:hover {
-    color: #dc2626;
-    background-color: rgba(239, 68, 68, 0.1);
+    color: var(--danger-hover);
+    background-color: var(--danger-bg);
 }
 
 .no-users-message {
     text-align: center;
-    color: #666;
-    margin-top: 2rem; /* mt: 4 in MUI theme (4 * 8px) / 16px = 2rem */
+    color: var(--text-dim);
+    margin-top: 2rem;
 }
 
 .confirm-delete-button {

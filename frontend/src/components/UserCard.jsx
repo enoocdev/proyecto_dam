@@ -26,11 +26,11 @@ const UserCard = ({ user, onEdit, onDelete }) => {
             <div className="user-info">
                 <Avatar 
                     sx={{ 
-                        bgcolor: user.is_superuser ? '#f59e0b' : '#333',
+                        bgcolor: user.is_superuser ? '#f59e0b' : 'var(--border-color)',
                         width: 45, 
                         height: 45, 
                         fontWeight: 'bold',
-                        color: '#fff'
+                        color: 'var(--text-on-accent)'
                     }}
                     src={user.profile_picture || null}
                 >
@@ -68,7 +68,7 @@ const UserCard = ({ user, onEdit, onDelete }) => {
                 ))}
 
                 {!user.is_superuser && !user.is_staff && (!user.groups || user.groups.length === 0) && (
-                    <span style={{ fontSize: '0.8rem', color: '#666' }}>Usuario estándar</span>
+                    <span style={{ fontSize: '0.8rem', color: 'var(--text-dim)' }}>Usuario estándar</span>
                 )}
             </div>
 
@@ -76,7 +76,7 @@ const UserCard = ({ user, onEdit, onDelete }) => {
                 <Tooltip title="Editar Usuario">
                     <IconButton 
                         onClick={() => onEdit(user)}
-                        sx={{ color: '#a1a1aa', '&:hover':{ color: '#fff', bgcolor: 'rgba(255,255,255,0.1)'} }}
+                        sx={{ color: 'var(--text-secondary)', '&:hover':{ color: 'var(--text-primary)', bgcolor: 'var(--hover-bg-strong)'} }}
                     >
                         <EditIcon />
                     </IconButton>
@@ -85,7 +85,7 @@ const UserCard = ({ user, onEdit, onDelete }) => {
                 <Tooltip title="Eliminar Usuario">
                     <IconButton 
                         onClick={() => onDelete(user)}
-                        sx={{ color: '#ef4444', '&:hover':{ color: '#dc2626', bgcolor: 'rgba(239,68,68,0.1)'} }}
+                        sx={{ color: 'var(--danger-color)', '&:hover':{ color: 'var(--danger-hover)', bgcolor: 'var(--danger-bg)'} }}
                     >
                         <DeleteIcon />
                     </IconButton>

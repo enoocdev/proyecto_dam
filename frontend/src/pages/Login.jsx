@@ -50,11 +50,11 @@ function Login() {
         <div className="login-container">
             <div className="login-card">
 
-                <Typography variant="h5" style={{ color: 'white', marginBottom: '10px' }}>
+                <Typography variant="h5" style={{ color: 'var(--text-primary)', marginBottom: '10px' }}>
                     Bienvenido
                 </Typography>
 
-                <Typography variant="body2" style={{ color: '#aaa', marginBottom: '20px' }}>
+                <Typography variant="body2" style={{ color: 'var(--text-secondary)', marginBottom: '20px' }}>
                     Inicia sesión para continuar
                 </Typography>
 
@@ -94,8 +94,8 @@ function Login() {
                         style={{
                             marginTop: '20px',
                             height: '45px',
-                            backgroundColor: '#90caf9',
-                            color: '#000'
+                            backgroundColor: 'var(--accent-color)',
+                            color: 'var(--text-on-accent)'
                         }}
                     >
                         {loading ? <CircularProgress size={24} color="inherit" /> : "Iniciar Sesión"}

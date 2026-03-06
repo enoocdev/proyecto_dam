@@ -11,16 +11,16 @@
 
 /* La tarjeta del formulario */
 .login-card {
-    background-color: #1e1e1e;
-    /* Gris oscuro */
+    background-color: var(--bg-card);
     padding: 2.5rem;
     border-radius: 8px;
-    border: 1px solid #333;
+    border: 1px solid var(--border-color);
     width: 100%;
     max-width: 400px;
     display: flex;
     flex-direction: column;
     align-items: center;
+    transition: background-color 0.3s ease, border-color 0.3s ease;
 }
 
 /* --- OVERRIDES (SOBREESCRIBIR) MATERIAL UI --- */
@@ -28,30 +28,27 @@
 
 /* Color del texto que escribes */
 .login-card .MuiInputBase-input {
-    color: white !important;
+    color: var(--text-primary) !important;
 }
 
 /* Color de la etiqueta (Label) */
 .login-card .MuiInputLabel-root {
-    color: #aaaaaa !important;
+    color: var(--text-secondary) !important;
 }
 
 .login-card .MuiInputLabel-root.Mui-focused {
-    color: #90caf9 !important;
-    /* Azul al hacer click */
+    color: var(--accent-color) !important;
 }
 
 /* Color del borde del input */
 .login-card .MuiOutlinedInput-notchedOutline {
-    border-color: #444444 !important;
+    border-color: var(--border-light) !important;
 }
 
 .login-card .MuiOutlinedInput-root:hover .MuiOutlinedInput-notchedOutline {
-    border-color: #ffffff !important;
-    /* Borde blanco al pasar ratón */
+    border-color: var(--text-primary) !important;
 }
 
 .login-card .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline {
-    border-color: #90caf9 !important;
-    /* Borde azul al escribir */
+    border-color: var(--accent-color) !important;
 }

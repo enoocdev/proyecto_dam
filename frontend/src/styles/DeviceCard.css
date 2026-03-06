@@ -1,9 +1,10 @@
 
 .device-card{
-    background-color: #1e1e1e !important;
-    border: 1px solid #333;
+    background-color: var(--bg-card) !important;
+    border: 1px solid var(--border-color);
     border-radius: 16px !important;
     overflow: hidden;
+    transition: background-color 0.3s ease;
 }
 
 .device-card--online {
@@ -11,7 +12,7 @@
 }
 
 .device-card--offline {
-    border-left: 3px solid #555;
+    border-left: 3px solid var(--border-lighter);
 }
 
 .device-card__action-area {
@@ -22,7 +23,7 @@
 
 /* ── Placeholder imagen ── */
 .device-card__preview {
-    background-color: #0a0a0a;
+    background-color: var(--bg-preview);
     height: 160px;
     display: flex;
     align-items: center;
@@ -31,7 +32,7 @@
 
 .device-card__preview-icon {
     font-size: 56px !important;
-    color: #2a2a2a !important;
+    color: var(--border-color) !important;
 }
 
 .device-card__body {
@@ -43,14 +44,14 @@
 
 .device-card__hostname {
     font-weight: 700 !important;
-    color: #fff !important;
+    color: var(--text-primary) !important;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
 }
 
 .device-card__ip {
-    color: #71717a !important;
+    color: var(--text-dim) !important;
     font-family: 'Roboto Mono', monospace !important;
 }
 
@@ -128,8 +129,8 @@
 /* Drawer */
 
 .action-sheet .MuiDrawer-paper {
-    background-color: #1e1e1e !important;
-    border-top: 1px solid #333 !important;
+    background-color: var(--bg-card) !important;
+    border-top: 1px solid var(--border-color) !important;
     border-top-left-radius: 20px !important;
     border-top-right-radius: 20px !important;
     max-width: 480px !important;
@@ -138,14 +139,14 @@
 }
 
 .action-sheet .MuiBackdrop-root {
-    background-color: rgba(0, 0, 0, 0.55) !important;
+    background-color: var(--overlay-bg) !important;
 }
 
 .action-sheet__handle {
     width: 40px;
     height: 4px;
     border-radius: 4px;
-    background-color: #444;
+    background-color: var(--border-light);
     margin: 0 auto 16px;
 }
 
@@ -163,34 +164,34 @@
 }
 
 .action-sheet__device-icon {
-    color: #8b5cf6 !important;
+    color: var(--accent-color) !important;
     font-size: 28px !important;
 }
 
 .action-sheet__title {
     font-weight: 700 !important;
-    color: #fff !important;
+    color: var(--text-primary) !important;
 }
 
 .action-sheet__subtitle {
-    color: #71717a !important;
+    color: var(--text-dim) !important;
     font-family: 'Roboto Mono', monospace !important;
 }
 
 .action-sheet__close {
-    border: 1px solid #444 !important;
+    border: 1px solid var(--border-light) !important;
     border-radius: 8px !important;
-    color: #a1a1aa !important;
+    color: var(--text-secondary) !important;
 }
 
 .action-sheet__close:hover {
-    background-color: rgba(255, 255, 255, 0.08) !important;
-    color: #fff !important;
-    border-color: #666 !important;
+    background-color: var(--hover-bg-strong) !important;
+    color: var(--text-primary) !important;
+    border-color: var(--border-lighter) !important;
 }
 
 .action-sheet__divider {
-    border-color: #333 !important;
+    border-color: var(--border-color) !important;
     margin-bottom: 20px !important;
 }
 

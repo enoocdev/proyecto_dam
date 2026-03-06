@@ -157,18 +157,18 @@ const Profile = () => {
             
             {loading && (
                 <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%' }}>
-                    <CircularProgress sx={{ color: '#8b5cf6' }} />
+                    <CircularProgress sx={{ color: 'var(--accent-color)' }} />
                 </Box>
             )}
             
             {
                 error &&
                 (<Paper className="error-card" elevation={10}>
-                        <CloudOffIcon sx={{ fontSize: 80, color: '#a1a1aa', mb: 3 }} />
-                        <Typography variant="h4" sx={{ fontWeight: 'bold', mb: 2, color: '#fff' }}>
+                        <CloudOffIcon sx={{ fontSize: 80, color: 'var(--text-secondary)', mb: 3 }} />
+                        <Typography variant="h4" sx={{ fontWeight: 'bold', mb: 2, color: 'var(--text-primary)' }}>
                             Error de Conexión
                         </Typography>
-                        <Typography variant="body1" sx={{ color: '#a1a1aa', mb: 4, maxWidth: '320px', lineHeight: 1.6 }}>
+                        <Typography variant="body1" sx={{ color: 'var(--text-secondary)', mb: 4, maxWidth: '320px', lineHeight: 1.6 }}>
                             No se pudo cambiar la Información de tu perfil
                         </Typography>
                         <Button 
@@ -230,7 +230,7 @@ const Profile = () => {
                     }
 
                     <Box sx={{ width: '100%', mt: 4 }}>
-                        <Typography variant="caption" sx={{ color: '#8b5cf6', letterSpacing: 1 }}>
+                        <Typography variant="caption" sx={{ color: 'var(--accent-color)', letterSpacing: 1 }}>
                             ROLES ASIGNADOS
                         </Typography>
                         <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, mt: 1 }}>
@@ -315,11 +315,11 @@ const Profile = () => {
                             onClick={handlePreSave}
                             startIcon={<SaveIcon />}
                             sx={{ 
-                                bgcolor: '#8b5cf6', 
+                                bgcolor: 'var(--accent-color)', 
                                 color: 'white',
                                 padding: '10px 30px',
                                 fontWeight: 'bold',
-                                '&:hover': { bgcolor: '#7c3aed' } 
+                                '&:hover': { bgcolor: 'var(--accent-hover)' } 
                             }}
                         >
                             ACTUALIZAR PERFIL
@@ -334,19 +334,19 @@ const Profile = () => {
             <Dialog
                 open={confirmOpen}
                 onClose={() => setConfirmOpen(false)}
-                PaperProps={{ style: { backgroundColor: '#1e1e1e', color: 'white', border: '1px solid #333' } }}
+                PaperProps={{ style: { backgroundColor: 'var(--bg-card)', color: 'var(--text-primary)', border: '1px solid var(--border-color)' } }}
             >
                 <DialogTitle sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                     <WarningIcon sx={{ color: '#f59e0b' }} /> Confirmar Cambios
                 </DialogTitle>
                 <DialogContent>
-                    <DialogContentText sx={{ color: '#ccc' }}>
+                    <DialogContentText sx={{ color: 'var(--text-light)' }}>
                         ¿Estás seguro de que deseas guardar los cambios realizados en tu perfil?
                     </DialogContentText>
                 </DialogContent>
                 <DialogActions>
-                    <Button onClick={() => setConfirmOpen(false)} sx={{ color: '#ccc' }}>Cancelar</Button>
-                    <Button onClick={handleConfirmSave} variant="contained" sx={{ bgcolor: '#8b5cf6' }}>Confirmar</Button>
+                    <Button onClick={() => setConfirmOpen(false)} sx={{ color: 'var(--text-light)' }}>Cancelar</Button>
+                    <Button onClick={handleConfirmSave} variant="contained" sx={{ bgcolor: 'var(--accent-color)' }}>Confirmar</Button>
                 </DialogActions>
             </Dialog>
 

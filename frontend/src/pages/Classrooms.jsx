@@ -129,7 +129,7 @@ const Classroom = () => {
         <div className="classrooms-container">
             <div className="classrooms-header">
                 <Typography variant="h5" className="classrooms-header-title">
-                    <MeetingRoomIcon sx={{ color: '#8b5cf6', fontSize: 28 }} />
+                    <MeetingRoomIcon sx={{ color: 'var(--accent-color)', fontSize: 28 }} />
                     Gestión de Aulas
                 </Typography>
 
@@ -207,15 +207,15 @@ const Classroom = () => {
             />
 
             <Dialog open={isDeleteDialogOpen} onClose={handleCloseDeleteDialog} PaperProps={{ className: "modal-paper" }}>
-                <DialogTitle sx={{ color: '#fff' }}>Confirmar Eliminación</DialogTitle>
+                <DialogTitle sx={{ color: 'var(--text-primary)' }}>Confirmar Eliminación</DialogTitle>
                 <DialogContent>
-                    <DialogContentText sx={{ color: '#ccc' }}>
+                    <DialogContentText sx={{ color: 'var(--text-light)' }}>
                         ¿Estás seguro de que quieres eliminar el aula "{classroomToDelete?.name}"? Esta acción no se puede deshacer.
                     </DialogContentText>
                 </DialogContent>
                 <DialogActions>
-                    <Button onClick={handleCloseDeleteDialog} sx={{ color: '#aaa' }}>Cancelar</Button>
-                    <Button onClick={handleConfirmDelete} sx={{ color: '#ef4444' }} autoFocus>
+                    <Button onClick={handleCloseDeleteDialog} sx={{ color: 'var(--text-secondary)' }}>Cancelar</Button>
+                    <Button onClick={handleConfirmDelete} sx={{ color: 'var(--danger-color)' }} autoFocus>
                         Eliminar
                     </Button>
                 </DialogActions>

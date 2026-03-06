@@ -197,7 +197,7 @@ const Users = () => {
                 )}
             </div>
 
-            <div className="groups-pagination">
+            <Box sx={{ display: 'flex', justifyContent: 'center', mt: 3, pb: 2 }}>
                 <Pagination 
                     count={totalPages} 
                     page={page} 
@@ -206,8 +206,17 @@ const Users = () => {
                     shape="rounded" 
                     showFirstButton 
                     showLastButton
+                    sx={{
+                        '& .MuiPaginationItem-root': { color: 'var(--text-primary)', borderColor: 'var(--border-lighter)' },
+                        '& .Mui-selected': { 
+                            backgroundColor: 'var(--accent-color) !important', 
+                            borderColor: 'var(--accent-color)',
+                            fontWeight: 'bold' 
+                        },
+                        '& .MuiPaginationItem-root:hover': { backgroundColor: 'var(--accent-bg)' }
+                    }}
                 />
-            </div>
+            </Box>
 
             <UserModal
                 onSave={handleSaveUser}
@@ -223,15 +232,15 @@ const Users = () => {
                 onClose={handleCloseDeleteDialog}
                 PaperProps={{ className: "modal-paper" }}
             >
-                <DialogTitle sx={{ color: '#fff' }}>Confirmar Eliminación</DialogTitle>
+                <DialogTitle sx={{ color: 'var(--text-primary)' }}>Confirmar Eliminación</DialogTitle>
                 <DialogContent>
-                    <DialogContentText sx={{ color: '#ccc' }}>
+                    <DialogContentText sx={{ color: 'var(--text-light)' }}>
                         ¿Estás seguro de que quieres eliminar al usuario "{userToDelete?.username}"? Esta acción no se puede deshacer.
                     </DialogContentText>
                 </DialogContent>
                 <DialogActions>
-                    <Button onClick={handleCloseDeleteDialog} sx={{ color: '#aaa' }}>Cancelar</Button>
-                    <Button onClick={handleConfirmDelete} sx={{ color: '#ef4444' }} autoFocus>
+                    <Button onClick={handleCloseDeleteDialog} sx={{ color: 'var(--text-secondary)' }}>Cancelar</Button>
+                    <Button onClick={handleConfirmDelete} sx={{ color: 'var(--danger-color)' }} autoFocus>
                         Eliminar
                     </Button>
                 </DialogActions>
