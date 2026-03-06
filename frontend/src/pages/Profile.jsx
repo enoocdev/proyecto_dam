@@ -32,7 +32,7 @@ import RefreshIcon from '@mui/icons-material/Refresh';
 import '../styles/Profile.css';
 import api from "../api";
 import { jwtDecode } from "jwt-decode";
-import { ACCESS_TOKEN } from "../constants"
+import { ACCESS_TOKEN , API_PATH_USERS} from "../constants"
 
 const Profile = () => {
 
@@ -60,7 +60,7 @@ const Profile = () => {
     const reloadProfile = async () =>{
             setloading(true)
             try{
-                const userData = await api.get(`/users/${user_id}/`)
+                const userData = await api.get(`${API_PATH_USERS}${user_id}/`)
                 if (userData.status === 200){
                     
                     setUser({
@@ -125,7 +125,7 @@ const Profile = () => {
             if(!patchUser.password_validator) delete patchUser.password_validator
 
             try{
-                const { data, status }  = await api.patch(`/users/${user_id}/`, patchUser)
+                const { data, status }  = await api.patch(`${API_PATH_USERS}${user_id}/`, patchUser)
 
                 if(status === 200){
                     const updatedUser ={

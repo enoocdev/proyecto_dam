@@ -95,7 +95,7 @@ class DeviceSerializer(serializers.ModelSerializer):
         }
         
 
-class DeviceSimpleSerializer(serializers.ModelSerializer):
+class ClassRoomSimpleSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Device
-        fields = ['id', 'hostname']
+        model = Classroom
+        fields = ['id', 'name']

@@ -14,8 +14,7 @@ import '../styles/Classrooms.css';
 import ClassroomCard from '../components/ClassroomCard';
 import ClassroomModal from '../components/ClassroomModal';
 
-const API_PATH_CLASSROOMS = "/devices/classroom/";
-const API_PATH_DEVICES = "/devices/devices/";
+import { API_PATH_CLASSROOMS, API_PATH_DEVICES } from '../constants';
 
 const Classroom = () => {
     const [classrooms, setClassrooms] = useState([]);

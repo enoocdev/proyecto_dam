@@ -13,12 +13,10 @@ import UserGroup from "../components/UserGroup";
 import RestrictedAccess from '../components/RestrictedAccess';
 import PermissionsMenu from '../components/PermissionsMenu'; 
 
-import { USER_PERMISSIONS } from '../constants';
+import { USER_PERMISSIONS , API_PATH_USER_GROUPS, API_PATH_PERMISIONS } from '../constants';
 import api from '../api';
 import '../styles/UserGroups.css';
 
-const API_PATH_USER_GROUPS = "/users-groups/";
-const API_PATH_PERMISIONS = "/permissions/";
 const PAGE_SIZE = 10;
 
 const UserGroups = () => {

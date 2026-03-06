@@ -10,7 +10,9 @@ import DeviceCard from "../components/DeviceCard";
 import useDashboardSocket from "../hooks/useDashboardSocket";
 import "../styles/Dashboard.css";
 
-const API_PATH_DEVICES = "/devices/devices/";
+import {API_PATH_DEVICES, API_PATH_CLASSROOMS_WITHOUT_PAGINATION} from '../constants';
+
+
 
 function DashboardPage() {
 
@@ -21,13 +23,29 @@ function DashboardPage() {
     const [totalPages, setTotalPages] = useState(1);
     const pageSize = 10;
 
+    const [classrooms, setClassrooms] = useState([]);
+    const [selectedClassroom, setSelectedClassroom] = useState(null);
+
     const [notification, setNotification] = useState({ open: false, message: '', severity: 'success' });
 
 
     useEffect(() => {
-        fetchDevices()
+        fetchClassrooms();
+    }, []);
 
-    },[])
+    useEffect(() => {
+        fetchDevices();
+    }, [selectedClassroom]);
+
+    const fetchClassrooms = async () => {
+        try {
+            const response = await api.get(API_PATH_CLASSROOMS_WITHOUT_PAGINATION);
+            const data = Array.isArray(response.data) ? response.data : [];
+            setClassrooms(data);
+        } catch (err) {
+            setNotification({ open: true, message: 'Error al cargar las Aulas', severity: 'error' });
+        }
+    };
 
     //WebSocket: actualizar estado de dispositivos en tiempo real
     const handleDeviceStatus = useCallback((payload) => {
@@ -47,15 +65,20 @@ function DashboardPage() {
         onDeviceStatus: handleDeviceStatus,
     });
 
+    const handleClassroomChange = (classroomId) => {
+        setSelectedClassroom(classroomId);
+    };
+
     const fetchDevices = async () => {
 
         setLoading(true);
         try {
-            const response = await api.get(API_PATH_DEVICES, {
-                params: {
-                    page: page,
-                },
-            });
+            const params = { page };
+            if (selectedClassroom !== null) {
+                params.classroom = selectedClassroom;
+            }
+
+            const response = await api.get(API_PATH_DEVICES, { params });
             
             const data = response.data.results ? response.data.results : response.data;
             const count = response.data.count || (Array.isArray(data) ? data.length : 0);
@@ -81,6 +104,25 @@ function DashboardPage() {
                 <Typography variant="body2" className="dashboard-header__subtitle">
                     Equipos en la red
                 </Typography>
+            </div>
+
+            {/* Filtro por aula */}
+            <div className="dashboard-filter">
+                <button
+                    className={`dashboard-filter__btn ${selectedClassroom === null ? 'dashboard-filter__btn--active' : ''}`}
+                    onClick={() => handleClassroomChange(null)}
+                >
+                    Todos
+                </button>
+                {classrooms.map((classroom) => (
+                    <button
+                        key={classroom.id}
+                        className={`dashboard-filter__btn ${selectedClassroom === classroom.id ? 'dashboard-filter__btn--active' : ''}`}
+                        onClick={() => handleClassroomChange(classroom.id)}
+                    >
+                        {classroom.name}
+                    </button>
+                ))}
             </div>
 
             {/* Contenido scrollable */}

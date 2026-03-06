@@ -1,7 +1,7 @@
 from .models import Device, Classroom, NetworkDevice
 from  rest_framework import viewsets
 from rest_framework.permissions import IsAuthenticated
-from .serializer import DeviceSerializer, ClassroomSerializer, NetworkDeviceSerializer, DeviceSimpleSerializer
+from .serializer import DeviceSerializer, ClassroomSerializer, NetworkDeviceSerializer, ClassRoomSimpleSerializer
 from .permissions import StrictDjangoModelPermissions
 
 
@@ -11,6 +11,13 @@ class DevicesViewSet(viewsets.ModelViewSet):
     permission_classes = [StrictDjangoModelPermissions, IsAuthenticated ]
     serializer_class = DeviceSerializer
     pagination_class = None
+
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        classroom_id = self.request.query_params.get('classroom')
+        if classroom_id is not None:
+            queryset = queryset.filter(classroom_id=classroom_id)
+        return queryset
 
 class NetworkDevicViewSet(viewsets.ModelViewSet):
     queryset = NetworkDevice.objects.all()
@@ -22,9 +29,9 @@ class ClassroomViewSet(viewsets.ModelViewSet):
     permission_classes = [StrictDjangoModelPermissions, IsAuthenticated ]
     serializer_class = ClassroomSerializer
 
-class ReadOnlyDeviceWithoutPagination(viewsets.ReadOnlyModelViewSet):
-    queryset = Device.objects.all()
-    serializer_class = DeviceSimpleSerializer
+class ReadOnlyClassRoomWithoutPagination(viewsets.ReadOnlyModelViewSet):
+    queryset = Classroom.objects.all().order_by("id")
+    serializer_class = ClassRoomSimpleSerializer
     permission_classes = [StrictDjangoModelPermissions, IsAuthenticated]
     pagination_class = None
 

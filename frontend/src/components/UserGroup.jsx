@@ -12,7 +12,8 @@ import CloseIcon from '@mui/icons-material/Close';
 import api from '../api';
 import PermissionsMenu from './PermissionsMenu'; 
 
-const API_PATH_USER_GROUPS = "/users-groups/";
+import {API_PATH_USER_GROUPS} from '../constants';
+
 
 function UserGroup({ group, allPermissions, onGroupUpdated, onGroupDelete, setNotification }) {
 

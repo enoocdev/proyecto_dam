@@ -39,6 +39,40 @@
     color: #8b5cf6 !important;
 }
 
+.dashboard-filter {
+    display: flex;
+    gap: 8px;
+    padding: 0.75rem 2rem;
+    border-bottom: 1px solid #333;
+    flex-shrink: 0;
+    overflow-x: auto;
+    scrollbar-width: thin;
+    scrollbar-color: #555 transparent;
+}
+
+.dashboard-filter__btn {
+    padding: 6px 16px;
+    border: 1px solid #444;
+    border-radius: 20px;
+    background: transparent;
+    color: #a1a1aa;
+    font-size: 0.85rem;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: all 0.2s ease;
+}
+
+.dashboard-filter__btn:hover {
+    border-color: #8b5cf6;
+    color: #c4b5fd;
+}
+
+.dashboard-filter__btn--active {
+    background: #8b5cf6;
+    border-color: #8b5cf6;
+    color: #fff;
+}
+
 .devices-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));

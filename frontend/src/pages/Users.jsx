@@ -21,20 +21,13 @@ import {
 // Iconos
 import SearchIcon from '@mui/icons-material/Search';
 import AddIcon from '@mui/icons-material/Add';
-import EditIcon from '@mui/icons-material/Edit';
-import DeleteIcon from '@mui/icons-material/Delete';
-import AdminPanelSettingsIcon from '@mui/icons-material/AdminPanelSettings';
-import SecurityIcon from '@mui/icons-material/Security';
 
 // Componentes, API y CSS
 import api from "../api"; 
 import '../styles/Users.css'; 
 import UserCard from '../components/UserCard';
 import UserModal from '../components/UserModal';
-
-const API_PATH_USERS = "/users/";
-const API_PATH_USER_GROUPS = "/users-groups-without-pagination/";
-
+import { API_PATH_USERS, API_PATH_USER_GROUPS_WITHOUT_PAGINATION } from '../constants';
 
 const Users = () => {
     const [users, setUsers] = useState([]);
@@ -75,7 +68,7 @@ const Users = () => {
 
     const fetchUserGroups = async () => {
         try {
-            const { data, status } = await api.get(API_PATH_USER_GROUPS);
+            const { data, status } = await api.get(API_PATH_USER_GROUPS_WITHOUT_PAGINATION);
             if (status === 200) {
                 setAllUserGroups(data);
             }
