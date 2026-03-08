@@ -1,16 +1,7 @@
-"""
-Servicio nativo de Windows para el cliente de Proyecto DAM.
-
-Utiliza pywin32 para registrarse como un servicio real del sistema operativo.
-El servicio ejecuta client.py como subproceso y lo gestiona correctamente
-(inicio, parada, reinicio automatico si el proceso muere).
-
-Requisitos:
-    pip install pywin32
-    python -m pywin32_postinstall -install
-
-No ejecutar directamente; usar install_service.py para gestionar.
-"""
+# Servicio nativo de Windows para el cliente del proyecto
+# Usa pywin32 para registrarse como servicio del sistema operativo
+# Ejecuta client py como subproceso y lo reinicia si se cae
+# Para instalar y gestionar el servicio usar install service py
 
 import subprocess
 import sys
@@ -33,8 +24,8 @@ CLIENT_SCRIPT = str(CLIENT_DIR / "client.py")
 SERVICE_LOG = str(CLIENT_DIR / "service_wrapper.log")
 
 
+# Clase del servicio de Windows que ejecuta el cliente de monitorizacion
 class ProyectoDAMClientService(win32serviceutil.ServiceFramework):
-    """Servicio de Windows que ejecuta el cliente de monitorizacion."""
 
     _svc_name_ = "ProyectoDAMClient"
     _svc_display_name_ = "Proyecto DAM - Cliente de dispositivo"
@@ -48,14 +39,14 @@ class ProyectoDAMClientService(win32serviceutil.ServiceFramework):
         self.stop_event = win32event.CreateEvent(None, 0, 0, None)
         self.process = None
 
+    # Detiene el servicio cuando el sistema lo solicita
     def SvcStop(self):
-        """Detiene el servicio."""
         self.ReportServiceStatus(win32service.SERVICE_STOP_PENDING)
         win32event.SetEvent(self.stop_event)
         self._terminate_process()
 
+    # Punto de entrada principal cuando el sistema arranca el servicio
     def SvcDoRun(self):
-        """Punto de entrada principal del servicio."""
         servicemanager.LogMsg(
             servicemanager.EVENTLOG_INFORMATION_TYPE,
             servicemanager.PYS_SERVICE_STARTED,
@@ -63,14 +54,13 @@ class ProyectoDAMClientService(win32serviceutil.ServiceFramework):
         )
         self._run_client()
 
-    # ------------------------------------------------------------------
-
+    # Lanza client py y espera hasta recibir senal de parada
+    # Si el proceso muere lo reinicia automaticamente
     def _run_client(self):
-        """Lanza client.py y espera hasta recibir senal de parada."""
         python_exe = sys.executable
 
         while True:
-            # Lanzar el proceso del cliente
+            # Lanza el proceso del cliente redirigiendo la salida al log
             with open(SERVICE_LOG, "a", encoding="utf-8") as log_fh:
                 self.process = subprocess.Popen(
                     [python_exe, CLIENT_SCRIPT],
@@ -80,25 +70,25 @@ class ProyectoDAMClientService(win32serviceutil.ServiceFramework):
                     creationflags=subprocess.CREATE_NO_WINDOW,
                 )
 
-            # Esperar: senal de parada o muerte del proceso
+            # Espera senal de parada o fin inesperado del proceso
             while True:
                 rc = win32event.WaitForSingleObject(self.stop_event, 5000)
                 if rc == win32event.WAIT_OBJECT_0:
-                    # Senal de parada recibida
+                    # Se recibio la orden de parar
                     self._terminate_process()
                     return
 
-                # Si el proceso termino inesperadamente, reiniciarlo
+                # Si el proceso termino se sale del bucle para reiniciarlo
                 if self.process and self.process.poll() is not None:
                     break  # Sale del bucle interno para reiniciar
 
-            # Pausa antes de reiniciar (permite capturar stop signal)
+            # Pausa breve antes de reiniciar para capturar posible parada
             rc = win32event.WaitForSingleObject(self.stop_event, 3000)
             if rc == win32event.WAIT_OBJECT_0:
                 return
 
+    # Termina el subproceso del cliente de forma limpia
     def _terminate_process(self):
-        """Termina el subproceso limpiamente."""
         if self.process and self.process.poll() is None:
             self.process.terminate()
             try:
@@ -110,10 +100,10 @@ class ProyectoDAMClientService(win32serviceutil.ServiceFramework):
 
 if __name__ == "__main__":
     if len(sys.argv) == 1:
-        # Ejecutado por el SCM (Service Control Manager de Windows)
+        # Ejecutado por el Service Control Manager de Windows
         servicemanager.Initialize()
         servicemanager.PrepareToHostSingle(ProyectoDAMClientService)
         servicemanager.StartServiceCtrlDispatcher()
     else:
-        # Ejecutado desde linea de comandos (install, start, stop, remove)
+        # Ejecutado desde linea de comandos para instalar iniciar o parar
         win32serviceutil.HandleCommandLine(ProyectoDAMClientService)

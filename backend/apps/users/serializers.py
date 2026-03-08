@@ -1,4 +1,4 @@
-
+# Serializadores de la API REST para usuarios permisos grupos y tokens JWT
 from django.contrib.auth.models import Permission, Group
 from rest_framework import serializers
 from django.contrib.auth import get_user_model
@@ -6,6 +6,7 @@ from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 
 User = get_user_model()
 
+# Serializador de usuarios con validacion de contrasena y gestion de grupos
 class UserSerializer(serializers.ModelSerializer):
     password_validator = serializers.CharField(write_only=True, required=False)
     class Meta:
@@ -87,12 +88,14 @@ class UserSerializer(serializers.ModelSerializer):
         return super().update(instance, validated_data)
 
 
+# Serializador de permisos de Django para la API
 class UserPermisionsSerializer(serializers.ModelSerializer):
     class Meta:
         model = Permission
         fields = "__all__"
 
 
+# Serializador de grupos con sus permisos detallados
 class GroupSerializer(serializers.ModelSerializer):
 
 
@@ -107,6 +110,7 @@ class GroupSerializer(serializers.ModelSerializer):
         
         return response
         
+# Serializador simple de grupos con solo id y nombre
 class GroupSimpleSerializer(serializers.ModelSerializer):
     class Meta:
         model = Group
@@ -115,6 +119,7 @@ class GroupSimpleSerializer(serializers.ModelSerializer):
 
 
 
+# Serializador JWT personalizado que anade is staff y is superuser al token
 class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
 
     @classmethod

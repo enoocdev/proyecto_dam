@@ -1,18 +1,20 @@
+// Componente que muestra un mensaje de acceso denegado
+// Se renderiza cuando el usuario no tiene permisos para acceder a una seccion
 import React from 'react';
 import { Box, Paper, Typography, Button } from '@mui/material';
 import LockPersonIcon from '@mui/icons-material/LockPerson';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
-import { useNavigate } from 'react-router-dom'; // Asumo que usas react-router
+import { useNavigate } from 'react-router-dom';
 
 const RestrictedAccess = () => {
     const navigate = useNavigate();
 
+    // Navega hacia atras en el historial o al inicio si no hay historial
     const goBack = () => {
-        // Intenta ir atrás en el historial, si no hay, va al inicio
         if (window.history.state && window.history.state.idx > 0) {
             navigate(-1);
         } else {
-            navigate('/'); // Cambia '/' por tu ruta principal si es diferente
+            navigate('/');
         }
     };
 
@@ -23,7 +25,7 @@ const RestrictedAccess = () => {
                 display: 'flex',
                 justifyContent: 'center',
                 alignItems: 'center',
-                minHeight: '70vh', // Altura mínima para que quede centrado bonito
+                minHeight: '70vh',
                 padding: 3,
                 background: 'transparent' // Deja ver el fondo de tu app (#121212)
             }}
@@ -52,7 +54,7 @@ const RestrictedAccess = () => {
                     alignItems: 'center'
                 }}
             >
-                {/* --- ICONO DEL CANDADO --- */}
+                {/* Icono de candado */}
                 <Box
                     sx={{
                         mb: 3,
@@ -78,7 +80,7 @@ const RestrictedAccess = () => {
                     />
                 </Box>
 
-                {/* --- TÍTULO --- */}
+                {/* Titulo */}
                 <Typography 
                     variant="h4" 
                     sx={{ 
@@ -91,7 +93,7 @@ const RestrictedAccess = () => {
                     Zona Restringida
                 </Typography>
 
-                {/* --- DESCRIPCIÓN --- */}
+                {/* Descripcion */}
                 <Typography 
                     variant="body1" 
                     sx={{ 
@@ -108,7 +110,7 @@ const RestrictedAccess = () => {
                     Si crees que se trata de un error, contacta con un administrador.
                 </Typography>
 
-                {/* --- BOTÓN DE VOLVER --- */}
+                {/* Boton para volver atras */}
                 <Button
                     variant="outlined"
                     startIcon={<ArrowBackIcon />}

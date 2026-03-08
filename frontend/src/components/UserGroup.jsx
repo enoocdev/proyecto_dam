@@ -1,3 +1,5 @@
+// Componente de grupo que muestra su nombre y permisos
+// Incluye modal de edicion donde se pueden modificar permisos y eliminar el grupo
 import React, { useEffect, useState } from 'react';
 import {
     Box, Typography, Paper, Chip, Dialog, DialogTitle,
@@ -105,7 +107,7 @@ function UserGroup({ group, allPermissions, onGroupUpdated, onGroupDelete, setNo
     };
 
 
-    // --- GESTIÓN DE PERMISOS ---
+    // Gestion de permisos del grupo
 
     const handleAddPermission = (perm) => {
         setPermisions([
@@ -118,7 +120,7 @@ function UserGroup({ group, allPermissions, onGroupUpdated, onGroupDelete, setNo
         setPermisions(permissions.filter((permission) => permission.id !== permId));
     };
 
-    // Recalcular permisos disponibles (Available = All - Current)
+    // Recalcula los permisos disponibles excluyendo los ya asignados
     useEffect(() => {
         const currentIds = permissions.map(p => p.id);
         setAvaliablePermissions(
@@ -134,12 +136,12 @@ function UserGroup({ group, allPermissions, onGroupUpdated, onGroupDelete, setNo
                 elevation={0}
                 onClick={() => handleOpenGroup()}
             >
-                {/* 1. NOMBRE DEL GRUPO */}
+                {/* Nombre del grupo */}
                 <Typography variant="body1" sx={{ fontWeight: 'bold', minWidth: '150px', color: 'var(--text-primary)' }}>
                     {localGroup.name}
                 </Typography>
 
-                {/* 2. PERMISOS (Chips visuales en la lista) */}
+                {/* Permisos del grupo en forma de chips */}
                 <div className="permissions-container">
                     {localGroup.permissions.map((perm) => (
                         <Chip
@@ -151,11 +153,11 @@ function UserGroup({ group, allPermissions, onGroupUpdated, onGroupDelete, setNo
                     ))}
                 </div>
 
-                {/* 3. ICONO EDITAR */}
+                {/* Icono de edicion */}
                 <EditIcon sx={{ color: 'var(--border-lighter)', fontSize: '1.1rem', minWidth: '24px' }} />
             </Paper>
 
-            {/* --- MODAL DE EDICIÓN --- */}
+            {/* Modal de edicion del grupo */}
             <Dialog open={open} onClose={handleClose} classes={{ paper: 'group-dialog-paper' }}>
                 <DialogTitle sx={{ borderBottom: '1px solid var(--border-color)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     Editar {localGroup.name}
@@ -164,7 +166,7 @@ function UserGroup({ group, allPermissions, onGroupUpdated, onGroupDelete, setNo
                 <DialogContent sx={{ pt: 3 }}>
                     <Box sx={{ mt: 2, display: 'flex', flexDirection: 'column', gap: 3 }}>
                         
-                        {/* INPUT NOMBRE */}
+                        {/* Campo de nombre del grupo */}
                         <TextField
                             label="Nombre" fullWidth value={newName} onChange={(e) => setNewName(e.target.value)}
                             sx={{
@@ -175,7 +177,7 @@ function UserGroup({ group, allPermissions, onGroupUpdated, onGroupDelete, setNo
                             }}
                         />
 
-                        {/* LISTA DE PERMISOS DENTRO DEL MODAL */}
+                        {/* Lista de permisos del grupo con opcion de eliminar */}
                         <Box>
                             <Typography variant="caption" sx={{ color: 'var(--accent-color)', mb: 1, display: 'block' }}>PERMISOS</Typography>
                             <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
@@ -198,7 +200,7 @@ function UserGroup({ group, allPermissions, onGroupUpdated, onGroupDelete, setNo
                                     />
                                 ))}
                                 
-                                {/* BOTÓN AÑADIR (+): ABRE EL NUEVO MENÚ */}
+                                {/* Boton para anadir permiso */}
                                 <IconButton
                                     onClick={handleOpenMenu}
                                     size="small"

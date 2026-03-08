@@ -1,8 +1,10 @@
+// Pagina de gestion de grupos de usuarios con paginacion y CRUD
+// Permite crear editar y eliminar grupos y asignar permisos a cada grupo
 import React, { useEffect, useState } from 'react'; 
 import {
     Box, Typography, CircularProgress, Snackbar, Alert, Button, Dialog, 
     DialogTitle, IconButton, DialogContent, DialogActions, TextField, Chip,
-    Pagination // <--- 1. IMPORTADO PAGINATION
+    Pagination
 } from '@mui/material';
 
 import GroupIcon from '@mui/icons-material/Group';
@@ -27,19 +29,19 @@ const UserGroups = () => {
     const [groups, setGroups] = useState([]);
     const [notification, setNotification] = useState({ open: false, message: '', severity: 'success' });
     
-    //ESTADOS PARA PAGINACION
+    // Estados de paginacion
     const [page, setPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
 
     const [allPermissions, setAllPermissions] = useState([]);
     const [avaliablePermissions, setAvaliablePermissions] = useState([]);
     
-    // Modal Crear Grupo
+    // Estado del modal de creacion de grupo
     const [open, setOpen] = useState(false);
     const [newName, setNewName] = useState("");
     const [newGroupPermisions, setNewGroupPermisions] = useState([]);
     
-    // Menu desplegable
+    // Estado del menu desplegable de permisos
     const [anchorEl, setAnchorEl] = useState(null);
 
     const fetchUserGroups = async (pageNumber = page) => {
@@ -215,7 +217,7 @@ const UserGroups = () => {
                         />
                     </Box>
 
-                    {/*DIALOG CREAR GRUPO*/}
+                    {/* Dialogo para crear un nuevo grupo */}
                     <Dialog open={open} onClose={handleClose} classes={{ paper: 'group-dialog-paper' }}>
                         <DialogTitle sx={{ borderBottom: '1px solid var(--border-color)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                             Crear Grupo

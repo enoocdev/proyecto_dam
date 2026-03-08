@@ -1,3 +1,5 @@
+// Pagina de gestion de aulas
+// Permite crear editar y eliminar aulas y asignar dispositivos a cada una
 import React, { useState, useEffect } from 'react';
 import {
     Typography, Button, TextField, InputAdornment,
@@ -70,7 +72,7 @@ const Classroom = () => {
         fetchClassrooms();
     }, [page]);
 
-    // --- Modal ---
+    // Funciones para abrir y cerrar el modal de crear o editar aula
     const handleOpenModal = (classroom = null) => {
         setSelectedClassroom(classroom);
         setIsModalOpen(true);
@@ -98,7 +100,7 @@ const Classroom = () => {
         }
     };
 
-    // --- Delete Dialog ---
+    // Funciones para el dialogo de confirmacion de borrado
     const handleOpenDeleteDialog = (classroom) => {
         setClassroomToDelete(classroom);
         setIsDeleteDialogOpen(true);

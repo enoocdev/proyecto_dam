@@ -1,3 +1,5 @@
+// Pagina de gestion de usuarios con listado paginado busqueda y CRUD completo
+// Incluye modal de creacion y edicion y dialogo de confirmacion de eliminacion
 import React, { useState, useEffect } from 'react';
 import { 
     Typography, 
@@ -22,7 +24,7 @@ import {
 import SearchIcon from '@mui/icons-material/Search';
 import AddIcon from '@mui/icons-material/Add';
 
-// Componentes, API y CSS
+// Componentes API y estilos
 import api from "../api"; 
 import '../styles/Users.css'; 
 import UserCard from '../components/UserCard';
@@ -54,7 +56,7 @@ const Users = () => {
                 },
             });
             
-            const data = response.data.results ? response.data.results : response.data; // para que no reviente siquito  la paginacion
+            const data = response.data.results ? response.data.results : response.data;
             const count = response.data.count || (Array.isArray(data) ? data.length : 0);
 
             setUsers(Array.isArray(data) ? data : []);

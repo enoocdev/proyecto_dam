@@ -21,7 +21,7 @@
     align-items: stretch !important;
 }
 
-/* ── Placeholder imagen ── */
+/* Previsualizacion del equipo */
 .device-card__preview {
     background-color: var(--bg-preview);
     height: 160px;
@@ -200,7 +200,7 @@
     gap: 12px;
 }
 
-/* Botones de accion */
+/* Botones de accion del equipo */
 .action-btn {
     border-radius: 12px !important;
     padding: 12px 16px !important;

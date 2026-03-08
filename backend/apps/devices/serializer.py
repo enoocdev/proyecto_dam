@@ -1,7 +1,8 @@
-
+# Serializadores de la API REST para dispositivos aulas y equipos de red
 from rest_framework import serializers
 from .models import Device, Classroom, NetworkDevice
 
+# Serializador de aulas con gestion de asignacion de dispositivos
 class ClassroomSerializer(serializers.ModelSerializer):
     url = serializers.HyperlinkedIdentityField(
             view_name='classroom-detail',
@@ -33,9 +34,9 @@ class ClassroomSerializer(serializers.ModelSerializer):
         instance.save()
 
         if devices is not None:
-            # Desasignar los dispositivos que ya no pertenecen a esta clase
+    # Desasigna los dispositivos que ya no pertenecen a esta aula
             instance.device_set.exclude(pk__in=[d.pk for d in devices]).update(classroom=None)
-            # Asignar los nuevos dispositivos a esta clase
+            # Asigna los nuevos dispositivos a esta aula
             for device in devices:
                 device.classroom = instance
                 device.save()
@@ -43,6 +44,7 @@ class ClassroomSerializer(serializers.ModelSerializer):
         return instance
 
 
+# Serializador de equipos de red con la contrasena oculta en respuestas
 class NetworkDeviceSerializer(serializers.ModelSerializer):
     url = serializers.HyperlinkedIdentityField(
             view_name='network-device-detail',
@@ -60,6 +62,7 @@ class NetworkDeviceSerializer(serializers.ModelSerializer):
             
         }
 
+# Serializador de dispositivos monitorizados con campos de solo lectura
 class DeviceSerializer(serializers.ModelSerializer):
     url = serializers.HyperlinkedIdentityField(
             view_name='device-detail',
@@ -95,6 +98,7 @@ class DeviceSerializer(serializers.ModelSerializer):
         }
         
 
+# Serializador simple de aulas con solo id y nombre para selectores
 class ClassRoomSimpleSerializer(serializers.ModelSerializer):
     class Meta:
         model = Classroom

@@ -1,17 +1,5 @@
-"""
-Script para instalar/desinstalar el cliente como servicio del sistema.
-
-Uso:
-    python install_service.py install   -> Instala y arranca el servicio
-    python install_service.py remove    -> Detiene y elimina el servicio
-    python install_service.py status    -> Muestra el estado del servicio y logs recientes
-    python install_service.py test      -> Prueba que el cliente arranque correctamente
-
-Soporta:
-  - Windows: Servicio nativo del SO (pywin32) — se ejecuta en segundo plano
-             sin ventana de consola.
-  - Linux:   Servicio systemd — se ejecuta como daemon del sistema.
-"""
+# Script para instalar o desinstalar el cliente como servicio del sistema
+# Soporta Windows con servicio nativo pywin32 y Linux con systemd
 import os
 import platform
 import subprocess
@@ -27,18 +15,13 @@ SERVICE_LOG = CLIENT_DIR / "service_wrapper.log"
 CLIENT_LOG = CLIENT_DIR / "client_errors.log"
 WINDOWS_SERVICE_SCRIPT = str(CLIENT_DIR / "windows_service.py")
 
-# Nombre del servicio systemd (minusculas)
+# Nombre del servicio systemd en minusculas
 SYSTEMD_SERVICE = SERVICE_NAME.lower()
 SYSTEMD_UNIT_PATH = Path(f"/etc/systemd/system/{SYSTEMD_SERVICE}.service")
 
 
+# Obtiene la ruta del interprete Python priorizando el venv del cliente
 def _get_python_exe() -> str:
-    """
-    Devuelve la ruta del interprete Python a usar.
-    Prioridad:
-      1. .venv dentro del directorio del cliente (recomendado)
-      2. sys.executable (el Python con el que se ejecuto este script)
-    """
     # Buscar venv del cliente
     if platform.system() == "Windows":
         venv_python = CLIENT_DIR / ".venv" / "Scripts" / "python.exe"
@@ -54,18 +37,18 @@ def _get_python_exe() -> str:
 PYTHON_EXE = _get_python_exe()
 
 
+# Comprueba si se ejecuta con privilegios de administrador o root
 def is_admin() -> bool:
-    """Comprueba si se ejecuta con privilegios de administrador/root."""
     if platform.system() != "Windows":
         return os.geteuid() == 0
     import ctypes
     return ctypes.windll.shell32.IsUserAnAdmin() != 0
 
 
-# ─── Windows: Servicio nativo con pywin32 ────────────────────────────────────
+# Funciones para Windows con servicio nativo pywin32
 
+# Verifica que pywin32 esta instalado
 def _check_pywin32():
-    """Verifica que pywin32 esta instalado."""
     try:
         import win32serviceutil  # noqa: F401
         return True
@@ -76,14 +59,14 @@ def _check_pywin32():
         return False
 
 
+# Instala el cliente como servicio nativo de Windows sin ventana de consola
 def install_windows():
-    """Instala el cliente como servicio nativo de Windows (sin ventana de consola)."""
     if not _check_pywin32():
         sys.exit(1)
 
     print(f"Instalando servicio nativo '{SERVICE_NAME}'...")
 
-    # Instalar el servicio usando windows_service.py
+    # Instalar el servicio usando windows service py
     result = subprocess.run(
         [PYTHON_EXE, WINDOWS_SERVICE_SCRIPT, "install"],
         capture_output=True, text=True,
@@ -116,8 +99,8 @@ def install_windows():
     print("  Se iniciara automaticamente al encender el equipo.")
 
 
+# Detiene y elimina el servicio nativo de Windows
 def remove_windows():
-    """Detiene y elimina el servicio nativo de Windows."""
     if not _check_pywin32():
         sys.exit(1)
 
@@ -142,8 +125,8 @@ def remove_windows():
         print(f"  Error: {result.stderr}")
 
 
+# Muestra el estado del servicio de Windows y los logs recientes
 def status_windows():
-    """Muestra el estado del servicio de Windows y logs recientes."""
     print("=" * 64)
     print(f"  Estado del servicio: {SERVICE_NAME}")
     print("=" * 64)
@@ -170,10 +153,10 @@ def status_windows():
     print()
 
 
-# ─── Linux: Servicio systemd ─────────────────────────────────────────────────
+# Funciones para Linux con servicio systemd
 
+# Verifica que el interprete Python tiene las dependencias necesarias
 def _verify_python_deps():
-    """Verifica que el Python seleccionado tiene websockets y psutil instalados."""
     print(f"  Verificando dependencias con: {PYTHON_EXE}")
     result = subprocess.run(
         [PYTHON_EXE, "-c", "import websockets, psutil"],
@@ -194,8 +177,8 @@ def _verify_python_deps():
     print("  [OK] Dependencias verificadas (websockets, psutil).")
 
 
+# Crea e inicia un servicio systemd en Linux
 def install_linux():
-    """Crea e inicia un servicio systemd en Linux."""
     print(f"Instalando servicio systemd '{SYSTEMD_SERVICE}'...")
 
     # Determinar el usuario que ejecuta el script
@@ -230,7 +213,7 @@ WantedBy=multi-user.target
     SYSTEMD_UNIT_PATH.write_text(service_content, encoding="utf-8")
     print(f"  Unidad systemd creada: {SYSTEMD_UNIT_PATH}")
 
-    # Recargar, habilitar e iniciar
+    # Recargar habilitar e iniciar
     subprocess.run(["systemctl", "daemon-reload"], check=True)
     subprocess.run(["systemctl", "enable", SYSTEMD_SERVICE], check=True)
     subprocess.run(["systemctl", "start", SYSTEMD_SERVICE], check=True)
@@ -246,8 +229,8 @@ WantedBy=multi-user.target
     print(f"    sudo journalctl -u {SYSTEMD_SERVICE} -f")
 
 
+# Detiene y elimina el servicio systemd en Linux
 def remove_linux():
-    """Detiene y elimina el servicio systemd en Linux."""
     print(f"Eliminando servicio '{SYSTEMD_SERVICE}'...")
 
     subprocess.run(["systemctl", "stop", SYSTEMD_SERVICE], capture_output=True)
@@ -261,8 +244,8 @@ def remove_linux():
     print("  Servicio eliminado correctamente.")
 
 
+# Muestra el estado del servicio systemd y los logs recientes
 def status_linux():
-    """Muestra el estado del servicio systemd y logs recientes."""
     print("=" * 64)
     print(f"  Estado del servicio: {SYSTEMD_SERVICE}")
     print("=" * 64)
@@ -286,10 +269,10 @@ def status_linux():
     print()
 
 
-# ─── Comunes ─────────────────────────────────────────────────────────────────
+# Funciones comunes
 
+# Muestra las ultimas lineas de un fichero de log
 def _show_recent_logs(log_file: Path, label: str, lines: int = 15):
-    """Muestra las ultimas N lineas de un fichero de log."""
     if not log_file.exists():
         print(f"  {label}: (no existe) {log_file}")
         return
@@ -309,12 +292,8 @@ def _show_recent_logs(log_file: Path, label: str, lines: int = 15):
         print(f"  {label}: error al leer: {e}")
 
 
+# Ejecuta el cliente unos segundos para verificar que arranca correctamente
 def test_client():
-    """
-    Ejecuta client.py durante unos segundos para verificar que arranca
-    correctamente (imports, config, conexion...). Util para diagnosticar
-    antes de instalar como servicio.
-    """
     print("Ejecutando prueba del cliente (5 segundos)...")
     print(f"  Python:  {PYTHON_EXE}")
     print(f"  Script:  {CLIENT_SCRIPT}")
@@ -362,7 +341,7 @@ def test_client():
         print(f"  [ERROR] {e}")
 
 
-# ─── CLI ─────────────────────────────────────────────────────────────────────
+# Interfaz de linea de comandos
 
 def main():
     if len(sys.argv) < 2:

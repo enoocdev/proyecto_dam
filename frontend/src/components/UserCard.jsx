@@ -1,3 +1,4 @@
+// Tarjeta de usuario que muestra su informacion roles y acciones de edicion y eliminacion
 import React from 'react';
 import { 
     Avatar, 
@@ -45,16 +46,16 @@ const UserCard = ({ user, onEdit, onDelete }) => {
                 </div>
             </div>
 
-            {/* --- 2. RANGOS Y GRUPOS (CENTRO) --- */}
+            {/* Roles y grupos del usuario */}
             <div className="user-roles">
-                {/* Rango: Superusuario */}
+                {/* Rango Superusuario */}
                 {user.is_superuser && (
                     <div className="role-chip admin">
                         <BoltIcon sx={{ fontSize: 16 }} /> GOD MODE
                     </div>
                 )}
                 
-                {/* Rango: Staff */}
+                {/* Rango Staff */}
                 {user.is_staff && (
                     <div className="role-chip staff">
                         <SecurityIcon sx={{ fontSize: 16 }} /> STAFF

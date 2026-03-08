@@ -1,9 +1,6 @@
-"""
-Consumers de WebSocket para la app devices.
-
-AgentConsumer  → recibe conexiones de los clientes (agentes instalados en PCs).
-DashboardConsumer → envía notificaciones en tiempo real al frontend (React).
-"""
+# Consumers WebSocket para la aplicacion de dispositivos
+# AgentConsumer recibe conexiones de los agentes instalados en los equipos
+# DashboardConsumer envia actualizaciones en tiempo real al frontend React
 import json
 import logging
 from datetime import datetime
@@ -15,26 +12,20 @@ from .models import Device
 
 logger = logging.getLogger("devices.consumers")
 
-# Nombre del grupo al que se suscriben los navegadores (dashboard)
+# Nombre del grupo de canales al que se suscriben los navegadores
 DASHBOARD_GROUP = "dashboard_updates"
 
 
+# Consumer que atiende a cada agente instalado en un equipo
+# Recibe mensajes de tipo startup heartbeat shutdown y command result
 class AgentConsumer(AsyncJsonWebsocketConsumer):
-    """
-    Consumer que atiende a cada agente (client.py).
-    Protocolo esperado del cliente:
-        - { "type": "startup",         "data": { "mac", "ip", "hostname", ... } }
-        - { "type": "heartbeat",       "data": { "mac", "ip" } }
-        - { "type": "shutdown_notice",  "data": { "mac", ... } }
-        - { "type": "command_result",  "data": { ... } }
-    """
 
     async def connect(self):
         self.mac = None
         await self.accept()
         logger.info("Agente WebSocket conectado (channel=%s)", self.channel_name)
 
-    # Recepción de mensajes
+    # Recepcion de mensajes del agente
 
     async def receive_json(self, content, **kwargs):
         msg_type = content.get("type", "")
@@ -51,12 +42,9 @@ class AgentConsumer(AsyncJsonWebsocketConsumer):
 
         elif msg_type == "command_result":
             logger.info("Resultado de comando recibido: %s", data)
-            # Aquí podrías almacenar el resultado o reenviarlo al dashboard
 
         else:
             logger.warning("Tipo de mensaje desconocido del agente: %s", msg_type)
-
-    # Desconexión 
 
     async def disconnect(self, close_code):
         logger.info("Agente desconectado (mac=%s, code=%s)", self.mac, close_code)
@@ -65,10 +53,10 @@ class AgentConsumer(AsyncJsonWebsocketConsumer):
             if device_data:
                 await self._notify_dashboard("offline", device_data)
 
-    # Handlers internos
+    # Handlers internos para cada tipo de mensaje
 
+    # Procesa el mensaje de encendido del agente y lo registra como online
     async def _handle_startup(self, data: dict):
-        """El agente acaba de encenderse y manda toda su info."""
         self.mac = data.get("mac")
         device_data = await self._set_device_online(
             mac=self.mac,
@@ -78,14 +66,14 @@ class AgentConsumer(AsyncJsonWebsocketConsumer):
         await self._notify_dashboard("online", device_data)
         logger.info("Agente online: %s (%s)", self.mac, data.get("hostname"))
 
+    # Actualiza la IP del dispositivo si ha cambiado en el heartbeat
     async def _handle_heartbeat(self, data: dict):
-        """Heartbeat periódico: actualiza IP por si cambió."""
         mac = data.get("mac")
         if mac:
             await self._update_heartbeat(mac, data.get("ip"))
 
+    # Procesa el aviso de apagado del agente y lo marca como offline
     async def _handle_shutdown_notice(self, data: dict):
-        """El agente avisa de que se va a apagar."""
         mac = data.get("mac")
         if mac:
             device_data = await self._set_device_offline(mac)
@@ -93,21 +81,15 @@ class AgentConsumer(AsyncJsonWebsocketConsumer):
                 await self._notify_dashboard("offline", device_data)
             logger.info("Agente avisó de apagado: %s", mac)
 
-    # Enviar comandos al agente 
-
+    # Envia un comando al agente conectado por WebSocket
     async def send_command(self, command_name: str, params: dict = None):
-        """
-        Método auxiliar para enviar un comando al agente conectado.
-        Se puede invocar desde otra parte (p.ej. una vista REST que
-        envíe un mensaje al channel_layer).
-        """
         await self.send_json({
             "type": "command",
             "command": command_name,
             "params": params or {},
         })
 
-    # Operaciones de base de datos (sync → async) 
+    # Operaciones de base de datos convertidas de sincrono a asincrono
 
     @database_sync_to_async
     def _set_device_online(self, mac, ip=None, hostname=None):
@@ -158,16 +140,15 @@ class AgentConsumer(AsyncJsonWebsocketConsumer):
             "classroom_id": device.classroom_id,
         }
 
-    # Notificar al dashboard
+    # Notifica al grupo del dashboard sobre cambios en el estado del dispositivo
 
     async def _notify_dashboard(self, event: str, device_data: dict):
-        """Envía un evento al grupo del dashboard."""
         await self.channel_layer.group_send(
             DASHBOARD_GROUP,
             {
-                "type": "device.status",   # se traduce a device_status()
+                "type": "device.status",
                 "payload": {
-                    "event": event,         # "online" | "offline"
+                    "event": event,
                     "device": device_data,
                     "timestamp": datetime.now().isoformat(),
                 },
@@ -175,11 +156,9 @@ class AgentConsumer(AsyncJsonWebsocketConsumer):
         )
 
 
+# Consumer para el frontend React
+# Se suscribe al grupo del dashboard y reenvia los eventos al navegador
 class DashboardConsumer(AsyncJsonWebsocketConsumer):
-    """
-    Consumer para el frontend (React).
-    Se suscribe al grupo DASHBOARD_GROUP y reenvía cada evento al navegador.
-    """
 
     async def connect(self):
         await self.channel_layer.group_add(DASHBOARD_GROUP, self.channel_name)
@@ -190,7 +169,6 @@ class DashboardConsumer(AsyncJsonWebsocketConsumer):
         await self.channel_layer.group_discard(DASHBOARD_GROUP, self.channel_name)
         logger.info("Dashboard desconectado (channel=%s)", self.channel_name)
 
-    # Recibe eventos del grupo y los envía al navegador
+    # Recibe eventos del grupo del dashboard y los envia al navegador
     async def device_status(self, event):
-        """Llamado por channel_layer.group_send con type='device.status'."""
         await self.send_json(event["payload"])

@@ -1,3 +1,5 @@
+// Componente principal que define las rutas de la aplicacion
+// Cada ruta protegida verifica permisos antes de mostrar el contenido
 import { BrowserRouter, Routes, Route, Outlet } from "react-router-dom";
 import Login from "./pages/Login";
 import Logout from "./components/Logout";

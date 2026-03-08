@@ -1,3 +1,5 @@
+// Pagina del dashboard que muestra los equipos monitorizados en tiempo real
+// Recibe actualizaciones por WebSocket y permite filtrar por aula
 
 import React, { useEffect, useState, useCallback, useRef } from 'react'; 
 import {
@@ -51,7 +53,7 @@ function DashboardPage() {
         }
     };
 
-    //WebSocket: actualizar estado de dispositivos en tiempo real
+    // Actualiza el estado de los dispositivos en tiempo real via WebSocket
     const handleDeviceStatus = useCallback((payload) => {
         const { event, device } = payload;
         if (!device?.id) return;
@@ -60,7 +62,7 @@ function DashboardPage() {
             const exists = prev.some((d) => d.id === device.id);
 
             if (exists) {
-                // Dispositivo conocido -> actualizar su estado
+                // Dispositivo conocido actualiza su estado
                 return prev.map((d) =>
                     d.id === device.id
                         ? { ...d, ...device, is_online: event === "online" }
@@ -68,16 +70,16 @@ function DashboardPage() {
                 );
             }
 
-            // Dispositivo nuevo que se conecta -> añadirlo si encaja con el filtro
+            // Dispositivo nuevo que se conecta se anade si encaja con el filtro
             if (event === "online") {
                 const filter = selectedClassroomRef.current;
                 if (filter !== null && device.classroom !== filter) {
-                    return prev; // no pertenece al aula filtrada
+                    return prev; // No pertenece al aula filtrada
                 }
                 return [...prev, { ...device, is_online: true }];
             }
 
-            // Dispositivo desconocido que se desconecta -> ignorar
+            // Dispositivo desconocido que se desconecta se ignora
             return prev;
         });
     }, []);
@@ -91,7 +93,7 @@ function DashboardPage() {
         selectedClassroomRef.current = classroomId;
     };
 
-    // --- Estado para diálogo de confirmación de eliminación ---
+    // Estado del dialogo de confirmacion de eliminacion
     const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
     const [deviceToDelete, setDeviceToDelete] = useState(null);
 
@@ -118,7 +120,7 @@ function DashboardPage() {
         setLoading(false);
     };
 
-    // --- Acciones sobre dispositivos ---
+    // Acciones sobre dispositivos
 
     const handleShutdown = async (device) => {
         try {
@@ -229,7 +231,7 @@ function DashboardPage() {
                 </div>
             </div>
 
-            {/* Diálogo confirmar eliminación */}
+            {/* Dialogo para confirmar eliminacion */}
             <Dialog
                 open={deleteDialogOpen}
                 onClose={handleCloseDeleteDialog}

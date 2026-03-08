@@ -1,3 +1,5 @@
+// Layout principal con barra lateral de navegacion y contenido dinamico
+// Muestra u oculta opciones del menu segun los permisos del usuario
 import { Outlet, Link, useLocation } from "react-router-dom"; 
 import ProtecterMenuItem from "../components/ProtecterMenuItem";
 import {

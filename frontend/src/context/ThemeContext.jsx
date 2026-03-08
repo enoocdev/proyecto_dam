@@ -1,3 +1,5 @@
+// Contexto global para el tema visual de la aplicacion
+// Permite alternar entre modo oscuro y claro persistiendo en localStorage
 import { createContext, useContext, useState, useEffect } from 'react';
 
 const ThemeContext = createContext();

@@ -1,3 +1,4 @@
+# Rutas de la API REST de dispositivos aulas y equipos de red
 from rest_framework import routers
 from django.urls import path, include
 from .views import DevicesViewSet, ClassroomViewSet, NetworkDevicViewSet, ReadOnlyClassRoomWithoutPagination

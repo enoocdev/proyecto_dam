@@ -1,3 +1,5 @@
+// Pagina de perfil del usuario autenticado
+// Permite modificar datos personales y contrasena
 import React, { use, useEffect, useState } from 'react';
 import {
     Paper,
@@ -38,7 +40,7 @@ const Profile = () => {
 
     const token = localStorage.getItem(ACCESS_TOKEN)
     const {user_id, is_superuser, is_staff} = jwtDecode(token);
-    // Estados
+    // Estados del componente
     const [notification, setNotification] = useState({ open: false, message: '', severity: 'success' });
     const [confirmOpen, setConfirmOpen] = useState(false);
     const [error, setError] = useState(false);
@@ -185,7 +187,7 @@ const Profile = () => {
             {!loading && !error && (
                 <Paper className="main-card" elevation={10}>
                 
-                {/* --- PANE IZQUIERDO: VISUAL --- */}
+                {/* Panel izquierdo con datos visuales del perfil */}
                 <div className="left-pane">
                     <Avatar 
                         className="profile-avatar"
@@ -210,7 +212,7 @@ const Profile = () => {
                         className="status-chip"
                     />
 
-                    {/* Lógica del Modo Dios */}
+                    {/* Indicador de superusuario */}
                     {User.is_superuser && (
                         <Chip
                             icon={<BoltIcon />}
@@ -241,12 +243,12 @@ const Profile = () => {
                     </Box>
                 </div>
 
-                {/* --- PANE DERECHO: FORMULARIO --- */}
+                {/* Panel derecho con formulario de edicion */}
                 <div className="right-pane">
                     
                     <div className="form-content">
                         
-                        {/* Sección 1 */}
+                        {/* Seccion de informacion personal */}
                         <Typography className="section-title">
                             <BadgeIcon /> Información Personal
                         </Typography>
@@ -282,7 +284,7 @@ const Profile = () => {
                             </Grid>
                         </Grid>
 
-                        {/* Sección 2 */}
+                        {/* Seccion de seguridad y contrasena */}
                         <Typography className="section-title" sx={{ color: '#f87171 !important' }}>
                             <KeyIcon /> Seguridad
                         </Typography>
@@ -330,7 +332,7 @@ const Profile = () => {
             </Paper>
             )}
 
-            {/* Modal de Confirmación */}
+            {/* Modal de confirmacion */}
             <Dialog
                 open={confirmOpen}
                 onClose={() => setConfirmOpen(false)}

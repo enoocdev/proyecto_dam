@@ -1,3 +1,4 @@
+// Modal para crear o editar un usuario con campos de datos y gestion de grupos
 import React, { useState, useEffect } from 'react';
 import {
     Dialog,
@@ -93,8 +94,8 @@ const UserModal = ({ open, onClose, onSave, user, availableGroups = [] }) => {
         setGroupSearch('');
     };
 
+    // Evita anadir grupos duplicados
     const handleAddGroup = (groupToAdd) => {
-        // Evitar duplicados
         if (!formData.groups.some(g => g.id === groupToAdd.id)) {
             setFormData(prev => ({
                 ...prev,
@@ -117,8 +118,8 @@ const UserModal = ({ open, onClose, onSave, user, availableGroups = [] }) => {
     );
 
 
+    // Valida las contrasenas antes de guardar
     const handleSave = () => {
-        // Validar contraseñas si se están estableciendo
         const isChangingPassword = formData.password || formData.password_validator;
 
         if (!isEditMode && !formData.password) {
@@ -133,7 +134,7 @@ const UserModal = ({ open, onClose, onSave, user, availableGroups = [] }) => {
             }
         }
 
-        // Construir payload para la API
+        // Construye el payload para la API
         const dataToSave = {
             username: formData.username,
             email: formData.email,
@@ -144,7 +145,7 @@ const UserModal = ({ open, onClose, onSave, user, availableGroups = [] }) => {
             groups: formData.groups.map(g => g.id),
         };
 
-        // Solo incluir password + password_validator si se están cambiando
+        // Solo incluye contrasena si se esta modificando
         if (isChangingPassword) {
             dataToSave.password = formData.password;
             dataToSave.password_validator = formData.password_validator;
@@ -217,7 +218,7 @@ const UserModal = ({ open, onClose, onSave, user, availableGroups = [] }) => {
                         </Grid>
                     </Grid>
 
-                    {/* Sección Contraseñas */}
+                    {/* Seccion de contrasenas */}
                     <Box className="password-section">
                         <Grid container spacing={2}>
                             <Grid item xs={6}>
@@ -265,7 +266,7 @@ const UserModal = ({ open, onClose, onSave, user, availableGroups = [] }) => {
                         )}
                     </Box>
 
-                    {/* Switches de Estado */}
+                    {/* Switches de estado activo y staff */}
                     <Box className="switches-container">
                         <FormControlLabel
                             control={
@@ -293,7 +294,7 @@ const UserModal = ({ open, onClose, onSave, user, availableGroups = [] }) => {
                         />
                     </Box>
 
-                    {/* SECCIÓN GRUPOS (Abajo del todo, estilo imagen) */}
+                    {/* Seccion de asignacion de grupos al usuario */}
                     <Box className="groups-section">
                         <Typography variant="caption" className="section-label">
                             GRUPOS
@@ -310,7 +311,7 @@ const UserModal = ({ open, onClose, onSave, user, availableGroups = [] }) => {
                                 />
                             ))}
 
-                            {/* Botón + */}
+                            {/* Boton para anadir grupo */}
                             <IconButton
                                 onClick={handleOpenGroupMenu}
                                 className="add-button"
@@ -320,7 +321,7 @@ const UserModal = ({ open, onClose, onSave, user, availableGroups = [] }) => {
                             </IconButton>
                         </Box>
 
-                        {/* Menú Dropdown Estilo Custom */}
+                        {/* Menu desplegable para seleccionar grupo */}
                         <Menu
                             anchorEl={groupMenuAnchor}
                             open={Boolean(groupMenuAnchor)}

@@ -1,3 +1,5 @@
+// Tarjeta de dispositivo que muestra su estado y permite acciones
+// Al pulsar se abre un panel inferior con botones de apagar bloquear y eliminar
 import { useState } from "react";
 import {
     Card,
@@ -48,11 +50,11 @@ function DeviceCard({ device, onShutdown, onBlockInternet, onUnblockInternet, on
 
     return (
         <>
-            {/*Equipo*/}
+            {/* Tarjeta del equipo */}
             <Card className={`device-card ${device.is_online ? "device-card--online" : "device-card--offline"}`}>
                 <CardActionArea onClick={handleCardClick} className="device-card__action-area">
 
-                    {/* En un futura imagen de pantalla del equipo */}
+                    {/* Previsualizacion del equipo */}
                     <Box className="device-card__preview">
                         <ComputerIcon className="device-card__preview-icon" />
                     </Box>
@@ -66,7 +68,7 @@ function DeviceCard({ device, onShutdown, onBlockInternet, onUnblockInternet, on
                             {device.ip}
                         </Typography>
 
-                        {/* chips de estado */}
+                        {/* Chips indicadores de estado */}
                         <Box className="device-card__badges">
                             <Chip
                                 icon={<FiberManualRecordIcon className="badge-dot" />}
@@ -90,7 +92,7 @@ function DeviceCard({ device, onShutdown, onBlockInternet, onUnblockInternet, on
                 </CardActionArea>
             </Card>
 
-            {/* BOTTOM ACTION SHEET*/}
+            {/* Panel de acciones del equipo */}
             <Drawer
                 anchor="bottom"
                 open={sheetOpen}
@@ -119,7 +121,7 @@ function DeviceCard({ device, onShutdown, onBlockInternet, onUnblockInternet, on
 
                 <Divider className="action-sheet__divider" />
 
-                {/* Botones de acción */}
+                {/* Botones para controlar el equipo */}
                 <div className="action-sheet__actions">
                     <Button
                         fullWidth

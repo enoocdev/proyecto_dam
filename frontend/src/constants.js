@@ -1,10 +1,9 @@
+// Constantes de la aplicacion con claves de almacenamiento y rutas de la API
 export const ACCESS_TOKEN = "access";
 export const REFRESH_TOKEN = "refresh"
 export const USER_PERMISSIONS = "user-permissions"
 
-
-// Endpoints
-
+// Rutas de los endpoints de la API REST
 export const API_PATH_USERS = "/users/";
 export const API_PATH_USER_GROUPS_WITHOUT_PAGINATION = "/users-groups-without-pagination/";
 export const API_PATH_DEVICES = "/devices/devices/";

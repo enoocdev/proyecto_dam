@@ -1,3 +1,4 @@
+# Rutas principales del proyecto que incluyen admin dispositivos y usuarios
 from django.contrib import admin
 from django.urls import path, include
 

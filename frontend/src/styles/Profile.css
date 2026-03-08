@@ -1,6 +1,6 @@
-/* src/pages/Profile.css */
+/* Estilos de la pagina de perfil de usuario */
 
-/* --- CONTENEDOR DE LA PÁGINA (Centrado Absoluto) --- */
+/* Contenedor de la pagina centrado en pantalla */
 .profile-container {
     height: 100vh;
     width: 100%;
@@ -13,7 +13,7 @@
     transition: background-color 0.3s ease;
 }
 
-/* --- LA TARJETA ÚNICA (Layout Principal) --- */
+/* Tarjeta principal con layout de dos columnas */
 .main-card {
     width: 100%;
     max-width: 1400px;
@@ -27,7 +27,7 @@
     transition: background-color 0.3s ease, border-color 0.3s ease;
 }
 
-/* --- COLUMNA IZQUIERDA (Avatar y Resumen) --- */
+/* Columna izquierda con avatar y resumen */
 .left-pane {
     width: 350px;
     background-color: var(--bg-card-darker);
@@ -53,22 +53,22 @@
     transform: scale(1.05);
 }
 
-/* --- COLUMNA DERECHA (Formulario) --- */
+/* Columna derecha con el formulario */
 .right-pane {
-    flex-grow: 1; /* Ocupa el resto del ancho */
+    flex-grow: 1;
     padding: 3rem;
     display: flex;
     flex-direction: column;
     position: relative;
-    overflow-y: auto; /* Scroll si la pantalla es muy bajita */
+    overflow-y: auto;
 }
 
-/* Área de inputs */
+/* Area de inputs */
 .form-content {
-    flex-grow: 1; /* Empuja el botón hacia abajo */
+    flex-grow: 1;
 }
 
-/* Área del botón (Pegado abajo) */
+/* Area del boton fijada abajo */
 .form-actions {
     margin-top: auto;
     display: flex;
@@ -77,7 +77,7 @@
     border-top: 1px solid var(--border-color);
 }
 
-/* --- ESTILOS DE TEXTO E INPUTS (Blanco forzado) --- */
+/* Estilos de texto e inputs con color forzado */
 .section-title {
     color: var(--accent-color);
     font-weight: 600 !important;
@@ -124,7 +124,7 @@
 .profile-input .MuiOutlinedInput-notchedOutline { border-color: var(--border-light) !important; }
 .profile-input:hover .MuiOutlinedInput-notchedOutline { border-color: var(--border-lighter) !important; }
 
-/* Responsive para móvil */
+/* Responsive para movil */
 @media (max-width: 900px) {
     .main-card {
         flex-direction: column;
@@ -146,26 +146,26 @@
 
 
 
-/* --- GOD MODE STYLES --- */
+/* Animacion del modo dios */
 
-/* 1. Definimos la animación */
+/* Se define la animacion de pulso dorado */
 @keyframes godPulse {
     0% { box-shadow: 0 0 10px #FFD700; }
     50% { box-shadow: 0 0 25px #FFD700, 0 0 10px #ffffff; } /* Pico brillante */
     100% { box-shadow: 0 0 10px #FFD700; }
 }
 
-/* 2. Definimos la clase del Chip */
+/* Clase del chip de modo dios */
 .god-mode-chip {
     background: linear-gradient(45deg, #FFD700 30%, #FF8C00 90%) !important;
     color: #000 !important;
-    font-weight: 900 !important; /* Extra bold */
+    font-weight: 900 !important;
     border: 2px solid #FFFF00 !important;
     padding: 0 5px !important;
     height: 32px !important;
-    margin-top: 30px; /* Separación si lo pones bajo el nombre */
+    margin-top: 30px;
     
-    /* Aquí aplicamos la animación definida arriba */
+    /* Aplica la animacion de pulso */
     animation: godPulse 2s infinite ease-in-out !important;
 }
 
@@ -184,7 +184,7 @@
 
 
 
-/* --- TARJETA DE ERROR (Añadir al final de Profile.css) --- */
+/* Tarjeta de error */
 .error-card {
     background-color: var(--bg-sidebar) !important;
     border: 2px solid #692828; 
@@ -196,13 +196,12 @@
     justify-content: center;
     text-align: center;
     
-    /* Sombra roja suave (en lugar de la violeta normal) */
+    /* Sombra roja suave */
     box-shadow: 0 10px 40px rgba(239, 68, 68, 0.2) !important;
     
-    /* Tamaño */
     max-width: 450px;
     width: 90%;
-    /* Animación de entrada suave (opcional) */
+    /* Animacion de entrada suave */
     animation: fadeIn 0.5s ease-out;
 }
 
@@ -211,7 +210,7 @@
     to { opacity: 1; transform: translateY(0); }
 }
 
-/* StaffChip.css */
+/* Chip de staff */
 
 .staff-mode-chip {
     margin-top: 20px;
@@ -223,7 +222,7 @@
     font-family: 'Roboto Mono', monospace !important;
 }
 
-/* CAMBIAR COLOR DEL ICONO AUTOMÁTICAMENTE */
+/* Color del icono del chip staff automatico */
 .staff-mode-chip .MuiChip-icon {
     color: #00d9ff !important;
     filter: drop-shadow(0 0 5px rgba(0, 217, 255, 0.8));

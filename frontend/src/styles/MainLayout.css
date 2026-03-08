@@ -1,6 +1,6 @@
-/* src/styles/MainLayout.css */
+/* Estilos del layout principal con barra lateral */
 
-/* --- ESTRUCTURA GENERAL --- */
+/* Estructura general */
 .MainContainer{
     margin: 0;
     padding: 20px;
@@ -23,9 +23,9 @@
     transition: background-color 0.3s ease, color 0.3s ease;
 }
 
-/* --- BARRA LATERAL (DRAWER) --- */
+/* Barra lateral del menu */
 
-/* Sobreescribimos los estilos por defecto de MUI */
+/* Sobreescribe los estilos por defecto de MUI */
 .layout-drawer .MuiDrawer-paper {
     background-color: var(--bg-sidebar) !important;
     color: var(--text-primary) !important;
@@ -42,16 +42,13 @@
     margin-bottom: 16px;
 }
 
-/* --- BOTONES DEL MENÚ --- */
+/* Botones del menu */
 
-/* Estilo base del botón */
+/* Estilo base del boton */
 .menu-item-btn {
     border-radius: 12px !important;
-    /* Bordes redondeados modernos */
     margin: 4px 12px !important;
-    /* Margen para que no toque los bordes */
     transition: all 0.3s ease !important;
-    /* Animación suave */
     color: var(--text-secondary) !important;
 }
 
@@ -60,20 +57,19 @@
     min-width: 40px !important;
 }
 
-/* Efecto Hover (Pasar el ratón) */
+/* Efecto hover del boton del menu */
 .menu-item-btn:hover {
     background-color: var(--hover-bg) !important;
     color: var(--text-primary) !important;
     transform: translateX(5px);
-    /* Pequeño movimiento a la derecha */
 }
 
 .menu-item-btn:hover .MuiListItemIcon-root {
     color: var(--text-primary) !important;
 }
 
-/* --- ESTADO ACTIVO (PÁGINA ACTUAL) --- */
-/* MUI añade la clase .Mui-selected automáticamente */
+/* Estado activo en la pagina actual */
+/* MUI aplica la clase Mui selected automaticamente */
 
 .menu-item-btn.Mui-selected {
     background-color: var(--accent-bg) !important;
@@ -85,7 +81,7 @@
     color: var(--accent-color) !important;
 }
 
-/* Pequeña línea decorativa a la izquierda cuando está activo */
+/* Linea decorativa a la izquierda del boton activo */
 .menu-item-btn.Mui-selected::before {
     content: '';
     position: absolute;
@@ -100,8 +96,7 @@
     background-color: var(--accent-bg) !important;
 }
 
-/* --- BOTÓN DE CERRAR SESIÓN --- */
-/* Un estilo especial para el logout */
+/* Boton de cerrar sesion */
 
 .logout-btn:hover {
     background-color: rgba(239, 68, 68, 0.1) !important;
@@ -112,7 +107,7 @@
     color: var(--danger-color) !important;
 }
 
-/* --- BOTÓN CAMBIO DE TEMA --- */
+/* Boton de cambio de tema */
 .theme-toggle-btn .MuiListItemIcon-root {
     color: #f59e0b !important;
     transition: color 0.3s ease;

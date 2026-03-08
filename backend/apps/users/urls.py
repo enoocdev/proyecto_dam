@@ -1,3 +1,4 @@
+# Rutas de la API REST de usuarios permisos grupos y autenticacion JWT
 from rest_framework import routers
 from django.urls import path, include
 from .views import UserViewSet, UserPermissionsView, UserGroupView, CustomTokenObtainPairView, ReadOnlyGroupWithoutPagination

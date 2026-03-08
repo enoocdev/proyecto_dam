@@ -6,9 +6,9 @@ services:
     container_name: proyecto-dam-client
     restart: always
     environment:
-      # URL del servidor WebSocket — ajustar segun tu entorno:
-      #   - Desde Docker en Linux:  ws://host.docker.internal:8000/ws/client/
-      #   - Si el server esta en otro host: ws://<IP_DEL_SERVER>:8000/ws/client/
+      # URL del servidor WebSocket
+      #   Desde Docker en Linux  ws host docker internal 8000 ws client
+      #   Si el server esta en otro host  ws IP DEL SERVER 8000 ws client
       - CLIENT_WS_URL=ws://host.docker.internal:8000/ws/client/
       - CLIENT_HEARTBEAT_INTERVAL=30
       - CLIENT_RECONNECT_DELAY=5

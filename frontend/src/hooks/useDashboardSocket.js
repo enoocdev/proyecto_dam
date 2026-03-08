@@ -1,14 +1,12 @@
+// Hook que conecta al WebSocket del dashboard para recibir actualizaciones
+// Construye la URL a partir de la variable de entorno y gestiona la reconexion
 import { useMemo } from "react";
 import useWebSocketLib from "react-use-websocket";
 import { ACCESS_TOKEN } from "../constants";
 
 const useWebSocket = useWebSocketLib.default || useWebSocketLib;
 
-/**
- * Construye la URL del WebSocket a partir de VITE_API_URL.
- *   http://host  →  ws://host/ws/dashboard/
- *   https://host →  wss://host/ws/dashboard/
- */
+// Construye la URL del WebSocket a partir de la URL de la API
 function buildWsUrl() {
     const apiUrl = import.meta.env.VITE_API_URL || "http://127.0.0.1:8000";
     const wsProtocol = apiUrl.startsWith("https") ? "wss" : "ws";
@@ -18,13 +16,7 @@ function buildWsUrl() {
     return token ? `${base}?token=${token}` : base;
 }
 
-/**
- * Hook que consume el WebSocket /ws/dashboard/ usando react-use-websocket.
- *
- * @param {object}   options
- * @param {function} options.onDeviceStatus — callback con el payload JSON del servidor
- * @returns {{ status: string, reconnect: function }}
- */
+// Hook que consume el WebSocket del dashboard y ejecuta el callback al recibir eventos
 export default function useDashboardSocket({ onDeviceStatus } = {}) {
 
     const socketUrl = useMemo(() => buildWsUrl(), []);

@@ -1,3 +1,4 @@
+// Tarjeta que muestra la informacion de un aula y sus dispositivos asignados
 import React from 'react';
 import { IconButton, Tooltip, Chip } from '@mui/material';
 import EditIcon from '@mui/icons-material/Edit';
@@ -6,7 +7,7 @@ import MeetingRoomIcon from '@mui/icons-material/MeetingRoom';
 import DevicesIcon from '@mui/icons-material/Devices';
 
 const ClassroomCard = ({ classroom, allDevices = [], onEdit, onDelete }) => {
-    // Resolver IDs de devices a objetos completos
+    // Resuelve los IDs de dispositivos a objetos completos
     const devicesMap = Object.fromEntries(allDevices.map(d => [d.id, d]));
     const resolvedDevices = (classroom.devices || []).map(dev =>
         typeof dev === 'object' ? dev : devicesMap[dev]

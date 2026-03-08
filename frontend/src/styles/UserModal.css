@@ -1,4 +1,4 @@
-/* UserModal.css */
+/* Estilos del modal de usuario y de aula */
 
 /* Fondo general del modal y texto */
 .modal-paper {
@@ -90,7 +90,7 @@
     color: var(--text-muted) !important;
 }
 
-/* --- SECCIÓN GRUPOS --- */
+/* Seccion de grupos */
 .groups-section {
     margin-top: 20px;
     border-top: 1px solid var(--border-color);
@@ -122,7 +122,7 @@
     height: 28px !important;
 }
 
-/* Botón + */
+/* Boton para agregar */
 .add-button {
     color: var(--text-muted) !important;
     border: 1px dashed var(--border-lighter);
@@ -136,7 +136,7 @@
     background-color: var(--accent-bg-soft);
 }
 
-/* --- MENU DROPDOWN --- */
+/* Menu desplegable de seleccion */
 .dark-menu-paper {
     background-color: var(--bg-card-darker) !important;
     color: var(--text-light) !important;
@@ -191,7 +191,7 @@
     line-height: 0;
 }
 
-/* Botones de acción inferiores */
+/* Botones de accion en la parte inferior */
 .modal-actions {
     background-color: var(--bg-card);
     border-top: 1px solid var(--border-color);

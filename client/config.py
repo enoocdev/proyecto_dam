@@ -1,41 +1,36 @@
-"""
-Configuracion del cliente (Agente PC).
-
-Prioridad de valores (de menor a mayor):
-  1. DEFAULTS definidos en este archivo.
-  2. Archivo  client_config.json  (junto a este script).
-  3. Variables de entorno con prefijo CLIENT_.
-"""
+# Modulo de configuracion del cliente
+# Fusiona valores por defecto con fichero JSON y variables de entorno
+# La prioridad es variables de entorno sobre JSON sobre valores por defecto
 import os
 import json
 from pathlib import Path
 
-# Rutas base 
+# Rutas base del fichero de configuracion
 CONFIG_DIR = Path(__file__).parent.resolve()
 CONFIG_FILE = CONFIG_DIR / "client_config.json"
 
-# Valores por defecto
+# Valores por defecto del agente
 DEFAULTS = {
-    # URL del WebSocket del backend (Django Channels - AgentConsumer)
+    # URL del WebSocket del backend Django Channels
     "WS_URL": "ws://127.0.0.1:8000/ws/client/",
 
-    # Intervalo en segundos entre heartbeats
+    # Segundos entre cada heartbeat
     "HEARTBEAT_INTERVAL": 30,
 
-    # Tiempo en segundos antes de reintentar la conexion WebSocket
+    # Segundos antes de reintentar la conexion
     "RECONNECT_DELAY": 5,
 
-    # Maximo de reintentos de conexion (0 = infinito)
+    # Maximo de reintentos de conexion donde cero es infinito
     "MAX_RECONNECT_ATTEMPTS": 0,
 
-    # Nivel de log: DEBUG, INFO, WARNING, ERROR
+    # Nivel de log del agente
     "LOG_LEVEL": "INFO",
 
-    # Ruta del archivo de log
+    # Ruta del fichero de log
     "LOG_FILE": str(CONFIG_DIR / "client_errors.log"),
 }
 
-# Mapa: clave interna -> variable de entorno
+# Mapeo de clave interna a variable de entorno
 _ENV_MAP = {
     "WS_URL":                "CLIENT_WS_URL",
     "HEARTBEAT_INTERVAL":    "CLIENT_HEARTBEAT_INTERVAL",
@@ -46,11 +41,11 @@ _ENV_MAP = {
 }
 
 
+# Carga la configuracion fusionando valores por defecto JSON y variables de entorno
 def load_config() -> dict:
-    """Carga la configuracion fusionando defaults, JSON y env-vars."""
     config = dict(DEFAULTS)
 
-    # 1) Archivo JSON (si existe)
+    # Carga el fichero JSON si existe
     if CONFIG_FILE.exists():
         try:
             with open(CONFIG_FILE, "r", encoding="utf-8") as f:
@@ -59,7 +54,7 @@ def load_config() -> dict:
         except (json.JSONDecodeError, OSError) as e:
             print(f"[WARN] No se pudo leer {CONFIG_FILE}: {e}. Usando defaults.")
 
-    # 2) Variables de entorno (prioridad maxima)
+    # Sobreescribe con variables de entorno que tengan mayor prioridad
     for key, env_key in _ENV_MAP.items():
         value = os.getenv(env_key)
         if value is not None:

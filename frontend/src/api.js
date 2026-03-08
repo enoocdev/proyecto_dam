@@ -1,12 +1,17 @@
+// Instancia de Axios con interceptores para autenticacion JWT
+// Anade el token de acceso a cada peticion automaticamente
+// Si el token caduca intenta refrescarlo y reenviar la peticion
 import axios from "axios";
 import { ACCESS_TOKEN, REFRESH_TOKEN } from "./constants";
 
+// Crea la instancia de Axios con la URL base del backend
 const api = axios.create(
     {
         baseURL: import.meta.env.VITE_API_URL
     }
 )
 
+// Interceptor de peticion que anade el token JWT en la cabecera
 api.interceptors.request.use((config) => {
     const token = localStorage.getItem(ACCESS_TOKEN)
 
@@ -18,6 +23,7 @@ api.interceptors.request.use((config) => {
 },
 (error) => Promise.reject(error))
 
+// Interceptor de respuesta que refresca el token si recibe un error de autenticacion
 api.interceptors.response.use(
     (response) => response,
     async (error) => {

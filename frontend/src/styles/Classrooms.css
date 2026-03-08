@@ -1,5 +1,5 @@
 /* =========================================
-   CLASSROOMS - Layout Principal
+   Estilos de la pagina de aulas
    ========================================= */
 
 .classrooms-container {
@@ -134,7 +134,7 @@ button.new-classroom-button:hover {
     gap: 4px;
 }
 
-/* Chips de dispositivos (centro) */
+/* Chips de dispositivos en la zona central */
 .classroom-devices-chips {
     display: flex;
     gap: 8px;
@@ -178,14 +178,14 @@ button.new-classroom-button:hover {
     font-style: italic;
 }
 
-/* Botones de acción */
+/* Botones de accion del aula */
 .classroom-actions {
     display: flex;
     gap: 5px;
 }
 
 /* =========================================
-   Paginación
+   Paginacion
    ========================================= */
 
 .classrooms-pagination {
@@ -211,7 +211,7 @@ button.new-classroom-button:hover {
 }
 
 /* =========================================
-   Mensajes vacíos y spinner
+   Mensajes vacios y spinner
    ========================================= */
 
 .no-classrooms-message {
@@ -231,7 +231,7 @@ button.new-classroom-button:hover {
 }
 
 /* =========================================
-   Botón eliminar (dialog)
+   Boton eliminar del dialogo
    ========================================= */
 
 .confirm-delete-button {
@@ -239,7 +239,6 @@ button.new-classroom-button:hover {
 }
 
 /* =========================================
-   Reutiliza estilos de UserModal.css para
-   ClassroomModal (.modal-paper, .dark-input,
-   .groups-section, .chips-container, etc.)
+   Reutiliza estilos de UserModal css para
+   ClassroomModal
    ========================================= */

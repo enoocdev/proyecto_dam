@@ -1,15 +1,7 @@
-"""
-Agente PC  -  Cliente basico de monitorizacion.
-
-Version inicial con las siguientes funcionalidades:
-  1. Conexion asincrona al backend via WebSocket con reconexion automatica.
-  2. Envio de informacion del equipo (startup) y heartbeat periodico.
-  3. Logging integral a  client_errors.log  — registra CADA mensaje
-     enviado y recibido con fecha, hora y nivel.
-
-Protocolo compatible con AgentConsumer del backend Django Channels.
-Ruta del WebSocket: ws://<host>/ws/client/
-"""
+# Agente de monitorizacion que se instala en cada equipo
+# Se conecta al backend por WebSocket y envia informacion del sistema
+# Incluye reconexion automatica y heartbeat periodico
+# Registra toda la actividad en un fichero de log
 
 import logging
 import os
@@ -18,21 +10,20 @@ from datetime import datetime
 from pathlib import Path
 
 
-#  Fijar directorio de trabajo al de este script.
-#  Critico cuando se ejecuta como tarea programada (cwd = System32).
+# Fija el directorio de trabajo al del propio script
+# Necesario cuando se ejecuta como tarea programada del sistema
 
 _CLIENT_DIR = str(Path(__file__).parent.resolve())
 if _CLIENT_DIR not in sys.path:
     sys.path.insert(0, _CLIENT_DIR)
 os.chdir(_CLIENT_DIR)
 
-# Log de emergencia: si algo falla en los imports de abajo, al menos
-# queda registrado en el fichero de log para poder diagnosticarlo.
+# Log de emergencia para registrar fallos durante la carga inicial
 
 _EMERGENCY_LOG = os.path.join(_CLIENT_DIR, "client_errors.log")
 
 def _setup_emergency_log():
-    """Configura un logging minimo antes de importar dependencias externas."""
+    # Configura un logging minimo antes de importar dependencias externas
     log_path = Path(_EMERGENCY_LOG)
     log_path.parent.mkdir(parents=True, exist_ok=True)
     logging.basicConfig(
@@ -50,7 +41,7 @@ _boot_logger.info("=== Cliente iniciando (PID %d, cwd=%s) ===", os.getpid(), os.
 _boot_logger.info("Python: %s", sys.executable)
 
 
-#  Importar dependencias externas con captura de errores
+# Importa dependencias externas y captura errores de importacion
 
 try:
     import asyncio
@@ -76,18 +67,18 @@ except Exception as exc:
     sys.exit(1)
 
 
-#  Configuracion y logger 
+# Carga la configuracion y reconfigura el logger
 try:
     config = load_config()
 except Exception as exc:
     _boot_logger.critical("ERROR FATAL al cargar configuracion: %s", exc, exc_info=True)
     sys.exit(1)
 
-# Reconfigurar el logger con el nivel del config (el fichero ya esta abierto)
+# Reconfigura el logger con el nivel definido en la configuracion
 log_path = Path(config["LOG_FILE"])
 log_path.parent.mkdir(parents=True, exist_ok=True)
 
-# Limpiar handlers previos del emergency log y reconfigurar
+# Limpia los handlers del log de emergencia y reconfigura
 for h in logging.root.handlers[:]:
     logging.root.removeHandler(h)
 
@@ -103,14 +94,10 @@ logger = logging.getLogger("client")
 logger.info("Configuracion cargada correctamente. Log level=%s", config["LOG_LEVEL"])
 
 
-# DeviceClient
-
+# Clase principal del agente que gestiona la conexion WebSocket
+# Envia la informacion del equipo al conectarse y mantiene un heartbeat
+# Se reconecta automaticamente si se pierde la conexion
 class DeviceClient:
-    """
-    Cliente WebSocket basico.
-    Se conecta al servidor, envia la info del equipo (startup),
-    mantiene un heartbeat periodico y se reconecta automaticamente.
-    """
 
     def __init__(self):
         self.config = config
@@ -118,13 +105,12 @@ class DeviceClient:
         self.running = True
         self.reconnect_attempts = 0
 
-        # Datos del equipo (cacheados para no recalcular en cada heartbeat)
+        # Datos del equipo cacheados para evitar recalcularlos en cada heartbeat
         self._mac = get_mac_address()
         self._ip = get_ip_address()
 
-    #Bucle principal de conexion 
+    # Bucle principal que conecta envia startup escucha y reconecta
     async def run(self):
-        """Conectar -> startup -> (listen + heartbeat) -> reconectar."""
         while self.running:
             try:
                 url = self.config["WS_URL"]
@@ -135,16 +121,16 @@ class DeviceClient:
                     self.reconnect_attempts = 0
                     logger.info("Conexion WebSocket establecida con %s", url)
 
-                    # 1) Enviar reporte de encendido
+                    # Envia el reporte de encendido con la informacion del sistema
                     await self._send_startup()
 
-                    # 2) Escuchar mensajes del servidor + heartbeat en paralelo
+                    # Ejecuta en paralelo la escucha de mensajes y el heartbeat
                     await asyncio.gather(
                         self._listen(),
                         self._heartbeat_loop(),
                     )
 
-            # Errores de conexion 
+            # Manejo de errores de conexion y reconexion automatica
             except (
                 websockets.exceptions.ConnectionClosed,
                 websockets.exceptions.ConnectionClosedError,
@@ -156,7 +142,7 @@ class DeviceClient:
                 self.reconnect_attempts += 1
                 max_att = self.config["MAX_RECONNECT_ATTEMPTS"]
 
-                # Si hay limite de reintentos y lo alcanzamos, parar
+                # Detiene el cliente si alcanza el maximo de reintentos
                 if max_att and self.reconnect_attempts >= max_att:
                     logger.error(
                         "Maximo de reintentos alcanzado (%d). Deteniendo cliente.",
@@ -176,11 +162,9 @@ class DeviceClient:
                 logger.info("Tarea cancelada, cerrando cliente...")
                 break
 
-    # Startup: enviar info completa del equipo
-
+    # Recopila la informacion completa del sistema y la envia al servidor
     async def _send_startup(self):
-        """Recopila info del sistema y la envia como mensaje 'startup'."""
-        # collect_system_info bloquea ~1s (cpu_percent), lanzar en thread
+        # Ejecuta la recopilacion en un hilo aparte porque bloquea brevemente
         info = await asyncio.to_thread(collect_system_info)
         self._mac = info["mac"]
         self._ip = info["ip"]
@@ -191,22 +175,20 @@ class DeviceClient:
             "data": info,
         })
 
-    # Escucha de mensajes del servidor
-
+    # Escucha mensajes del servidor y los registra en el log
     async def _listen(self):
-        """Lee cada mensaje del servidor y lo registra en el log."""
         async for raw in self.ws:
             try:
                 msg = json.loads(raw)
                 msg_type = msg.get("type", "desconocido")
 
-                # Log de CADA mensaje recibido 
+                # Registra cada mensaje recibido en el log
                 logger.info(
                     "RECIBIDO del servidor -> type=%s  contenido=%s",
                     msg_type, json.dumps(msg, ensure_ascii=False)[:300],
                 )
 
-                # Por ahora solo respondemos a pings del servidor
+                # Responde a pings del servidor con un pong
                 if msg_type == "ping":
                     await self._send({
                         "type": "pong",
@@ -218,15 +200,13 @@ class DeviceClient:
                     "Mensaje recibido NO es JSON valido: %s", str(raw)[:200]
                 )
 
-    # Heartbeat periodico
-
+    # Envia un heartbeat periodico al servidor con la MAC y la IP
     async def _heartbeat_loop(self):
-        """Envia un heartbeat cada HEARTBEAT_INTERVAL segundos."""
         interval = self.config["HEARTBEAT_INTERVAL"]
         while self.running:
             await asyncio.sleep(interval)
             try:
-                # Actualizar IP por si cambio
+                # Actualiza la IP por si ha cambiado desde el ultimo envio
                 self._ip = get_ip_address()
 
                 await self._send({
@@ -242,29 +222,23 @@ class DeviceClient:
                 logger.warning("Conexion cerrada durante heartbeat.")
                 break
 
-    # Envio de mensajes
-
+    # Serializa los datos a JSON y los envia por WebSocket
+    # Registra cada envio en el log con el tipo de mensaje
     async def _send(self, data: dict):
-        """
-        Serializa 'data' a JSON y lo envia por WebSocket.
-        Registra un log INFO con la fecha/hora y tipo de cada envio.
-        """
         if not self.ws:
             return
 
         payload = json.dumps(data)
         await self.ws.send(payload)
 
-        # Log de CADA mensaje enviado (requisito)
+        # Registra cada mensaje enviado en el log
         logger.info(
             "ENVIADO al servidor   -> type=%s  contenido=%s",
             data.get("type", "?"), payload[:300],
         )
 
-    # ── Desconexion limpia ───────────────────────────────────────────────
-
+    # Avisa al servidor del apagado y cierra la conexion limpiamente
     async def disconnect(self):
-        """Avisa al servidor de apagado y cierra la conexion."""
         self.running = False
         if self.ws:
             try:
@@ -283,12 +257,12 @@ class DeviceClient:
 
 
 
-#  Punto de entrada
+# Punto de entrada principal del agente
 async def _main():
     client = DeviceClient()
     loop = asyncio.get_event_loop()
 
-    # Intentar capturar senales de cierre para desconexion limpia
+    # Captura senales de cierre del sistema para desconexion limpia
     def handle_signal():
         logger.info("Senal de cierre recibida.")
         asyncio.ensure_future(client.disconnect())

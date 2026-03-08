@@ -1,9 +1,9 @@
 /* =========================================
-   TEMA GLOBAL - Variables CSS
-   =========================================
-   Se aplica con data-theme="dark" o data-theme="light"
-   en el elemento <html>.
-   :root actúa como fallback (dark por defecto).
+   TEMA GLOBAL
+   Variables CSS para modo oscuro y claro
+   Se aplica con data theme dark o light
+   en el elemento html
+   root actua como fallback oscuro
    ========================================= */
 
 :root,
@@ -33,7 +33,7 @@
     --border-light: #444444;
     --border-lighter: #555555;
 
-    /* Acento (Violeta) */
+    /* Acento violeta */
     --accent-color: #8b5cf6;
     --accent-hover: #7c3aed;
     --accent-light: #c4b5fd;
@@ -91,7 +91,7 @@
     --border-light: #cbd5e1;
     --border-lighter: #b0b8c4;
 
-    /* Acento (Violeta - ligeramente más saturado para legibilidad) */
+    /* Acento violeta mas saturado para legibilidad en modo claro */
     --accent-color: #7c3aed;
     --accent-hover: #6d28d9;
     --accent-light: #a78bfa;
@@ -124,7 +124,7 @@
 }
 
 /* =========================================
-   Transición suave global al cambiar tema
+   Transicion suave global al cambiar de tema
    ========================================= */
 html {
     transition: background-color 0.3s ease, color 0.3s ease;

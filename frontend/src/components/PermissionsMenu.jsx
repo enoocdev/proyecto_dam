@@ -1,3 +1,5 @@
+// Menu desplegable para buscar y seleccionar permisos disponibles
+// Se usa en la edicion de grupos para anadir permisos
 import React, { useState } from 'react';
 import { 
     Menu, 
@@ -19,7 +21,6 @@ const PermissionsMenu = ({ anchorEl, onClose, permissions = [], onAddPermission 
     const handleItemClick = (perm) => {
         onAddPermission(perm);
         setSearchTerm(""); 
-        // Opcional: onClose(); // Si quieres que se cierre al seleccionar uno
     };
 
     return (
@@ -73,7 +74,7 @@ const PermissionsMenu = ({ anchorEl, onClose, permissions = [], onAddPermission 
                 />
             </Box>
 
-            {/* --- LISTA DE PERMISOS --- */}
+            {/* Lista de permisos filtrados */}
             {filteredPermissions.length > 0 ? (
                 filteredPermissions.map((perm) => (
                     <MenuItem

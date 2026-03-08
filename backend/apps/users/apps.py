@@ -1,3 +1,4 @@
+# Configuracion de la aplicacion de usuarios
 from django.apps import AppConfig
 
 class UsersConfig(AppConfig):

@@ -1,6 +1,8 @@
+# Permisos personalizados para la aplicacion de dispositivos
 from rest_framework import permissions
 
 
+# Extiende DjangoModelPermissions para exigir permiso tambien en peticiones GET
 class StrictDjangoModelPermissions(permissions.DjangoModelPermissions):
     perms_map = {
         'GET': ['%(app_label)s.view_%(model_name)s'],

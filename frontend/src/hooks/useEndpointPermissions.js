@@ -1,6 +1,7 @@
+// Hook que consulta los permisos disponibles en un endpoint de la API
+// Hace una peticion OPTIONS y extrae que acciones puede realizar el usuario
 import { useEffect, useState } from "react"
 import api from "../api"
-import { all } from "axios"
 
 
 const useEndpointPermission = (endpoint) => {
@@ -20,10 +21,7 @@ const useEndpointPermission = (endpoint) => {
             try {
                 const response = await api.options(endpoint);
                 
-                // console.log(endpoint)
-                // console.log(response)
                 const {allow} =  response.headers
-                // console.log(allow)
                 const actions = response.data?.actions;
 
                 if (actions) {
@@ -45,7 +43,6 @@ const useEndpointPermission = (endpoint) => {
                 
                 
             } catch (err) {
-                // console.log(err)
                 setPermissions({
                     canRead: false,
                     canCreate: false,
@@ -53,10 +50,6 @@ const useEndpointPermission = (endpoint) => {
                     canDelete: false,
                 });
             }
-
-            // console.log(permissions)
-            
-        }
 
         fetchPermissions()
         

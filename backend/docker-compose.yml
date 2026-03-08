@@ -1,35 +1,35 @@
 version: '3.8'
 
 services:
-  # --- SERVICIO 1: BASE DE DATOS (PostgreSQL) ---
+  # Servicio de base de datos PostgreSQL
   db:
     image: postgres:16
     restart: always
     volumes:
-      # Esto crea un "disco duro" virtual para que no pierdas los datos al apagar
+      # Volumen persistente para conservar los datos al reiniciar
       - postgres_data:/var/lib/postgresql/data
     env_file:
-      - .env  # Lee tu archivo .env para saber usuario y contraseña
+      - .env
     ports:
-      - "5432:5432" # Te permite conectar DBeaver o TablePlus desde fuera
+      - "5432:5432"
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres"]
       interval: 3s
       timeout: 3s
       retries: 10
 
-  # --- SERVICIO 2: REDIS (necesario para Django Channels) ---
+  # Servicio Redis necesario para Django Channels y WebSockets
   redis:
     image: redis:7-alpine
     restart: always
     ports:
       - "6379:6379"
 
-  # --- SERVICIO 3: TU APP DJANGO ---
+  # Servicio del backend Django con Daphne como servidor ASGI
   backend:
     build:
-      context: .              # La "cámara" mira desde la raíz del proyecto
-      dockerfile: docker/Dockerfile  # Busca el archivo de instrucciones dentro de la carpeta docker
+      context: .
+      dockerfile: docker/Dockerfile
     command: >
       sh -c "
         echo 'Esperando a PostgreSQL...' &&
@@ -44,19 +44,21 @@ services:
         daphne -b 0.0.0.0 -p 8000 config.asgi:application
       "
     volumes:
-      - .:/app                # "Espejo" de tu código en tiempo real
+      - .:/app
     ports:
       - "8000:8000"
     env_file:
-      - .env                  # Carga las mismas variables (SECRET_KEY, DEBUG, etc)
+      - .env
     environment:
-      - REDIS_HOST=redis      # Apunta al servicio Redis del compose
+      # Apunta al servicio Redis del compose
+      - REDIS_HOST=redis
     depends_on:
       db:
-        condition: service_healthy  # Espera a que PostgreSQL acepte conexiones
+        # Espera a que PostgreSQL acepte conexiones
+        condition: service_healthy
       redis:
-        condition: service_started  # Espera a que Redis esté listo
+        condition: service_started
 
-# Definición del volumen persistente para la DB
+# Volumen persistente para la base de datos
 volumes:
   postgres_data:

@@ -1,3 +1,4 @@
+# Configuracion de la aplicacion de dispositivos
 from django.apps import AppConfig
 
 

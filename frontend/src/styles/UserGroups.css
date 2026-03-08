@@ -1,5 +1,5 @@
 /* =========================================
-   1. LAYOUT PRINCIPAL (PÁGINA)
+   Layout principal de la pagina de grupos
    ========================================= */
 
 .groups-container {
@@ -21,14 +21,14 @@
     border-bottom: 1px solid var(--border-color);
     padding-bottom: 1rem;
     
-    /* Mejora: Alineación perfecta entre título y botón */
+    /* Alineacion entre titulo y boton */
     display: flex;
     justify-content: space-between;
     align-items: center; 
 }
 
 /* =========================================
-   2. COMPONENTE FILA (TARJETA DE GRUPO)
+   Componente fila de cada grupo
    ========================================= */
 
 .group-row {
@@ -53,7 +53,7 @@
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
 }
 
-/* El nombre del grupo no debe romperse en dos líneas */
+/* El nombre del grupo no debe partirse en dos lineas */
 .group-row .group-name {
     min-width: 150px;
     font-weight: bold;
@@ -69,29 +69,29 @@
 }
 
 /* =========================================
-   3. SECCIÓN DE PERMISOS (SCROLL HORIZONTAL)
+   Seccion de permisos con scroll horizontal
    ========================================= */
 
 .permissions-container {
     display: flex;
     gap: 8px;
-    flex-grow: 1; /* Ocupa todo el espacio central disponible */
-    justify-content: flex-end; /* Alinea los chips hacia la derecha */
+    flex-grow: 1;
+    justify-content: flex-end;
     align-items: center;
     
     /* Scroll horizontal invisible */
     overflow-x: auto;
     white-space: nowrap;
-    padding-right: 16px; /* Margen para no pegarse al icono de editar */
+    padding-right: 16px;
     
-    /* Ocultar barra de scroll (Firefox/IE) */
+    /* Ocultar barra de scroll */
     scrollbar-width: none; 
     -ms-overflow-style: none;
     
-    /* Comportamiento de scroll suave */
+    /* Scroll suave */
     scroll-behavior: smooth;
     
-    /* Máscara de desvanecimiento opcional (avanzado) */
+    /* Mascara de desvanecimiento para indicar scroll */
     mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent);
     -webkit-mask-image: linear-gradient(to right, transparent, black 5%, black 100%);
 }
@@ -102,7 +102,7 @@
 }
 
 /* =========================================
-   4. CHIPS (ESTILO DISCORD/MODERNO)
+   Chips de permisos estilo moderno
    ========================================= */
 
 .permission-chip {
@@ -126,7 +126,7 @@
 }
 
 /* =========================================
-   5. MODAL (DIALOG)
+   Modal del grupo
    ========================================= */
 
 .group-dialog-paper {
@@ -139,14 +139,14 @@
 }
 
 
-/* --- 1. CONTENEDOR STICKY --- */
+/* Contenedor sticky del buscador */
 .permission-search-box {
     background-color: var(--bg-card) !important; 
     border-bottom: 1px solid var(--border-color);
     padding-bottom: 12px !important;
 }
 
-/* --- 2. EL TEXTFIELD (INPUT) --- */
+/* Campo de busqueda de permisos */
 .permission-search-input .MuiOutlinedInput-root {
     background-color: var(--bg-app);
     border-radius: 8px !important;
@@ -168,7 +168,7 @@
     box-shadow: 0 0 10px var(--shadow-glow);
 }
 
-/* --- 3. EL ICONO (LUPA) --- */
+/* Icono de la lupa */
 .permission-search-input .MuiSvgIcon-root {
     color: var(--border-lighter);
     transition: color 0.3s ease;

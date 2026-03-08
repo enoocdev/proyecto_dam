@@ -1,3 +1,5 @@
+// Modal para crear o editar un aula
+// Permite asignar nombre y seleccionar dispositivos del listado disponible
 import React, { useState, useEffect } from 'react';
 import {
     Dialog, DialogTitle, DialogContent, DialogActions,
@@ -23,7 +25,7 @@ const ClassroomModal = ({ open, onClose, onSave, classroom, availableDevices = [
     useEffect(() => {
         if (open) {
             if (isEditMode && classroom) {
-                // Resolver IDs de devices a objetos completos
+                // Resuelve los IDs de dispositivos a objetos completos
                 const devicesMap = Object.fromEntries(availableDevices.map(d => [d.id, d]));
                 const resolvedDevices = (classroom.devices || []).map(dev =>
                     typeof dev === 'object' ? dev : devicesMap[dev]
@@ -113,7 +115,7 @@ const ClassroomModal = ({ open, onClose, onSave, classroom, availableDevices = [
                         variant="outlined"
                     />
 
-                    {/* Sección Dispositivos */}
+                    {/* Seccion de dispositivos asignados */}
                     <Box className="groups-section">
                         <Typography variant="caption" className="section-label">
                             DISPOSITIVOS
@@ -139,7 +141,7 @@ const ClassroomModal = ({ open, onClose, onSave, classroom, availableDevices = [
                             </IconButton>
                         </Box>
 
-                        {/* Menú Dropdown */}
+                        {/* Menu desplegable para buscar y agregar dispositivos */}
                         <Menu
                             anchorEl={deviceMenuAnchor}
                             open={Boolean(deviceMenuAnchor)}

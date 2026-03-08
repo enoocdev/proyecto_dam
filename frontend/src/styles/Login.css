@@ -1,4 +1,4 @@
-/* src/pages/Login.css */
+/* Estilos de la pagina de inicio de sesion */
 
 /* El contenedor que centra todo */
 .login-container {
@@ -23,15 +23,15 @@
     transition: background-color 0.3s ease, border-color 0.3s ease;
 }
 
-/* --- OVERRIDES (SOBREESCRIBIR) MATERIAL UI --- */
-/* Esto es necesario porque sin tema JS, MUI cree que es fondo blanco */
+/* Sobreescrituras de Material UI */
+/* Necesario porque sin tema JS MUI aplica fondo blanco */
 
-/* Color del texto que escribes */
+/* Color del texto del input */
 .login-card .MuiInputBase-input {
     color: var(--text-primary) !important;
 }
 
-/* Color de la etiqueta (Label) */
+/* Color de la etiqueta del campo */
 .login-card .MuiInputLabel-root {
     color: var(--text-secondary) !important;
 }
@@ -40,7 +40,7 @@
     color: var(--accent-color) !important;
 }
 
-/* Color del borde del input */
+/* Color del borde del campo de texto */
 .login-card .MuiOutlinedInput-notchedOutline {
     border-color: var(--border-light) !important;
 }

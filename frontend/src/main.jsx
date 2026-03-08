@@ -1,3 +1,4 @@
+// Punto de entrada de la aplicacion React con el proveedor de tema
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import { ThemeProvider } from './context/ThemeContext'

@@ -1,3 +1,5 @@
+// Pagina de inicio de sesion con formulario de usuario y contrasena
+// Obtiene los tokens JWT y los permisos del usuario al autenticarse
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import api from "../api";

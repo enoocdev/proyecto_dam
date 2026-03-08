@@ -1,6 +1,8 @@
+# Modelos de la aplicacion de dispositivos
 from django.db import models
 
 
+# Equipo de red como un switch o router con acceso por API
 class NetworkDevice(models.Model):
     name = models.CharField(max_length=50)
     ip_address = models.GenericIPAddressField(unique=True)
@@ -9,6 +11,7 @@ class NetworkDevice(models.Model):
     api_port = models.IntegerField(default=8728)
 
 
+# Aula que agrupa dispositivos
 class Classroom(models.Model):
     name = models.CharField(unique=True)
     
@@ -16,6 +19,7 @@ class Classroom(models.Model):
         return self.name
 
 
+# Dispositivo individual que representa un equipo monitorizado
 class Device(models.Model):
     mac = models.CharField(max_length=17, unique=True)
     ip = models.GenericIPAddressField()
@@ -34,5 +38,6 @@ class Device(models.Model):
         return  f'hostname = {self.hostname} , mac = {self.mac}'
 
 
+# Modelo para registrar logs de actividad
 class Log(models.Model):
     pass
