@@ -10,6 +10,8 @@ import api from '../api';
 
 import DeviceCard from "../components/DeviceCard";
 import useDashboardSocket from "../hooks/useDashboardSocket";
+import { useStore } from "@nanostores/react";
+import { $screenshots } from "../stores/screenshotStore";
 import "../styles/Dashboard.css";
 
 import {API_PATH_DEVICES, API_PATH_CLASSROOMS_WITHOUT_PAGINATION} from '../constants';
@@ -34,9 +36,8 @@ function DashboardPage() {
 
     const [notification, setNotification] = useState({ open: false, message: '', severity: 'success' });
 
-    // Estado que almacena la ultima captura de pantalla por MAC de dispositivo
-    // No se persiste en BD solo se mantiene en memoria mientras el dashboard esta abierto
-    const [screenshots, setScreenshots] = useState({});
+    // Capturas de pantalla persistidas en sessionStorage via nanostores
+    const screenshots = useStore($screenshots);
 
 
     useEffect(() => {
@@ -88,19 +89,9 @@ function DashboardPage() {
         });
     }, []);
 
-    // Almacena la captura de pantalla recibida por WebSocket indexada por MAC
-    const handleScreenshot = useCallback((payload) => {
-        const { mac, image } = payload;
-        if (!mac || !image) return;
-        setScreenshots((prev) => ({
-            ...prev,
-            [mac]: `data:image/jpeg;base64,${image}`,
-        }));
-    }, []);
-
+    // El hook del socket ya persiste las capturas en el nanostore
     useDashboardSocket({
         onDeviceStatus: handleDeviceStatus,
-        onScreenshot: handleScreenshot,
     });
 
     const handleClassroomChange = (classroomId) => {

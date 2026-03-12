@@ -7,7 +7,7 @@
 #   - Sin NSSM, sin servicios, sin problemas de permisos
 #   - Ventana de consola oculta mediante un lanzador VBS
 #   - Reinicio automatico si el proceso falla
-#   - Arranca 30s despues de iniciar sesion
+#   - Arranca instantaneamente al iniciar sesion
 #
 # Linux: Servicio systemd
 #   - Requiere sudo
@@ -208,7 +208,7 @@ def _build_task_xml() -> str:
     """Genera el XML de definicion de la tarea programada.
 
     Configuracion clave:
-    - LogonTrigger: arranca 30s despues de iniciar sesion del usuario
+    - LogonTrigger: arranca instantaneamente al iniciar sesion del usuario
     - InteractiveToken: corre en la sesion del usuario (acceso a pantalla)
     - LeastPrivilege: no necesita permisos de admin para correr
     - ExecutionTimeLimit PT0S: sin limite de tiempo (corre indefinidamente)
@@ -230,7 +230,6 @@ def _build_task_xml() -> str:
     <LogonTrigger>
       <Enabled>true</Enabled>
       <UserId>{full_user}</UserId>
-      <Delay>PT30S</Delay>
     </LogonTrigger>
   </Triggers>
   <Principals>
@@ -346,7 +345,7 @@ def install_windows():
     print()
     print("  Comportamiento:")
     print("    - Se ejecuta sin ventana de consola.")
-    print("    - Arranca automaticamente 30s despues de iniciar sesion.")
+    print("    - Arranca automaticamente al iniciar sesion (instantaneo).")
     print("    - Si falla, se reinicia automaticamente cada 1 minuto.")
     print("    - No interfiere con el uso normal del equipo.")
     print()

@@ -3,6 +3,7 @@
 import { useMemo } from "react";
 import useWebSocketLib from "react-use-websocket";
 import { ACCESS_TOKEN } from "../constants";
+import { setScreenshot } from "../stores/screenshotStore";
 
 const useWebSocket = useWebSocketLib.default || useWebSocketLib;
 
@@ -34,6 +35,10 @@ export default function useDashboardSocket({ onDeviceStatus, onScreenshot } = {}
 
                 // Separa eventos de estado de dispositivo y capturas de pantalla
                 if (payload.event === "screenshot") {
+                    // Persiste la imagen en el nanostore (sessionStorage)
+                    if (payload.mac && payload.image) {
+                        setScreenshot(payload.mac, payload.image);
+                    }
                     onScreenshot?.(payload);
                 } else {
                     onDeviceStatus?.(payload);
