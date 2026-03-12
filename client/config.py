@@ -28,6 +28,9 @@ DEFAULTS = {
 
     # Ruta del fichero de log
     "LOG_FILE": str(CONFIG_DIR / "client_errors.log"),
+
+    # Segundos entre cada captura de pantalla (600 = 10 minutos)
+    "SCREENSHOT_INTERVAL": 600,
 }
 
 # Mapeo de clave interna a variable de entorno
@@ -38,6 +41,7 @@ _ENV_MAP = {
     "MAX_RECONNECT_ATTEMPTS":"CLIENT_MAX_RECONNECT_ATTEMPTS",
     "LOG_LEVEL":             "CLIENT_LOG_LEVEL",
     "LOG_FILE":              "CLIENT_LOG_FILE",
+    "SCREENSHOT_INTERVAL":   "CLIENT_SCREENSHOT_INTERVAL",
 }
 
 

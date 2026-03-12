@@ -23,7 +23,7 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import CloseIcon from "@mui/icons-material/Close";
 import "../styles/DeviceCard.css";
 
-function DeviceCard({ device, onShutdown, onBlockInternet, onUnblockInternet, onDelete }) {
+function DeviceCard({ device, screenshot, onShutdown, onBlockInternet, onUnblockInternet, onDelete }) {
     const [sheetOpen, setSheetOpen] = useState(false);
 
     const handleCardClick = () => setSheetOpen(true);
@@ -54,9 +54,17 @@ function DeviceCard({ device, onShutdown, onBlockInternet, onUnblockInternet, on
             <Card className={`device-card ${device.is_online ? "device-card--online" : "device-card--offline"}`}>
                 <CardActionArea onClick={handleCardClick} className="device-card__action-area">
 
-                    {/* Previsualizacion del equipo */}
+                    {/* Previsualizacion del equipo o captura de pantalla */}
                     <Box className="device-card__preview">
-                        <ComputerIcon className="device-card__preview-icon" />
+                        {screenshot ? (
+                            <img
+                                src={screenshot}
+                                alt={`Captura de ${device.hostname}`}
+                                className="device-card__screenshot"
+                            />
+                        ) : (
+                            <ComputerIcon className="device-card__preview-icon" />
+                        )}
                     </Box>
 
                     <Box className="device-card__body">

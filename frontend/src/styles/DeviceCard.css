@@ -35,6 +35,19 @@
     color: var(--border-color) !important;
 }
 
+/* Captura de pantalla del equipo */
+.device-card__screenshot {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    transition: opacity 0.3s ease;
+}
+
+.device-card__preview:hover .device-card__screenshot {
+    opacity: 0.9;
+}
+
 .device-card__body {
     padding: 14px 16px 16px;
     display: flex;

@@ -17,7 +17,7 @@ function buildWsUrl() {
 }
 
 // Hook que consume el WebSocket del dashboard y ejecuta el callback al recibir eventos
-export default function useDashboardSocket({ onDeviceStatus } = {}) {
+export default function useDashboardSocket({ onDeviceStatus, onScreenshot } = {}) {
 
     const socketUrl = useMemo(() => buildWsUrl(), []);
 
@@ -31,7 +31,13 @@ export default function useDashboardSocket({ onDeviceStatus } = {}) {
             try {
                 const payload = JSON.parse(event.data);
                 console.log(payload);
-                onDeviceStatus?.(payload);
+
+                // Separa eventos de estado de dispositivo y capturas de pantalla
+                if (payload.event === "screenshot") {
+                    onScreenshot?.(payload);
+                } else {
+                    onDeviceStatus?.(payload);
+                }
             } catch {
                 console.warn("[useDashboardSocket] payload no válido:", event.data);
             }

@@ -34,6 +34,10 @@ function DashboardPage() {
 
     const [notification, setNotification] = useState({ open: false, message: '', severity: 'success' });
 
+    // Estado que almacena la ultima captura de pantalla por MAC de dispositivo
+    // No se persiste en BD solo se mantiene en memoria mientras el dashboard esta abierto
+    const [screenshots, setScreenshots] = useState({});
+
 
     useEffect(() => {
         fetchClassrooms();
@@ -84,8 +88,19 @@ function DashboardPage() {
         });
     }, []);
 
+    // Almacena la captura de pantalla recibida por WebSocket indexada por MAC
+    const handleScreenshot = useCallback((payload) => {
+        const { mac, image } = payload;
+        if (!mac || !image) return;
+        setScreenshots((prev) => ({
+            ...prev,
+            [mac]: `data:image/jpeg;base64,${image}`,
+        }));
+    }, []);
+
     useDashboardSocket({
         onDeviceStatus: handleDeviceStatus,
+        onScreenshot: handleScreenshot,
     });
 
     const handleClassroomChange = (classroomId) => {
@@ -124,10 +139,11 @@ function DashboardPage() {
 
     const handleShutdown = async (device) => {
         try {
-            // await api.post(`${API_PATH_DEVICES}${device.id}/shutdown/`);
+            await api.post(`${API_PATH_DEVICES}${device.id}/shutdown/`);
             setNotification({ open: true, message: `Orden de apagado enviada a ${device.hostname}`, severity: 'success' });
-        } catch {
-            setNotification({ open: true, message: `Error al apagar ${device.hostname}`, severity: 'error' });
+        } catch (err) {
+            const detail = err.response?.data?.detail || `Error al apagar ${device.hostname}`;
+            setNotification({ open: true, message: detail, severity: 'error' });
         }
     };
 
@@ -222,6 +238,7 @@ function DashboardPage() {
                         <DeviceCard
                             key={device.id}
                             device={device}
+                            screenshot={screenshots[device.mac] || null}
                             onShutdown={handleShutdown}
                             onBlockInternet={handleBlockInternet}
                             onUnblockInternet={handleUnblockInternet}

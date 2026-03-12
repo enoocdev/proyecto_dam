@@ -16,12 +16,19 @@ logger = logging.getLogger("devices.consumers")
 DASHBOARD_GROUP = "dashboard_updates"
 
 
+# Nombre del grupo de canales al que se suscribe cada agente segun su MAC
+# Formato: agent_AABBCCDDEEFF (MAC sin dos puntos y en minusculas)
+def agent_group_name(mac: str) -> str:
+    return f"agent_{mac.replace(':', '').lower()}"
+
+
 # Consumer que atiende a cada agente instalado en un equipo
 # Recibe mensajes de tipo startup heartbeat shutdown y command result
 class AgentConsumer(AsyncJsonWebsocketConsumer):
 
     async def connect(self):
         self.mac = None
+        self._agent_group = None
         await self.accept()
         logger.info("Agente WebSocket conectado (channel=%s)", self.channel_name)
 
@@ -40,6 +47,9 @@ class AgentConsumer(AsyncJsonWebsocketConsumer):
         elif msg_type == "shutdown_notice":
             await self._handle_shutdown_notice(data)
 
+        elif msg_type == "screenshot":
+            await self._handle_screenshot(data)
+
         elif msg_type == "command_result":
             logger.info("Resultado de comando recibido: %s", data)
 
@@ -48,6 +58,11 @@ class AgentConsumer(AsyncJsonWebsocketConsumer):
 
     async def disconnect(self, close_code):
         logger.info("Agente desconectado (mac=%s, code=%s)", self.mac, close_code)
+        # Elimina al agente del grupo de su MAC
+        if self._agent_group:
+            await self.channel_layer.group_discard(
+                self._agent_group, self.channel_name
+            )
         if self.mac:
             device_data = await self._set_device_offline(self.mac)
             if device_data:
@@ -58,6 +73,14 @@ class AgentConsumer(AsyncJsonWebsocketConsumer):
     # Procesa el mensaje de encendido del agente y lo registra como online
     async def _handle_startup(self, data: dict):
         self.mac = data.get("mac")
+
+        # Suscribe al agente a un grupo unico por su MAC
+        # para poder enviarle comandos dirigidos desde la API
+        self._agent_group = agent_group_name(self.mac)
+        await self.channel_layer.group_add(
+            self._agent_group, self.channel_name
+        )
+
         device_data = await self._set_device_online(
             mac=self.mac,
             ip=data.get("ip"),
@@ -81,6 +104,16 @@ class AgentConsumer(AsyncJsonWebsocketConsumer):
                 await self._notify_dashboard("offline", device_data)
             logger.info("Agente avisó de apagado: %s", mac)
 
+    # Recibe una captura de pantalla del agente y la reenvia al dashboard
+    # La imagen no se guarda en base de datos solo se retransmite en tiempo real
+    async def _handle_screenshot(self, data: dict):
+        mac = data.get("mac")
+        image = data.get("image")
+        if mac and image:
+            await self._notify_dashboard_screenshot(mac, image)
+            logger.info("Screenshot recibido y reenviado de mac=%s (%d KB)",
+                        mac, len(image) // 1024)
+
     # Envia un comando al agente conectado por WebSocket
     async def send_command(self, command_name: str, params: dict = None):
         await self.send_json({
@@ -88,6 +121,14 @@ class AgentConsumer(AsyncJsonWebsocketConsumer):
             "command": command_name,
             "params": params or {},
         })
+
+    # Handler invocado cuando el channel layer envia un mensaje de tipo agent.command
+    # Esto permite que la API REST envie comandos a agentes concretos
+    async def agent_command(self, event):
+        command = event.get("command", "")
+        params = event.get("params", {})
+        logger.info("Enviando comando '%s' al agente mac=%s", command, self.mac)
+        await self.send_command(command, params)
 
     # Operaciones de base de datos convertidas de sincrono a asincrono
 
@@ -155,6 +196,21 @@ class AgentConsumer(AsyncJsonWebsocketConsumer):
             },
         )
 
+    # Envia la captura de pantalla al grupo del dashboard sin guardarla en BD
+    async def _notify_dashboard_screenshot(self, mac: str, image_b64: str):
+        await self.channel_layer.group_send(
+            DASHBOARD_GROUP,
+            {
+                "type": "device.screenshot",
+                "payload": {
+                    "event": "screenshot",
+                    "mac": mac,
+                    "image": image_b64,
+                    "timestamp": datetime.now().isoformat(),
+                },
+            },
+        )
+
 
 # Consumer para el frontend React
 # Se suscribe al grupo del dashboard y reenvia los eventos al navegador
@@ -171,4 +227,8 @@ class DashboardConsumer(AsyncJsonWebsocketConsumer):
 
     # Recibe eventos del grupo del dashboard y los envia al navegador
     async def device_status(self, event):
+        await self.send_json(event["payload"])
+
+    # Recibe capturas de pantalla del grupo y las reenvia al navegador
+    async def device_screenshot(self, event):
         await self.send_json(event["payload"])

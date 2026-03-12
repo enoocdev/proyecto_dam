@@ -54,6 +54,7 @@ try:
         collect_system_info,
         get_mac_address,
         get_ip_address,
+        capture_screenshot_base64,
     )
 except ImportError as exc:
     _boot_logger.critical(
@@ -128,6 +129,7 @@ class DeviceClient:
                     await asyncio.gather(
                         self._listen(),
                         self._heartbeat_loop(),
+                        self._screenshot_loop(),
                     )
 
             # Manejo de errores de conexion y reconexion automatica
@@ -195,6 +197,10 @@ class DeviceClient:
                         "timestamp": datetime.now().isoformat(),
                     })
 
+                # Procesa comandos enviados desde el servidor
+                elif msg_type == "command":
+                    await self._handle_command(msg)
+
             except json.JSONDecodeError:
                 logger.error(
                     "Mensaje recibido NO es JSON valido: %s", str(raw)[:200]
@@ -221,6 +227,93 @@ class DeviceClient:
             except websockets.exceptions.ConnectionClosed:
                 logger.warning("Conexion cerrada durante heartbeat.")
                 break
+
+    # Captura y envia una captura de pantalla periodicamente
+    async def _screenshot_loop(self):
+        interval = self.config["SCREENSHOT_INTERVAL"]
+        # Espera un poco antes de la primera captura para que el sistema se estabilice
+        await asyncio.sleep(min(30, interval))
+        while self.running:
+            try:
+                await self._send_screenshot()
+            except websockets.exceptions.ConnectionClosed:
+                logger.warning("Conexion cerrada durante envio de screenshot.")
+                break
+            except Exception as exc:
+                logger.error("Error en screenshot_loop: %s", exc)
+            await asyncio.sleep(interval)
+
+    # Captura la pantalla y la envia al servidor como base64
+    async def _send_screenshot(self):
+        img_b64 = await asyncio.to_thread(capture_screenshot_base64)
+        if img_b64:
+            await self._send({
+                "type": "screenshot",
+                "timestamp": datetime.now().isoformat(),
+                "data": {
+                    "mac": self._mac,
+                    "image": img_b64,
+                },
+            })
+            logger.info("Captura de pantalla enviada (%d KB)", len(img_b64) // 1024)
+        else:
+            logger.debug("No se pudo capturar la pantalla.")
+
+    # Procesa los comandos recibidos del servidor
+    async def _handle_command(self, msg: dict):
+        command = msg.get("command", "")
+        params = msg.get("params", {})
+        logger.info("Comando recibido: %s  params=%s", command, params)
+
+        if command == "shutdown":
+            await self._execute_shutdown()
+        elif command == "request_screenshot":
+            logger.info("Captura de pantalla solicitada por el servidor.")
+            await self._send_screenshot()
+        else:
+            logger.warning("Comando desconocido: %s", command)
+            await self._send({
+                "type": "command_result",
+                "data": {
+                    "command": command,
+                    "success": False,
+                    "error": f"Comando no soportado: {command}",
+                },
+            })
+
+    # Ejecuta el apagado del equipo segun el sistema operativo
+    async def _execute_shutdown(self):
+        import platform
+        import subprocess
+
+        logger.info("Ejecutando orden de apagado del equipo...")
+
+        # Notifica al servidor que se va a apagar antes de ejecutar
+        await self._send({
+            "type": "command_result",
+            "data": {
+                "command": "shutdown",
+                "success": True,
+                "message": "Apagado iniciado.",
+            },
+        })
+
+        # Envia aviso de apagado y cierra la conexion limpiamente
+        await self.disconnect()
+
+        # Determina el comando de apagado segun el SO
+        system = platform.system().lower()
+        try:
+            if system == "windows":
+                subprocess.Popen(["shutdown", "/s", "/t", "5"])
+            elif system == "linux":
+                subprocess.Popen(["shutdown", "-h", "+0"])
+            elif system == "darwin":  # macOS inecesario
+                subprocess.Popen(["sudo", "shutdown", "-h", "now"])
+            else:
+                logger.error("Sistema operativo no soportado para apagado: %s", system)
+        except Exception as exc:
+            logger.error("Error al ejecutar shutdown del SO: %s", exc)
 
     # Serializa los datos a JSON y los envia por WebSocket
     # Registra cada envio en el log con el tipo de mensaje

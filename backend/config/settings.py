@@ -159,6 +159,9 @@ CHANNEL_LAYERS = {
                 os.getenv("REDIS_HOST", "127.0.0.1"),
                 int(os.getenv("REDIS_PORT", 6379)),
             )],
+            # Capacidad ampliada para soportar mensajes con capturas de pantalla
+            "capacity": 300,
+            "expiry": 60,
         },
     },
 }

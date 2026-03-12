@@ -1,11 +1,20 @@
 # Modulo que recopila informacion del hardware y sistema operativo
 # Obtiene MAC IP hostname SO CPU RAM y disco
+import base64
+import io
 import logging
 import platform
 import socket
 import uuid
 
 import psutil
+
+try:
+    import mss
+    from PIL import Image
+    _HAS_SCREENSHOT = True
+except ImportError:
+    _HAS_SCREENSHOT = False
 
 logger = logging.getLogger("client.system_info")
 
@@ -85,6 +94,35 @@ def collect_basic_info() -> dict:
         "ip": get_ip_address(),
         "hostname": get_hostname(),
     }
+
+
+# Captura la pantalla principal y la devuelve como string base64 JPEG
+# Redimensiona la imagen para reducir el peso del mensaje WebSocket
+def capture_screenshot_base64(max_width: int = 800, quality: int = 50) -> str | None:
+    if not _HAS_SCREENSHOT:
+        logger.warning("mss o Pillow no disponibles, captura deshabilitada")
+        return None
+    try:
+        with mss.mss() as sct:
+            # Captura el monitor principal (indice 1)
+            monitor = sct.monitors[1]
+            raw = sct.grab(monitor)
+            img = Image.frombytes("RGB", raw.size, raw.bgra, "raw", "BGRX")
+
+        # Redimensiona manteniendo la proporcion
+        w, h = img.size
+        if w > max_width:
+            ratio = max_width / w
+            img = img.resize((max_width, int(h * ratio)), Image.LANCZOS)
+
+        # Codifica a JPEG en memoria y convierte a base64
+        buffer = io.BytesIO()
+        img.save(buffer, format="JPEG", quality=quality)
+        return base64.b64encode(buffer.getvalue()).decode("ascii")
+
+    except Exception as exc:
+        logger.error("Error al capturar pantalla: %s", exc)
+        return None
 
 
 if __name__ == "__main__":

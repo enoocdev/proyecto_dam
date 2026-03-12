@@ -1,9 +1,19 @@
 # ViewSets de la API REST para dispositivos aulas y equipos de red
-from .models import Device, Classroom, NetworkDevice
-from  rest_framework import viewsets
+import logging
+
+from channels.layers import get_channel_layer
+from asgiref.sync import async_to_sync
+from rest_framework import viewsets, status
+from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
+
+from .consumers import agent_group_name
+from .models import Device, Classroom, NetworkDevice
 from .serializer import DeviceSerializer, ClassroomSerializer, NetworkDeviceSerializer, ClassRoomSimpleSerializer
 from .permissions import StrictDjangoModelPermissions
+
+logger = logging.getLogger("devices.views")
 
 
 # CRUD de dispositivos con filtro opcional por aula
@@ -20,6 +30,41 @@ class DevicesViewSet(viewsets.ModelViewSet):
         if classroom_id is not None:
             queryset = queryset.filter(classroom_id=classroom_id)
         return queryset
+
+    # POST /devices/{id}/shutdown/
+    # Envia la orden de apagado al agente conectado por WebSocket
+    @action(detail=True, methods=["post"], url_path="shutdown")
+    def shutdown(self, request, pk=None):
+        device = self.get_object()
+
+        if not device.is_online:
+            return Response(
+                {"detail": "El dispositivo no está encendido."},
+                status=status.HTTP_409_CONFLICT,
+            )
+
+        group = agent_group_name(device.mac)
+        channel_layer = get_channel_layer()
+
+        # Envia el comando de apagado al grupo del agente a traves del channel layer
+        async_to_sync(channel_layer.group_send)(
+            group,
+            {
+                "type": "agent.command",
+                "command": "shutdown",
+                "params": {},
+            },
+        )
+
+        logger.info(
+            "Orden de apagado enviada a %s (mac=%s) por usuario %s",
+            device.hostname, device.mac, request.user,
+        )
+
+        return Response(
+            {"detail": f"Orden de apagado enviada a {device.hostname}."},
+            status=status.HTTP_200_OK,
+        )
 
 # CRUD de equipos de red como switches y routers
 class NetworkDevicViewSet(viewsets.ModelViewSet):
