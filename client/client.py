@@ -307,7 +307,7 @@ class DeviceClient:
             if system == "windows":
                 subprocess.Popen(["shutdown", "/s", "/t", "5"])
             elif system == "linux":
-                subprocess.Popen(["shutdown", "-h", "+0"])
+                subprocess.Popen(["shutdown", "now"])
             elif system == "darwin":  # macOS inecesario
                 subprocess.Popen(["sudo", "shutdown", "-h", "now"])
             else:
