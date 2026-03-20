@@ -48,6 +48,26 @@
     opacity: 1;
 }
 
+.dark-input .MuiInputLabel-root {
+    color: var(--text-muted) !important;
+}
+
+.dark-input .MuiInputLabel-root.Mui-focused {
+    color: var(--accent-color) !important;
+}
+
+.dark-input .MuiInputLabel-root.Mui-error {
+    color: var(--danger-color) !important;
+}
+
+.dark-input .MuiFormHelperText-root {
+    color: var(--text-dim) !important;
+}
+
+.dark-input .MuiFormHelperText-root.Mui-error {
+    color: var(--danger-color) !important;
+}
+
 /* Contenedores */
 .form-container {
     display: flex;

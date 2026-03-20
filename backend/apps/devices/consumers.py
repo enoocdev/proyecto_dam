@@ -9,6 +9,7 @@ from channels.generic.websocket import AsyncJsonWebsocketConsumer
 from channels.db import database_sync_to_async
 
 from .models import Device
+from . import mikrotik_service
 
 logger = logging.getLogger("devices.consumers")
 
@@ -102,7 +103,7 @@ class AgentConsumer(AsyncJsonWebsocketConsumer):
             device_data = await self._set_device_offline(mac)
             if device_data:
                 await self._notify_dashboard("offline", device_data)
-            logger.info("Agente avisó de apagado: %s", mac)
+            logger.info("Agente aviso de apagado: %s", mac)
 
     # Recibe una captura de pantalla del agente y la reenvia al dashboard
     # La imagen no se guarda en base de datos solo se retransmite en tiempo real
@@ -146,6 +147,20 @@ class AgentConsumer(AsyncJsonWebsocketConsumer):
         if hostname:
             device.hostname = hostname
         device.is_online = True
+
+        # Auto-asigna el equipo de red y el puerto del switch si no tiene uno asignado
+        if not device.connected_device:
+            try:
+                network_device, switch_port = mikrotik_service.find_device_network_info(mac)
+                if network_device:
+                    device.connected_device = network_device
+                    if switch_port:
+                        device.switch_port = switch_port
+            except Exception as exc:
+                logger.warning(
+                    "No se pudo auto-asignar switch para mac=%s: %s", mac, exc,
+                )
+
         device.save()
         return self._device_to_dict(device)
 
@@ -179,6 +194,8 @@ class AgentConsumer(AsyncJsonWebsocketConsumer):
             "is_online": device.is_online,
             "is_internet_blocked": device.is_internet_blocked,
             "classroom_id": device.classroom_id,
+            "connected_device_id": device.connected_device_id,
+            "switch_port": device.switch_port,
         }
 
     # Notifica al grupo del dashboard sobre cambios en el estado del dispositivo

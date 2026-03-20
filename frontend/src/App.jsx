@@ -12,6 +12,7 @@ import Users from "./pages/Users";
 import { Dashboard } from "@mui/icons-material";
 import DashboardPage from "./pages/Dashboard";
 import Classroom from "./pages/Classrooms";
+import NetworkDevices from "./pages/NetworkDevices";
 
 function App() {
 
@@ -23,7 +24,7 @@ function App() {
         <Route element={<ProtectedRoute><MainLayout/></ProtectedRoute>} >
           <Route path="/" element={<ProtectedRoute requiredPermission="view_device"><DashboardPage/></ProtectedRoute>} />
           <Route path="/classroom" element={<ProtectedRoute requiredPermission="view_classroom"><Classroom/></ProtectedRoute>} />
-          <Route path="/network-device" element={<ProtectedRoute requiredPermission="view_networkdevice"><div>network-device ...</div></ProtectedRoute>} />
+          <Route path="/network-device" element={<ProtectedRoute requiredPermission="view_networkdevice"><NetworkDevices/></ProtectedRoute>} />
           <Route path="/users" element={<ProtectedRoute requiredPermission="view_user" requireStaff><Users/></ProtectedRoute>} />
           <Route path="/users-groups" element={<ProtectedRoute requiredPermission="view_group" requireStaff><UserGroups/></ProtectedRoute>} />
           <Route path="/profile" element={<Profile/>} />

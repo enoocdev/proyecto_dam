@@ -11,4 +11,5 @@ export const API_PATH_USER_GROUPS = "/users-groups/";
 export const API_PATH_PERMISIONS = "/permissions/";
 export const API_PATH_CLASSROOMS = "/devices/classroom/";
 export const API_PATH_CLASSROOMS_WITHOUT_PAGINATION = "/devices/classroom-without-pagination/"
+export const API_PATH_NETWORK_DEVICES = "/devices/network-device/"
 

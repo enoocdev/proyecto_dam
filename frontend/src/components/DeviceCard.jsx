@@ -21,10 +21,18 @@ import WifiOffIcon from "@mui/icons-material/WifiOff";
 import WifiIcon from "@mui/icons-material/Wifi";
 import DeleteIcon from "@mui/icons-material/Delete";
 import CloseIcon from "@mui/icons-material/Close";
+import RouterIcon from "@mui/icons-material/Router";
+import SettingsEthernetIcon from "@mui/icons-material/SettingsEthernet";
 import "../styles/DeviceCard.css";
 
-function DeviceCard({ device, screenshot, onShutdown, onBlockInternet, onUnblockInternet, onDelete }) {
+function DeviceCard({ device, screenshot, networkDeviceNames = {}, onShutdown, onBlockInternet, onUnblockInternet, onDelete }) {
     const [sheetOpen, setSheetOpen] = useState(false);
+
+    // Nombre del switch resuelto desde la URL del dispositivo
+    const switchName = device.network_device_url
+        ? networkDeviceNames[device.network_device_url] || null
+        : null;
+    const switchPort = device.switch_port?.trim() || null;
 
     const handleCardClick = () => setSheetOpen(true);
     const handleClose = () => setSheetOpen(false);
@@ -95,6 +103,24 @@ function DeviceCard({ device, screenshot, onShutdown, onBlockInternet, onUnblock
                                 size="small"
                                 className={`device-badge ${device.is_internet_blocked ? "badge--blocked" : "badge--internet"}`}
                             />
+
+                            {switchName && (
+                                <Chip
+                                    icon={<RouterIcon className="badge-icon" />}
+                                    label={switchName}
+                                    size="small"
+                                    className="device-badge badge--switch"
+                                />
+                            )}
+
+                            {switchPort && (
+                                <Chip
+                                    icon={<SettingsEthernetIcon className="badge-icon" />}
+                                    label={`Port: ${switchPort}`}
+                                    size="small"
+                                    className="device-badge badge--switch"
+                                />
+                            )}
                         </Box>
                     </Box>
                 </CardActionArea>
@@ -118,6 +144,8 @@ function DeviceCard({ device, screenshot, onShutdown, onBlockInternet, onUnblock
                             </Typography>
                             <Typography variant="caption" className="action-sheet__subtitle">
                                 {device.ip} · {device.mac}
+                                {switchName && ` · Switch: ${switchName}`}
+                                {switchPort && ` · Puerto: ${switchPort}`}
                             </Typography>
                         </div>
                     </div>

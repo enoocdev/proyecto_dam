@@ -103,3 +103,9 @@ class ClassRoomSimpleSerializer(serializers.ModelSerializer):
     class Meta:
         model = Classroom
         fields = ['id', 'name']
+
+
+# Serializador para peticiones de bloqueo de internet
+# Acepta opcionalmente la IP del host al que se permite el acceso
+class BlockInternetSerializer(serializers.Serializer):
+    allowed_host = serializers.IPAddressField(required=False)

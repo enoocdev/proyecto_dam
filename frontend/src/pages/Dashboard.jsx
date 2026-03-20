@@ -34,6 +34,9 @@ function DashboardPage() {
     const [selectedClassroom, setSelectedClassroom] = useState(null);
     const selectedClassroomRef = useRef(selectedClassroom);
 
+    // Mapa de network_device_url -> nombre del switch
+    const [networkDeviceNames, setNetworkDeviceNames] = useState({});
+
     const [notification, setNotification] = useState({ open: false, message: '', severity: 'success' });
 
     // Capturas de pantalla persistidas en sessionStorage via nanostores
@@ -56,6 +59,32 @@ function DashboardPage() {
         } catch (err) {
             setNotification({ open: true, message: 'Error al cargar las Aulas', severity: 'error' });
         }
+    };
+
+    // Resuelve los nombres de los switches a partir de las URLs de cada dispositivo
+    const resolveNetworkDeviceNames = async (deviceList) => {
+        const urls = [...new Set(
+            deviceList
+                .map(d => d.network_device_url)
+                .filter(Boolean)
+        )];
+
+        // Solo fetchear URLs que aun no estan resueltas
+        const newUrls = urls.filter(url => !networkDeviceNames[url]);
+        if (newUrls.length === 0) return;
+
+        const resolved = { ...networkDeviceNames };
+        await Promise.all(
+            newUrls.map(async (url) => {
+                try {
+                    const { data } = await api.get(url);
+                    resolved[url] = data.name || 'Desconocido';
+                } catch {
+                    resolved[url] = 'Error';
+                }
+            })
+        );
+        setNetworkDeviceNames(resolved);
     };
 
     // Actualiza el estado de los dispositivos en tiempo real via WebSocket
@@ -117,8 +146,10 @@ function DashboardPage() {
             const data = response.data.results ? response.data.results : response.data;
             const count = response.data.count || (Array.isArray(data) ? data.length : 0);
 
-            setDevices(Array.isArray(data) ? data : []);
+            const deviceList = Array.isArray(data) ? data : [];
+            setDevices(deviceList);
             setTotalPages(Math.ceil(count / pageSize));
+            resolveNetworkDeviceNames(deviceList);
 
         } catch (err) {
             setNotification({ open: true, message: 'Error al cargar los Equipos', severity: 'error' });
@@ -230,6 +261,7 @@ function DashboardPage() {
                             key={device.id}
                             device={device}
                             screenshot={screenshots[device.mac] || null}
+                            networkDeviceNames={networkDeviceNames}
                             onShutdown={handleShutdown}
                             onBlockInternet={handleBlockInternet}
                             onUnblockInternet={handleUnblockInternet}

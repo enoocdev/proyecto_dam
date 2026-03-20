@@ -134,6 +134,18 @@
     font-size: 14px !important;
 }
 
+/* Switch / Router conectado */
+.badge--switch {
+    background-color: rgba(139, 92, 246, 0.12) !important;
+    color: #a78bfa !important;
+    border: 1px solid rgba(139, 92, 246, 0.25) !important;
+}
+
+.badge--switch .badge-icon {
+    color: #a78bfa !important;
+    font-size: 14px !important;
+}
+
 @keyframes pulse-dot {
     0%, 100% { opacity: 1; }
     50% { opacity: 0.4; }

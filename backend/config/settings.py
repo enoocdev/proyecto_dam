@@ -165,3 +165,6 @@ CHANNEL_LAYERS = {
         },
     },
 }
+
+# IP del host autorizado que siempre tendra acceso a internet
+MIKROTIK_ALLOWED_HOST = os.getenv('MIKROTIK_ALLOWED_HOST', '192.168.1.1')

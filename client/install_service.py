@@ -1,18 +1,6 @@
-#!/usr/bin/env python3
-# ================================================================
 # Instalador del cliente como tarea automatica del sistema
-#
-# Windows: Tarea Programada (Task Scheduler)
-#   - Corre bajo el usuario actual (NO bajo SYSTEM)
-#   - Sin NSSM, sin servicios, sin problemas de permisos
-#   - Ventana de consola oculta mediante un lanzador VBS
-#   - Reinicio automatico si el proceso falla
-#   - Arranca instantaneamente al iniciar sesion
-#
+# Windows: Tarea Programada Task Scheduler
 # Linux: Servicio systemd
-#   - Requiere sudo
-#   - Reinicio automatico si el proceso falla
-# ================================================================
 import os
 import platform
 import subprocess
@@ -20,7 +8,7 @@ import sys
 import time
 from pathlib import Path
 
-# ── Constantes ─────────────────────────────────────────────────
+# Constantes
 
 TASK_NAME = "ProyectoDAMClient"
 DISPLAY_NAME = "Proyecto DAM - Cliente de dispositivo"
@@ -41,8 +29,6 @@ SYSTEMD_SERVICE = TASK_NAME.lower()
 SYSTEMD_UNIT_PATH = Path(f"/etc/systemd/system/{SYSTEMD_SERVICE}.service")
 SERVICE_LOG = CLIENT_DIR / "service_wrapper.log"
 
-
-# ── Utilidades comunes ─────────────────────────────────────────
 
 def _get_python_exe() -> str:
     """Obtiene la ruta del interprete Python priorizando el venv."""
@@ -84,8 +70,6 @@ def _bootstrap_pip(venv_python: str):
         return  # pip ya existe, todo bien
 
     print("  [WARN] pip no esta disponible en el venv, bootstrapping...")
-
-    # --- Intento 1: ensurepip ---
     print("  Intentando ensurepip...")
     r = subprocess.run(
         [venv_python, "-m", "ensurepip", "--upgrade"],
@@ -94,8 +78,6 @@ def _bootstrap_pip(venv_python: str):
     if r.returncode == 0 and _has_pip(venv_python):
         print("  [OK] pip instalado via ensurepip.")
         return
-
-    # --- Intento 2: descargar get-pip.py ---
     print("  ensurepip no disponible. Descargando get-pip.py...")
     get_pip_path = CLIENT_DIR / "_get-pip.py"
     try:
@@ -148,7 +130,7 @@ def _ensure_venv() -> str:
     else:
         venv_python = venv_dir / "bin" / "python"
 
-    # --- Crear venv si no existe ---
+    # Crear venv si no existe
     if not venv_python.exists():
         print("  Creando entorno virtual (.venv)...")
         result = subprocess.run(
@@ -179,11 +161,11 @@ def _ensure_venv() -> str:
     else:
         print(f"  [OK] Entorno virtual ya existe: {venv_dir}")
 
-    # --- En Linux, asegurar que pip esta en el venv ---
+    # En Linux, asegurar que pip esta en el venv
     if platform.system() != "Windows":
         _bootstrap_pip(str(venv_python))
 
-    # --- Instalar/actualizar dependencias siempre ---
+    # Instalar/actualizar dependencias siempre
     reqs = CLIENT_DIR / "requirements.txt"
     if reqs.exists():
         # Comprobar si ya estan instaladas para no repetir
@@ -275,7 +257,7 @@ def is_admin() -> bool:
 PYTHON_EXE = _get_python_exe()
 
 
-# ── Windows: Tarea Programada (Task Scheduler) ────────────────
+# Windows: Tarea Programada Task Scheduler
 
 def _create_launcher_vbs(python_exe: str) -> Path:
     """Crea un script VBS que ejecuta el cliente sin ventana de consola.
@@ -390,7 +372,7 @@ def install_windows():
     print(f"  Script: {CLIENT_SCRIPT}")
     print()
 
-    # 2. Crear lanzador VBS (oculta ventana de consola)
+    # 2. Crear lanzador VBS
     print("  Creando lanzador sin ventana de consola...")
     _create_launcher_vbs(PYTHON_EXE)
     print(f"  [OK] {LAUNCHER_VBS}")
@@ -506,7 +488,7 @@ def status_windows():
     print()
 
 
-# ── Linux: systemd ─────────────────────────────────────────────
+# Linux: systemd
 
 def install_linux():
     """Crea e inicia un servicio systemd en Linux.
@@ -525,27 +507,36 @@ def install_linux():
     print(f"Instalando servicio systemd '{SYSTEMD_SERVICE}'...")
     print()
 
-    # 1. Preparar entorno virtual e instalar dependencias
+    # Preparar entorno virtual e instalar dependencias
     print("  Preparando entorno virtual...")
     PYTHON_EXE = _ensure_venv()
     _verify_python(PYTHON_EXE)
     _verify_deps(PYTHON_EXE)
 
-    # 2. Determinar usuario y home
+    # 2. Determinar usuario, home y UID
     user = os.environ.get("SUDO_USER", "root")
     group = user
-    # Obtener el HOME real del usuario (no el de root con sudo)
+    # Obtener HOME real y UID del usuario
     try:
         import pwd
-        user_home = pwd.getpwnam(user).pw_dir
+        _pw = pwd.getpwnam(user)
+        user_home = _pw.pw_dir
+        user_uid = _pw.pw_uid
     except (KeyError, ImportError):
         user_home = os.path.expanduser(f"~{user}")
+        user_uid = int(os.environ.get("SUDO_UID", "1000"))
 
-    # 3. Rutas del venv para las variables de entorno del servicio
+    # Rutas del venv para las variables de entorno del servicio
     venv_dir = CLIENT_DIR / ".venv"
     venv_bin = venv_dir / "bin"
 
-    # 4. Crear los ficheros de log antes de arrancar (systemd append: los necesita)
+    # Detectar variables de sesion grafica para capturas de pantalla
+    # Con sudo, las variables del usuario original suelen estar disponibles
+    # Si no, usamos valores por defecto
+    display = os.environ.get("DISPLAY", ":0")
+    xauthority = os.environ.get("XAUTHORITY", f"{user_home}/.Xauthority")
+    xdg_runtime_dir = os.environ.get("XDG_RUNTIME_DIR", f"/run/user/{user_uid}")
+
     for log_file in (SERVICE_LOG, CLIENT_LOG):
         log_file.touch(exist_ok=True)
         # Asegurar que el usuario del servicio puede escribir
@@ -554,13 +545,13 @@ def install_linux():
             capture_output=True,
         )
 
-    # 5. Asegurar permisos del directorio del cliente
+    # Asegurar permisos del directorio del cliente
     subprocess.run(
         ["chown", "-R", f"{user}:{group}", str(CLIENT_DIR)],
         capture_output=True,
     )
 
-    # 6. Generar el unit de systemd
+    # Generar el unit de systemd
     service_content = f"""[Unit]
 Description={DISPLAY_NAME}
 After=network-online.target
@@ -585,13 +576,44 @@ Environment=VIRTUAL_ENV={venv_dir}
 Environment=PATH={venv_bin}:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 Environment=HOME={user_home}
 
+# Variables de sesion grafica (capturas de pantalla con mss)
+Environment=DISPLAY={display}
+Environment=XAUTHORITY={xauthority}
+Environment=XDG_RUNTIME_DIR={xdg_runtime_dir}
+
 [Install]
 WantedBy=multi-user.target
 """
     SYSTEMD_UNIT_PATH.write_text(service_content, encoding="utf-8")
     print(f"  [OK] Unidad systemd creada: {SYSTEMD_UNIT_PATH}")
 
-    # 7. Recargar systemd, habilitar y arrancar
+    # Configurar polkit para autorizar apagado remoto.
+    polkit_rules_dir = Path("/etc/polkit-1/rules.d")
+    polkit_rule_file = polkit_rules_dir / f"50-{SYSTEMD_SERVICE}.rules"
+    polkit_rule_content = (
+        f'// Permite al servicio {SYSTEMD_SERVICE} apagar el equipo remotamente.\n'
+        f'// Solo autoriza power-off/reboot, NO da acceso root.\n'
+        f'polkit.addRule(function(action, subject) {{\n'
+        f'    if ((action.id === "org.freedesktop.login1.power-off" ||\n'
+        f'         action.id === "org.freedesktop.login1.power-off-multiple-sessions" ||\n'
+        f'         action.id === "org.freedesktop.login1.power-off-ignore-inhibit") &&\n'
+        f'        subject.user === "{user}") {{\n'
+        f'        return polkit.Result.YES;\n'
+        f'    }}\n'
+        f'}});\n'
+    )
+    try:
+        if polkit_rules_dir.exists():
+            polkit_rule_file.write_text(polkit_rule_content, encoding="utf-8")
+            polkit_rule_file.chmod(0o644)
+            print(f"  [OK] Polkit configurado para apagado remoto: {polkit_rule_file}")
+        else:
+            print("  [WARN] /etc/polkit-1/rules.d no existe. Apagado remoto podria requerir configuracion manual.")
+    except Exception as e:
+        print(f"  [WARN] No se pudo configurar polkit: {e}")
+        print("         El apagado remoto podria no funcionar.")
+
+    # Recargar systemd, habilitar y arrancar
     subprocess.run(["systemctl", "daemon-reload"], check=True)
     subprocess.run(["systemctl", "enable", SYSTEMD_SERVICE], check=True)
 
@@ -620,7 +642,7 @@ WantedBy=multi-user.target
         )
         sys.exit(1)
 
-    # 8. Verificar que el servicio sigue activo tras unos segundos
+    # Verificar que el servicio sigue activo tras unos segundos
     print("  Esperando 3 segundos para verificar estabilidad...")
     time.sleep(3)
 
@@ -674,7 +696,19 @@ def remove_linux():
         capture_output=True,
     )
 
-    # Limpiar logs del wrapper (no el log del cliente por si es util)
+    # Limpiar polkit de apagado remoto
+    polkit_rule_file = Path(f"/etc/polkit-1/rules.d/50-{SYSTEMD_SERVICE}.rules")
+    if polkit_rule_file.exists():
+        polkit_rule_file.unlink()
+        print(f"  [OK] Polkit eliminado: {polkit_rule_file}")
+
+    # Limpiar sudoers antiguo si quedaba de una version anterior
+    sudoers_file = Path(f"/etc/sudoers.d/{SYSTEMD_SERVICE}")
+    if sudoers_file.exists():
+        sudoers_file.unlink()
+        print(f"  [OK] Sudoers antiguo eliminado: {sudoers_file}")
+
+    # Limpiar logs del wrapper
     if SERVICE_LOG.exists():
         SERVICE_LOG.unlink()
         print(f"  [OK] Log del wrapper eliminado: {SERVICE_LOG}")
@@ -704,7 +738,7 @@ def status_linux():
 
     subprocess.run(["systemctl", "status", SYSTEMD_SERVICE, "--no-pager", "-l"])
 
-    # Journal de systemd (mas fiable que los ficheros de log)
+    # Journal de systemd
     print("\n[Journal systemd (ultimas 15 lineas)]")
     subprocess.run(
         ["journalctl", "-u", SYSTEMD_SERVICE, "--no-pager", "-n", "15"],
@@ -718,7 +752,7 @@ def status_linux():
     print()
 
 
-# ── Funciones comunes ──────────────────────────────────────────
+# Funciones comunes
 
 def _show_recent_logs(log_file: Path, label: str, lines: int = 15):
     """Muestra las ultimas lineas de un fichero de log."""
@@ -789,7 +823,7 @@ def test_client():
         print(f"  [ERROR] {e}")
 
 
-# ── CLI ────────────────────────────────────────────────────────
+# CLI
 
 def main():
     if len(sys.argv) < 2:

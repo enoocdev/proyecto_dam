@@ -1,7 +1,4 @@
 # Agente de monitorizacion que se instala en cada equipo
-# Se conecta al backend por WebSocket y envia informacion del sistema
-# Incluye reconexion automatica y heartbeat periodico
-# Registra toda la actividad en un fichero de log
 
 import logging
 import os
@@ -48,9 +45,9 @@ try:
     import json
     import signal
 
-    import websockets                    # noqa: E402
-    from config import load_config       # noqa: E402
-    from system_info import (            # noqa: E402
+    import websockets
+    from config import load_config
+    from system_info import (
         collect_system_info,
         get_mac_address,
         get_ip_address,
@@ -307,7 +304,39 @@ class DeviceClient:
             if system == "windows":
                 subprocess.Popen(["shutdown", "/s", "/t", "5"])
             elif system == "linux":
-                subprocess.Popen(["shutdown", "now"])
+                # Apagado via DBus → logind, autorizado por polkit.
+                # El instalador crea una regla polkit que permite SOLO
+                # la accion de apagar al usuario del servicio (sin sudo,
+                # sin acceso root, sin riesgo de escalada de privilegios).
+                shutdown_cmds = [
+                    # DBus directo a logind 
+                    ["busctl", "call", "org.freedesktop.login1",
+                     "/org/freedesktop/login1",
+                     "org.freedesktop.login1.Manager", "PowerOff", "b", "true"],
+                    # systemctl poweroff 
+                    ["systemctl", "poweroff"],
+                ]
+                apagado_ok = False
+                for cmd in shutdown_cmds:
+                    try:
+                        r = subprocess.run(
+                            cmd, capture_output=True, text=True, timeout=10,
+                        )
+                        if r.returncode == 0:
+                            logger.info("Apagado ejecutado con: %s", " ".join(cmd))
+                            apagado_ok = True
+                            break
+                        logger.warning(
+                            "Fallo %s (rc=%d): %s",
+                            " ".join(cmd), r.returncode, r.stderr.strip(),
+                        )
+                    except (FileNotFoundError, subprocess.TimeoutExpired) as e:
+                        logger.warning("No disponible %s: %s", " ".join(cmd), e)
+                if not apagado_ok:
+                    logger.error(
+                        "No se pudo apagar el equipo. Verifica que polkit "
+                        "esta configurado: sudo python install_service.py install"
+                    )
             elif system == "darwin":  # macOS inecesario
                 subprocess.Popen(["sudo", "shutdown", "-h", "now"])
             else:

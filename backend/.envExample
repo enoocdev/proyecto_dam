@@ -7,3 +7,4 @@ SECRET_KEY= secret key generada por  python
 DJANGO_SUPERUSER_USERNAME=enooc
 DJANGO_SUPERUSER_PASSWORD=Abc123..
 DJANGO_SUPERUSER_EMAIL=enooc@enooc.com // no necesario
+MIKROTIK_ALLOWED_HOST=192.168.1.1

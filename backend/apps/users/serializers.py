@@ -3,6 +3,7 @@ from django.contrib.auth.models import Permission, Group
 from rest_framework import serializers
 from django.contrib.auth import get_user_model
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
+from apps.devices.models import Classroom
 
 User = get_user_model()
 
@@ -11,16 +12,18 @@ class UserSerializer(serializers.ModelSerializer):
     password_validator = serializers.CharField(write_only=True, required=False)
     class Meta:
         model = User
-        fields = ["id", "email", "first_name", "last_name" ,"username", "password", "password_validator", "is_active", "is_staff", "groups"]
+        fields = ["id", "email", "first_name", "last_name" ,"username", "password", "password_validator", "is_active", "is_staff", "groups", "classrooms"]
         extra_kwargs = {
             'password': {'write_only': True},
-            'groups': {'required': False}, 
+            'groups': {'required': False},
+            'classrooms': {'required': False},
         }
     
     def to_representation(self, instance):
         response = super().to_representation(instance)
         
         response['groups'] = GroupSimpleSerializer(instance.groups.all(), many=True).data
+        response['classrooms'] = ClassroomSimpleSerializer(instance.classrooms.all(), many=True).data
         
         return response
 
@@ -60,9 +63,12 @@ class UserSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         password = validated_data.pop('password')
         groups_data = validated_data.pop('groups', [])
+        classrooms_data = validated_data.pop('classrooms', [])
         user = User.objects.create_user(password=password, **validated_data)
         if groups_data:
             user.groups.set(groups_data)
+        if classrooms_data:
+            user.classrooms.set(classrooms_data)
         
         return user
     
@@ -85,7 +91,18 @@ class UserSerializer(serializers.ModelSerializer):
             groups_data = validated_data.pop('groups')
             instance.groups.set(groups_data)
 
+        if 'classrooms' in validated_data:
+            classrooms_data = validated_data.pop('classrooms')
+            instance.classrooms.set(classrooms_data)
+
         return super().update(instance, validated_data)
+
+
+# Serializador simple de aulas con solo id y nombre
+class ClassroomSimpleSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Classroom
+        fields = ['id', 'name']
 
 
 # Serializador de permisos de Django para la API

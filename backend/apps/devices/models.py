@@ -1,13 +1,15 @@
 # Modelos de la aplicacion de dispositivos
 from django.db import models
+from .fields import EncryptedCharField
 
 
 # Equipo de red como un switch o router con acceso por API
+# La contrasena se almacena cifrada con Fernet en la base de datos
 class NetworkDevice(models.Model):
     name = models.CharField(max_length=50)
     ip_address = models.GenericIPAddressField(unique=True)
     username = models.CharField(max_length=50)
-    password = models.CharField(max_length=50)
+    password = EncryptedCharField(max_length=255)
     api_port = models.IntegerField(default=8728)
 
 
