@@ -27,7 +27,7 @@ import {
 } from '@mui/icons-material';
 import '../styles/UserModal.css';
 
-const UserModal = ({ open, onClose, onSave, user, availableGroups = [] }) => {
+const UserModal = ({ open, onClose, onSave, user, availableGroups = [], availableClassrooms = [] }) => {
 
     const initialFormState = {
         username: '',
@@ -38,7 +38,8 @@ const UserModal = ({ open, onClose, onSave, user, availableGroups = [] }) => {
         password_validator: '',
         is_active: true,
         is_staff: false,
-        groups: []
+        groups: [],
+        classrooms: []
     };
 
     const [formData, setFormData] = useState(initialFormState);
@@ -47,6 +48,9 @@ const UserModal = ({ open, onClose, onSave, user, availableGroups = [] }) => {
 
     const [groupMenuAnchor, setGroupMenuAnchor] = useState(null);
     const [groupSearch, setGroupSearch] = useState('');
+
+    const [classroomMenuAnchor, setClassroomMenuAnchor] = useState(null);
+    const [classroomSearch, setClassroomSearch] = useState('');
 
     const isEditMode = Boolean(user);
 
@@ -62,7 +66,8 @@ const UserModal = ({ open, onClose, onSave, user, availableGroups = [] }) => {
                     password_validator: '',
                     is_active: user.is_active ?? true,
                     is_staff: user.is_staff || false,
-                    groups: user.groups || []
+                    groups: user.groups || [],
+                    classrooms: user.classrooms || []
                 });
             } else {
                 setFormData(initialFormState);
@@ -70,6 +75,7 @@ const UserModal = ({ open, onClose, onSave, user, availableGroups = [] }) => {
             setShowPassword(false);
             setPasswordError('');
             setGroupSearch('');
+            setClassroomSearch('');
         }
     }, [user, open, isEditMode]);
 
@@ -117,6 +123,38 @@ const UserModal = ({ open, onClose, onSave, user, availableGroups = [] }) => {
         group.name.toLowerCase().includes(groupSearch.toLowerCase())
     );
 
+    // --- Aulas ---
+    const handleOpenClassroomMenu = (event) => {
+        setClassroomMenuAnchor(event.target);
+    };
+
+    const handleCloseClassroomMenu = () => {
+        setClassroomMenuAnchor(null);
+        setClassroomSearch('');
+    };
+
+    const handleAddClassroom = (classroomToAdd) => {
+        if (!formData.classrooms.some(c => c.id === classroomToAdd.id)) {
+            setFormData(prev => ({
+                ...prev,
+                classrooms: [...prev.classrooms, classroomToAdd]
+            }));
+        }
+        handleCloseClassroomMenu();
+    };
+
+    const handleRemoveClassroom = (classroomIdToDelete) => {
+        setFormData(prev => ({
+            ...prev,
+            classrooms: prev.classrooms.filter(c => c.id !== classroomIdToDelete)
+        }));
+    };
+
+    const filteredAvailableClassrooms = availableClassrooms.filter(classroom =>
+        !formData.classrooms.some(selected => selected.id === classroom.id) &&
+        classroom.name.toLowerCase().includes(classroomSearch.toLowerCase())
+    );
+
 
     // Valida las contrasenas antes de guardar
     const handleSave = () => {
@@ -143,6 +181,7 @@ const UserModal = ({ open, onClose, onSave, user, availableGroups = [] }) => {
             is_active: formData.is_active,
             is_staff: formData.is_staff,
             groups: formData.groups.map(g => g.id),
+            classrooms: formData.classrooms.map(c => c.id),
         };
 
         // Solo incluye contrasena si se esta modificando
@@ -356,6 +395,72 @@ const UserModal = ({ open, onClose, onSave, user, availableGroups = [] }) => {
                                 ) : (
                                     <MenuItem disabled className="dark-menu-item">
                                         No hay más grupos
+                                    </MenuItem>
+                                )}
+                            </Box>
+                        </Menu>
+                    </Box>
+
+                    {/* Seccion de asignacion de aulas al usuario */}
+                    <Box className="groups-section">
+                        <Typography variant="caption" className="section-label">
+                            AULAS
+                        </Typography>
+
+                        <Box className="chips-container">
+                            {formData.classrooms.map((classroom) => (
+                                <Chip
+                                    key={classroom.id}
+                                    label={classroom.name}
+                                    onDelete={() => handleRemoveClassroom(classroom.id)}
+                                    className="permission-chip"
+                                    deleteIcon={<Close style={{ color: 'var(--accent-light)', fontSize: 16 }} />}
+                                />
+                            ))}
+
+                            <IconButton
+                                onClick={handleOpenClassroomMenu}
+                                className="add-button"
+                                size="small"
+                            >
+                                <AddCircleOutline />
+                            </IconButton>
+                        </Box>
+
+                        <Menu
+                            anchorEl={classroomMenuAnchor}
+                            open={Boolean(classroomMenuAnchor)}
+                            onClose={handleCloseClassroomMenu}
+                            classes={{ paper: 'dark-menu-paper' }}
+                            anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
+                            transformOrigin={{ vertical: 'top', horizontal: 'left' }}
+                        >
+                            <Box className="menu-search-box">
+                                <Search className="search-icon" />
+                                <input
+                                    type="text"
+                                    placeholder="Buscar aula..."
+                                    className="menu-search-input"
+                                    value={classroomSearch}
+                                    onChange={(e) => setClassroomSearch(e.target.value)}
+                                    autoFocus
+                                />
+                            </Box>
+
+                            <Box className="menu-items-scroll">
+                                {filteredAvailableClassrooms.length > 0 ? (
+                                    filteredAvailableClassrooms.map((classroom) => (
+                                        <MenuItem
+                                            key={classroom.id}
+                                            onClick={() => handleAddClassroom(classroom)}
+                                            className="dark-menu-item"
+                                        >
+                                            <span className="bullet-point">•</span> {classroom.name}
+                                        </MenuItem>
+                                    ))
+                                ) : (
+                                    <MenuItem disabled className="dark-menu-item">
+                                        No hay más aulas
                                     </MenuItem>
                                 )}
                             </Box>

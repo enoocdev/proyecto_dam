@@ -16,6 +16,7 @@ class NetworkDevice(models.Model):
 # Aula que agrupa dispositivos
 class Classroom(models.Model):
     name = models.CharField(unique=True)
+    is_internet_blocked = models.BooleanField(default=False)
     
     def __str__(self):
         return self.name
@@ -38,6 +39,16 @@ class Device(models.Model):
 
     def __str__(self):
         return  f'hostname = {self.hostname} , mac = {self.mac}'
+
+
+# Hosts permitidos que siempre seran accesibles aunque se corte internet
+# Cuando se bloquea un puerto se crean reglas accept para cada uno de estos
+class AllowedHost(models.Model):
+    ip_address = models.GenericIPAddressField(unique=True)
+    name = models.CharField(max_length=100, blank=True)
+
+    def __str__(self):
+        return f"{self.name} ({self.ip_address})" if self.name else str(self.ip_address)
 
 
 # Modelo para registrar logs de actividad

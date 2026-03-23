@@ -29,11 +29,12 @@ import api from "../api";
 import '../styles/Users.css'; 
 import UserCard from '../components/UserCard';
 import UserModal from '../components/UserModal';
-import { API_PATH_USERS, API_PATH_USER_GROUPS_WITHOUT_PAGINATION } from '../constants';
+import { API_PATH_USERS, API_PATH_USER_GROUPS_WITHOUT_PAGINATION, API_PATH_CLASSROOMS_WITHOUT_PAGINATION } from '../constants';
 
 const Users = () => {
     const [users, setUsers] = useState([]);
     const [allUserGroups, setAllUserGroups] = useState([]);
+    const [allClassrooms, setAllClassrooms] = useState([]);
     const [loading, setLoading] = useState(false);
     const [searchTerm, setSearchTerm] = useState("");
     const [notification, setNotification] = useState({ open: false, message: '', severity: 'success' });
@@ -79,6 +80,17 @@ const Users = () => {
         }
     };
 
+    const fetchClassrooms = async () => {
+        try {
+            const { data, status } = await api.get(API_PATH_CLASSROOMS_WITHOUT_PAGINATION);
+            if (status === 200) {
+                setAllClassrooms(Array.isArray(data) ? data : []);
+            }
+        } catch (err) {
+            setNotification({ open: true, message: 'Error al cargar las aulas', severity: 'warning' });
+        }
+    };
+
     useEffect(() => {
         
     }, []);
@@ -86,6 +98,7 @@ const Users = () => {
 
     useEffect(() => {
         fetchUserGroups();
+        fetchClassrooms();
         fetchUsers();
 
     }, [page]);
@@ -226,6 +239,7 @@ const Users = () => {
                 user={selectedUser}
                 onClose={handleCloseModal}
                 availableGroups={allUserGroups}
+                availableClassrooms={allClassrooms}
             />
         
 

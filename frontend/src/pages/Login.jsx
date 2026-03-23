@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import api from "../api";
 import { ACCESS_TOKEN, REFRESH_TOKEN , USER_PERMISSIONS} from "../constants";
+import { setUserClassrooms } from '../stores/userClassroomsStore';
 
 import { TextField, Button, Alert, CircularProgress, Typography } from "@mui/material";
 import "../styles/Login.css";
@@ -36,6 +37,7 @@ function Login() {
                 
             }
             localStorage.setItem(USER_PERMISSIONS, JSON.stringify(userData))
+            setUserClassrooms(res.data.classrooms || []);
             navigate("/");
         } catch (err) {
             if (err.response && err.response.status === 401) {

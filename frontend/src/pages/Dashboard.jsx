@@ -12,7 +12,9 @@ import DeviceCard from "../components/DeviceCard";
 import useDashboardSocket from "../hooks/useDashboardSocket";
 import { useStore } from "@nanostores/react";
 import { $screenshots } from "../stores/screenshotStore";
+import { $userClassrooms } from "../stores/userClassroomsStore";
 import "../styles/Dashboard.css";
+import useAuth from '../hooks/useAuth';
 
 import {API_PATH_DEVICES, API_PATH_CLASSROOMS_WITHOUT_PAGINATION} from '../constants';
 import {
@@ -42,6 +44,10 @@ function DashboardPage() {
     // Capturas de pantalla persistidas en sessionStorage via nanostores
     const screenshots = useStore($screenshots);
 
+    // Aulas asignadas al usuario actual (persistidas en nanostore)
+    const userClassrooms = useStore($userClassrooms);
+    const { isSuperuser } = useAuth();
+
 
     useEffect(() => {
         fetchClassrooms();
@@ -54,8 +60,15 @@ function DashboardPage() {
     const fetchClassrooms = async () => {
         try {
             const response = await api.get(API_PATH_CLASSROOMS_WITHOUT_PAGINATION);
-            const data = Array.isArray(response.data) ? response.data : [];
-            setClassrooms(data);
+            const allData = Array.isArray(response.data) ? response.data : [];
+
+            // Superusuarios ven todas las aulas, el resto solo las asignadas
+            if (isSuperuser) {
+                setClassrooms(allData);
+            } else {
+                const assignedIds = (userClassrooms || []).map(c => c.id);
+                setClassrooms(allData.filter(c => assignedIds.includes(c.id)));
+            }
         } catch (err) {
             setNotification({ open: true, message: 'Error al cargar las Aulas', severity: 'error' });
         }
@@ -169,27 +182,19 @@ function DashboardPage() {
         }
     };
 
-    const handleBlockInternet = async (device) => {
+    const handleToggleInternet = async (device) => {
+        const action = device.is_internet_blocked ? 'desbloquear' : 'bloquear';
         try {
-            // await api.post(`${API_PATH_DEVICES}${device.id}/block-internet/`);
+            console.log(`[Dashboard] POST ${API_PATH_DEVICES}${device.id}/toggle-internet/ - ${action} internet a "${device.hostname}" (MAC: ${device.mac})`);
+            const response = await api.post(`${API_PATH_DEVICES}${device.id}/toggle-internet/`);
+            const willBlock = !device.is_internet_blocked;
             setDevices((prev) =>
-                prev.map((d) => d.id === device.id ? { ...d, is_internet_blocked: true } : d)
+                prev.map((d) => d.id === device.id ? { ...d,is_online: true ,is_internet_blocked: willBlock } : d)
             );
-            setNotification({ open: true, message: `Conexión cortada a ${device.hostname}`, severity: 'success' });
-        } catch {
-            setNotification({ open: true, message: `Error al cortar conexión de ${device.hostname}`, severity: 'error' });
-        }
-    };
-
-    const handleUnblockInternet = async (device) => {
-        try {
-            // await api.post(`${API_PATH_DEVICES}${device.id}/unblock-internet/`);
-            setDevices((prev) =>
-                prev.map((d) => d.id === device.id ? { ...d, is_internet_blocked: false } : d)
-            );
-            setNotification({ open: true, message: `Conexión restaurada a ${device.hostname}`, severity: 'success' });
-        } catch {
-            setNotification({ open: true, message: `Error al restaurar conexión de ${device.hostname}`, severity: 'error' });
+            setNotification({ open: true, message: response.data?.detail || `Internet ${willBlock ? 'bloqueado' : 'desbloqueado'} para ${device.hostname}`, severity: 'success' });
+        } catch (err) {
+            const detail = err.response?.data?.detail || `Error al ${action} internet de ${device.hostname}`;
+            setNotification({ open: true, message: detail, severity: 'error' });
         }
     };
 
@@ -263,8 +268,7 @@ function DashboardPage() {
                             screenshot={screenshots[device.mac] || null}
                             networkDeviceNames={networkDeviceNames}
                             onShutdown={handleShutdown}
-                            onBlockInternet={handleBlockInternet}
-                            onUnblockInternet={handleUnblockInternet}
+                            onToggleInternet={handleToggleInternet}
                             onDelete={handleOpenDeleteDialog}
                         />
                     ))}

@@ -11,6 +11,7 @@ import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import BoltIcon from '@mui/icons-material/Bolt';
 import SecurityIcon from '@mui/icons-material/Security';
+import MeetingRoomIcon from '@mui/icons-material/MeetingRoom';
 
 
 const UserCard = ({ user, onEdit, onDelete }) => {
@@ -68,7 +69,13 @@ const UserCard = ({ user, onEdit, onDelete }) => {
                     </div>
                 ))}
 
-                {!user.is_superuser && !user.is_staff && (!user.groups || user.groups.length === 0) && (
+                {user.classrooms && user.classrooms.map((classroom, index) => (
+                    <div key={`classroom-${index}`} className="role-chip" style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                        <MeetingRoomIcon sx={{ fontSize: 14 }} /> {classroom.name || classroom}
+                    </div>
+                ))}
+
+                {!user.is_superuser && !user.is_staff && (!user.groups || user.groups.length === 0) && (!user.classrooms || user.classrooms.length === 0) && (
                     <span style={{ fontSize: '0.8rem', color: 'var(--text-dim)' }}>Usuario estándar</span>
                 )}
             </div>

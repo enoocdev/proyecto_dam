@@ -146,6 +146,7 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
         
         token['is_staff'] = user.is_staff
         token['is_superuser'] = user.is_superuser
+        token['classrooms'] = list(user.classrooms.values_list('id', flat=True))
         return token
 
     def validate(self, attrs):
@@ -154,6 +155,6 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
         data['is_superuser'] = self.user.is_superuser
         data['is_staff'] = self.user.is_staff
         data['permissions'] = list(self.user.get_all_permissions())
-        
+        data['classrooms'] = list(self.user.classrooms.values('id', 'name'))
 
         return data

@@ -1,6 +1,6 @@
 # Serializadores de la API REST para dispositivos aulas y equipos de red
 from rest_framework import serializers
-from .models import Device, Classroom, NetworkDevice
+from .models import Device, Classroom, NetworkDevice, AllowedHost
 
 # Serializador de aulas con gestion de asignacion de dispositivos
 class ClassroomSerializer(serializers.ModelSerializer):
@@ -18,7 +18,10 @@ class ClassroomSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Classroom
-        fields = ["url", 'id', 'name', 'devices']
+        fields = ["url", 'id', 'name', 'devices', 'is_internet_blocked']
+        extra_kwargs = {
+            'is_internet_blocked': {'read_only': True},
+        }
 
     def create(self, validated_data):
         devices = validated_data.pop('device_set', [])
@@ -102,10 +105,12 @@ class DeviceSerializer(serializers.ModelSerializer):
 class ClassRoomSimpleSerializer(serializers.ModelSerializer):
     class Meta:
         model = Classroom
-        fields = ['id', 'name']
+        fields = ['id', 'name', 'is_internet_blocked']
 
 
 # Serializador para peticiones de bloqueo de internet
 # Acepta opcionalmente la IP del host al que se permite el acceso
-class BlockInternetSerializer(serializers.Serializer):
-    allowed_host = serializers.IPAddressField(required=False)
+class AllowedHostSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = AllowedHost
+        fields = ['id', 'ip_address', 'name']

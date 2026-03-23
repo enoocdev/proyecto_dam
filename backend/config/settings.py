@@ -66,13 +66,13 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    "corsheaders.middleware.CorsMiddleware"
 ]
 
 ROOT_URLCONF = 'config.urls'
@@ -147,7 +147,7 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # Configuracion de CORS para permitir conexiones desde el frontend
 CORS_ALLOW_ALL_ORIGINS = True
-CORS_ALLOWS_CREDENTIALS = True
+CORS_ALLOW_CREDENTIALS = True
 CORS_EXPOSE_HEADERS = ['Allow', 'Content-Type']
 
 # Configuracion de Channel Layers con Redis para WebSockets en tiempo real
@@ -166,5 +166,3 @@ CHANNEL_LAYERS = {
     },
 }
 
-# IP del host autorizado que siempre tendra acceso a internet
-MIKROTIK_ALLOWED_HOST = os.getenv('MIKROTIK_ALLOWED_HOST', '192.168.1.1')

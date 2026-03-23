@@ -19,6 +19,7 @@ import SchoolIcon from '@mui/icons-material/School';
 import RouterIcon from '@mui/icons-material/Router';
 import PeopleIcon from '@mui/icons-material/People';
 import GroupsIcon from '@mui/icons-material/Groups';
+import DnsIcon from '@mui/icons-material/Dns';
 import LightModeIcon from '@mui/icons-material/LightMode';
 import DarkModeIcon from '@mui/icons-material/DarkMode';
 
@@ -36,6 +37,7 @@ function MainLayout() {
         { text: "Dashboard", icon: <DashboardIcon />, path: "/", requiredPermission: "view_device" },
         { text: "Classroom", icon: <SchoolIcon />, path: "/classroom", requiredPermission: "view_classroom" },
         { text: "Switchs / routers", icon: <RouterIcon />, path: "/network-device", requiredPermission: "view_networkdevice" },
+        { text: "Hosts Permitidos", icon: <DnsIcon />, path: "/allowed-hosts", requiredPermission: "view_allowedhost" },
         { text: "Usuarios", icon: <PeopleIcon />, path: "/users", requiredPermission: "view_user", requireStaff: true },
         { text: "Grupos", icon: <GroupsIcon />, path: "/users-groups", requiredPermission: "view_group", requireStaff: true },
     ];

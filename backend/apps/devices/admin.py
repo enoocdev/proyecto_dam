@@ -1,5 +1,6 @@
-# Registro del modelo Device en el panel de administracion de Django
+# Registro de modelos en el panel de administracion de Django
 from django.contrib import admin
-from .models import Device
+from .models import Device, AllowedHost
 
 admin.site.register(Device)
+admin.site.register(AllowedHost)

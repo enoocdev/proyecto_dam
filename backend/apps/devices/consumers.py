@@ -148,18 +148,18 @@ class AgentConsumer(AsyncJsonWebsocketConsumer):
             device.hostname = hostname
         device.is_online = True
 
-        # Auto-asigna el equipo de red y el puerto del switch si no tiene uno asignado
-        if not device.connected_device:
-            try:
-                network_device, switch_port = mikrotik_service.find_device_network_info(mac)
-                if network_device:
-                    device.connected_device = network_device
-                    if switch_port:
-                        device.switch_port = switch_port
-            except Exception as exc:
-                logger.warning(
-                    "No se pudo auto-asignar switch para mac=%s: %s", mac, exc,
-                )
+        # Siempre intenta detectar o actualizar el equipo de red y el puerto fisico
+        # para que si se cambia un dispositivo de boca de red se actualice automaticamente
+        try:
+            network_device, switch_port = mikrotik_service.find_device_network_info(mac)
+            if network_device:
+                device.connected_device = network_device
+                if switch_port:
+                    device.switch_port = switch_port
+        except Exception as exc:
+            logger.warning(
+                "No se pudo auto-asignar switch para mac=%s: %s", mac, exc,
+            )
 
         device.save()
         return self._device_to_dict(device)

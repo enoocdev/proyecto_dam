@@ -12,10 +12,11 @@ from rest_framework.response import Response
 from .consumers import agent_group_name, DASHBOARD_GROUP
 from . import mikrotik_service
 from .mikrotik_service import MikrotikError
-from .models import Device, Classroom, NetworkDevice
+from librouteros.exceptions import TrapError
+from .models import Device, Classroom, NetworkDevice, AllowedHost
 from .serializer import (
     DeviceSerializer, ClassroomSerializer, NetworkDeviceSerializer,
-    ClassRoomSimpleSerializer, BlockInternetSerializer,
+    ClassRoomSimpleSerializer, AllowedHostSerializer,
 )
 from .permissions import StrictDjangoModelPermissions
 
@@ -74,7 +75,7 @@ class DevicesViewSet(viewsets.ModelViewSet):
 
     # POST /devices/{id}/toggle-internet/
     # Alterna el estado de internet del dispositivo en el router MikroTik
-    # Si esta bloqueado lo desbloquea y viceversa
+    # El bloqueo se aplica por PUERTO FISICO no por IP
     @action(detail=True, methods=["post"], url_path="toggle-internet")
     def toggle_internet(self, request, pk=None):
         device = self.get_object()
@@ -85,27 +86,28 @@ class DevicesViewSet(viewsets.ModelViewSet):
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
+        if not device.switch_port or device.switch_port.strip() == "":
+            return Response(
+                {"detail": "El dispositivo no tiene un puerto de red asignado. Espere a que se detecte automaticamente."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
         # Decide si bloquear o desbloquear segun el estado actual
         will_block = not device.is_internet_blocked
 
         try:
             if will_block:
-                serializer = BlockInternetSerializer(data=request.data)
-                serializer.is_valid(raise_exception=True)
-                allowed_host = serializer.validated_data.get("allowed_host")
-
                 mikrotik_service.block_device_internet(
                     network_device=device.connected_device,
-                    device_ip=str(device.ip),
+                    switch_port=device.switch_port,
                     device_id=device.id,
-                    allowed_host=str(allowed_host) if allowed_host else None,
                 )
             else:
                 mikrotik_service.unblock_device_internet(
                     network_device=device.connected_device,
                     device_id=device.id,
                 )
-        except MikrotikError as e:
+        except (MikrotikError, TrapError) as e:
             logger.error(
                 "Error MikroTik al %s internet device_id=%s: %s",
                 "bloquear" if will_block else "desbloquear", device.id, e,
@@ -136,6 +138,8 @@ class DevicesViewSet(viewsets.ModelViewSet):
                         "is_online": device.is_online,
                         "is_internet_blocked": device.is_internet_blocked,
                         "classroom_id": device.classroom_id,
+                        "connected_device_id": device.connected_device_id,
+                        "switch_port": device.switch_port,
                     },
                     "timestamp": datetime.now().isoformat(),
                 },
@@ -154,49 +158,56 @@ class DevicesViewSet(viewsets.ModelViewSet):
         )
 
 # CRUD de equipos de red como switches y routers
-# Incluye acciones para gestionar el bloqueo global de internet
 class NetworkDevicViewSet(viewsets.ModelViewSet):
     queryset = NetworkDevice.objects.all()
     permission_classes = [StrictDjangoModelPermissions, IsAuthenticated]
     serializer_class = NetworkDeviceSerializer
 
-    # POST /network-device/{id}/toggle-global-internet/
-    # Alterna el bloqueo global de internet en el router
+# CRUD de aulas con paginacion
+# Incluye accion para gestionar el bloqueo de internet por aula
+class ClassroomViewSet(viewsets.ModelViewSet):
+    queryset = Classroom.objects.all().order_by("id")
+    permission_classes = [StrictDjangoModelPermissions, IsAuthenticated ]
+    serializer_class = ClassroomSerializer
+
+    # POST /classroom/{id}/toggle-global-internet/
+    # Alterna el bloqueo de internet para todos los dispositivos del aula
     @action(detail=True, methods=["post"], url_path="toggle-global-internet")
     def toggle_global_internet(self, request, pk=None):
-        network_device = self.get_object()
+        classroom = self.get_object()
 
-        # Comprueba si ya existe un bloqueo global activo en el router
-        will_block = not mikrotik_service.is_global_block_active(network_device)
+        # Decide si bloquear o desbloquear segun el estado actual del aula
+        will_block = not classroom.is_internet_blocked
 
         try:
             if will_block:
-                serializer = BlockInternetSerializer(data=request.data)
-                serializer.is_valid(raise_exception=True)
-                allowed_host = serializer.validated_data.get("allowed_host")
-
-                mikrotik_service.global_block_internet(
-                    network_device=network_device,
-                    allowed_host=str(allowed_host) if allowed_host else None,
+                mikrotik_service.classroom_block_internet(
+                    classroom_id=classroom.id,
                 )
             else:
-                mikrotik_service.global_unblock_internet(
-                    network_device=network_device,
+                mikrotik_service.classroom_unblock_internet(
+                    classroom_id=classroom.id,
                 )
-        except MikrotikError as e:
+        except (MikrotikError, TrapError) as e:
             logger.error(
-                "Error MikroTik al %s bloqueo global en %s: %s",
-                "activar" if will_block else "desactivar",
-                network_device.ip_address, e,
+                "Error MikroTik al %s internet del aula %s: %s",
+                "bloquear" if will_block else "desbloquear",
+                classroom.name, e,
             )
             return Response(
                 {"detail": str(e)},
                 status=status.HTTP_502_BAD_GATEWAY,
             )
 
-        event = "global_block" if will_block else "global_unblock"
+        classroom.is_internet_blocked = will_block
+        classroom.save()
 
-        # Notifica al dashboard del cambio de bloqueo global
+        # Actualiza tambien el estado de cada dispositivo del aula
+        classroom.device_set.update(is_internet_blocked=will_block)
+
+        event = "classroom_block" if will_block else "classroom_unblock"
+
+        # Notifica al dashboard del cambio de bloqueo del aula
         channel_layer = get_channel_layer()
         async_to_sync(channel_layer.group_send)(
             DASHBOARD_GROUP,
@@ -204,34 +215,38 @@ class NetworkDevicViewSet(viewsets.ModelViewSet):
                 "type": "device.status",
                 "payload": {
                     "event": event,
-                    "network_device_id": network_device.id,
+                    "classroom_id": classroom.id,
+                    "is_internet_blocked": will_block,
                     "timestamp": datetime.now().isoformat(),
                 },
             },
         )
 
-        action_text = "activado" if will_block else "desactivado"
+        action_text = "bloqueado" if will_block else "desbloqueado"
         logger.info(
-            "Bloqueo global %s en %s por usuario %s",
-            action_text, network_device.ip_address, request.user,
+            "Internet %s para aula %s por usuario %s",
+            action_text, classroom.name, request.user,
         )
 
         return Response(
-            {"detail": f"Bloqueo global de internet {action_text}."},
+            {"detail": f"Internet {action_text} para el aula {classroom.name}."},
             status=status.HTTP_200_OK,
         )
-
-# CRUD de aulas con paginacion
-class ClassroomViewSet(viewsets.ModelViewSet):
-    queryset = Classroom.objects.all().order_by("id")
-    permission_classes = [StrictDjangoModelPermissions, IsAuthenticated ]
-    serializer_class = ClassroomSerializer
 
 # Listado de aulas de solo lectura sin paginacion para selectores del frontend
 class ReadOnlyClassRoomWithoutPagination(viewsets.ReadOnlyModelViewSet):
     queryset = Classroom.objects.all().order_by("id")
     serializer_class = ClassRoomSimpleSerializer
     permission_classes = [StrictDjangoModelPermissions, IsAuthenticated]
+    pagination_class = None
+
+
+# CRUD de hosts permitidos que no se aislaran al cortar internet
+# Estos hosts seran accesibles incluso cuando un puerto este bloqueado
+class AllowedHostViewSet(viewsets.ModelViewSet):
+    queryset = AllowedHost.objects.all().order_by("id")
+    permission_classes = [StrictDjangoModelPermissions, IsAuthenticated]
+    serializer_class = AllowedHostSerializer
     pagination_class = None
 
 

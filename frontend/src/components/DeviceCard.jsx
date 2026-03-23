@@ -25,7 +25,7 @@ import RouterIcon from "@mui/icons-material/Router";
 import SettingsEthernetIcon from "@mui/icons-material/SettingsEthernet";
 import "../styles/DeviceCard.css";
 
-function DeviceCard({ device, screenshot, networkDeviceNames = {}, onShutdown, onBlockInternet, onUnblockInternet, onDelete }) {
+function DeviceCard({ device, screenshot, networkDeviceNames = {}, onShutdown, onToggleInternet, onDelete }) {
     const [sheetOpen, setSheetOpen] = useState(false);
 
     // Nombre del switch resuelto desde la URL del dispositivo
@@ -43,11 +43,7 @@ function DeviceCard({ device, screenshot, networkDeviceNames = {}, onShutdown, o
     };
 
     const handleToggleInternet = () => {
-        if (device.is_internet_blocked) {
-            onUnblockInternet?.(device);
-        } else {
-            onBlockInternet?.(device);
-        }
+        onToggleInternet?.(device);
         handleClose();
     };
 
