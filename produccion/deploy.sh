@@ -43,11 +43,6 @@ cd "$PROD_DIR"
 docker compose -f docker-compose.prod.yml build
 docker compose -f docker-compose.prod.yml up -d --wait
 
-# Copiar build del frontend al volumen de Caddy
-info "Copiando build del frontend al contenedor de Caddy..."
-CADDY_CONTAINER=$(docker compose -f docker-compose.prod.yml ps -q caddy)
-docker cp "$FRONTEND_BUILD/." "$CADDY_CONTAINER:/var/www/frontend/"
-
 # Migraciones y ficheros estaticos 
 info "Ejecutando migraciones de base de datos..."
 docker compose -f docker-compose.prod.yml exec backend python manage.py migrate --noinput

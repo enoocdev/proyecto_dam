@@ -1,5 +1,5 @@
 services:
-  # ── Base de datos PostgreSQL ──────────────────────────────────
+  # Base de datos PostgreSQL
   db:
     image: postgres:16-alpine
     restart: unless-stopped
@@ -39,13 +39,13 @@ services:
       dockerfile: Dockerfile.prod
     restart: unless-stopped
     volumes:
-      - django_static:/app/staticfiles
+      - django_static:/var/www/django_static
     environment:
       POSTGRES_DB: ${POSTGRES_DB}
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-      POSTGRES_HOST: ${POSTGRES_HOST}
-      POSTGRES_PORT: ${POSTGRES_PORT}
+      POSTGRES_HOST: db
+      POSTGRES_PORT: 5432
       SECRET_KEY: ${SECRET_KEY}
       DEBUG: ${DEBUG:-False}
       ALLOWED_HOSTS: ${ALLOWED_HOSTS}
@@ -74,7 +74,7 @@ services:
       - "443:443/udp"   # HTTP/3
     volumes:
       - ./Caddyfile:/etc/caddy/Caddyfile:ro
-      - frontend_build:/var/www/frontend:ro
+      - ../frontend/dist:/var/www/frontend:ro
       - django_static:/var/www/django_static:ro
       - caddy_data:/data
       - caddy_config:/config
@@ -90,7 +90,6 @@ volumes:
   postgres_data:
   redis_data:
   django_static:
-  frontend_build:
   caddy_data:
   caddy_config:
 
@@ -98,5 +97,5 @@ networks:
   # Red interna para backend, db y redis (sin acceso externo)
   backend_net:
     internal: true
-  # Red para Caddy ↔ backend (Caddy es el unico que expone puertos)
+  # Red para Caddy <-> backend (Caddy es el unico que expone puertos)
   frontend_net:
