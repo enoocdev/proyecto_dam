@@ -1,4 +1,4 @@
-# **🛡️ Mikrotik NetManagement — Sistema de Monitorización y Control de Equipos**
+# **🛡️ NetManagement — Sistema de Monitorización y Control de Equipos**
 
 ![Status](https://img.shields.io/badge/Estado-En%20Desarrollo-yellow?style=for-the-badge)
 [![Django](https://img.shields.io/badge/Backend-Django_5_+_DRF-092E20?style=for-the-badge&logo=django)](https://www.django-rest-framework.org/)

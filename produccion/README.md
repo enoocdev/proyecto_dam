@@ -1,4 +1,4 @@
-# Despliegue en Producción — Mikrotik NetManagement
+# Despliegue en Producción — NetManagement
 
 Guía completa para levantar el proyecto en un entorno de producción usando Docker Compose.
 
