@@ -18,21 +18,28 @@ from .serializer import (
     DeviceSerializer, ClassroomSerializer, NetworkDeviceSerializer,
     ClassRoomSimpleSerializer, AllowedHostSerializer,
 )
-from .permissions import StrictDjangoModelPermissions
+from .permissions import StrictDjangoModelPermissions, IsStaffForWrite
 
 logger = logging.getLogger("devices.views")
 
 
 # CRUD de dispositivos con filtro opcional por aula
+# Los usuarios no staff solo ven dispositivos de sus aulas asignadas
 class DevicesViewSet(viewsets.ModelViewSet):
     queryset = Device.objects.all()
     permission_classes = [StrictDjangoModelPermissions, IsAuthenticated ]
     serializer_class = DeviceSerializer
     pagination_class = None
 
-    # Filtra los dispositivos por aula si se pasa el parametro en la URL
+    # Filtra los dispositivos por aula y por las aulas asignadas al usuario
     def get_queryset(self):
         queryset = super().get_queryset()
+        user = self.request.user
+
+        # Los usuarios no staff solo ven dispositivos de sus aulas asignadas
+        if not user.is_staff:
+            queryset = queryset.filter(classroom__in=user.classrooms.all())
+
         classroom_id = self.request.query_params.get('classroom')
         if classroom_id is not None:
             queryset = queryset.filter(classroom_id=classroom_id)
@@ -158,17 +165,26 @@ class DevicesViewSet(viewsets.ModelViewSet):
         )
 
 # CRUD de equipos de red como switches y routers
+# Solo accesible para usuarios staff ya que es configuracion de infraestructura
 class NetworkDevicViewSet(viewsets.ModelViewSet):
     queryset = NetworkDevice.objects.all()
-    permission_classes = [StrictDjangoModelPermissions, IsAuthenticated]
+    permission_classes = [StrictDjangoModelPermissions, IsAuthenticated, IsStaffForWrite]
     serializer_class = NetworkDeviceSerializer
 
 # CRUD de aulas con paginacion
 # Incluye accion para gestionar el bloqueo de internet por aula
+# Los usuarios no staff solo ven sus aulas asignadas y no pueden crear ni modificar aulas
 class ClassroomViewSet(viewsets.ModelViewSet):
     queryset = Classroom.objects.all().order_by("id")
-    permission_classes = [StrictDjangoModelPermissions, IsAuthenticated ]
+    permission_classes = [StrictDjangoModelPermissions, IsAuthenticated, IsStaffForWrite]
     serializer_class = ClassroomSerializer
+
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        user = self.request.user
+        if not user.is_staff:
+            queryset = queryset.filter(users=user)
+        return queryset
 
     # POST /classroom/{id}/toggle-global-internet/
     # Alterna el bloqueo de internet para todos los dispositivos del aula
@@ -234,18 +250,27 @@ class ClassroomViewSet(viewsets.ModelViewSet):
         )
 
 # Listado de aulas de solo lectura sin paginacion para selectores del frontend
+# Los usuarios no staff solo ven sus aulas asignadas
 class ReadOnlyClassRoomWithoutPagination(viewsets.ReadOnlyModelViewSet):
     queryset = Classroom.objects.all().order_by("id")
     serializer_class = ClassRoomSimpleSerializer
     permission_classes = [StrictDjangoModelPermissions, IsAuthenticated]
     pagination_class = None
 
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        user = self.request.user
+        if not user.is_staff:
+            queryset = queryset.filter(users=user)
+        return queryset
+
 
 # CRUD de hosts permitidos que no se aislaran al cortar internet
 # Estos hosts seran accesibles incluso cuando un puerto este bloqueado
+# Solo accesible para usuarios staff ya que es configuracion de infraestructura
 class AllowedHostViewSet(viewsets.ModelViewSet):
     queryset = AllowedHost.objects.all().order_by("id")
-    permission_classes = [StrictDjangoModelPermissions, IsAuthenticated]
+    permission_classes = [StrictDjangoModelPermissions, IsAuthenticated, IsStaffForWrite]
     serializer_class = AllowedHostSerializer
     pagination_class = None
 

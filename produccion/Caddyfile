@@ -1,0 +1,46 @@
+{$DOMAIN} {
+    #  Archivos estaticos de Django (/static/*) 
+    handle_path /static/* {
+        root * /var/www/django_static
+        file_server
+    }
+
+    #  Proxy inverso: API REST (/api/*) 
+    # handle_path elimina el prefijo /api antes de reenviar al backend
+    handle_path /api/* {
+        reverse_proxy backend:8000
+    }
+
+    # Proxy inverso: WebSockets (/ws/*)
+    handle /ws/* {
+        reverse_proxy backend:8000
+    }
+
+    # Proxy inverso: Admin de Django (/admin/*)
+    handle /admin/* {
+        reverse_proxy backend:8000
+    }
+
+    # Frontend React (SPA)
+    handle {
+        root * /var/www/frontend
+        try_files {path} /index.html
+        file_server
+    }
+
+    # Cabeceras de seguridad
+    header {
+        X-Content-Type-Options nosniff
+        X-Frame-Options DENY
+        Referrer-Policy strict-origin-when-cross-origin
+        -Server
+    }
+
+    # Compresion
+    encode gzip zstd
+
+    log {
+        output stdout
+        format console
+    }
+}

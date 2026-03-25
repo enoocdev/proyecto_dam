@@ -10,6 +10,7 @@ from channels.db import database_sync_to_async
 
 from .models import Device
 from . import mikrotik_service
+from . import heartbeat_monitor
 
 logger = logging.getLogger("devices.consumers")
 
@@ -65,6 +66,8 @@ class AgentConsumer(AsyncJsonWebsocketConsumer):
                 self._agent_group, self.channel_name
             )
         if self.mac:
+            # Elimina la clave de heartbeat para que el monitor no duplique el offline
+            heartbeat_monitor.delete_heartbeat(self.mac)
             device_data = await self._set_device_offline(self.mac)
             if device_data:
                 await self._notify_dashboard("offline", device_data)
@@ -87,6 +90,8 @@ class AgentConsumer(AsyncJsonWebsocketConsumer):
             ip=data.get("ip"),
             hostname=data.get("hostname"),
         )
+        # Registra el heartbeat en Redis con TTL de 2 minutos
+        heartbeat_monitor.set_heartbeat(self.mac)
         await self._notify_dashboard("online", device_data)
         logger.info("Agente online: %s (%s)", self.mac, data.get("hostname"))
 
@@ -94,6 +99,8 @@ class AgentConsumer(AsyncJsonWebsocketConsumer):
     async def _handle_heartbeat(self, data: dict):
         mac = data.get("mac")
         if mac:
+            # Renueva el TTL del heartbeat en Redis
+            heartbeat_monitor.set_heartbeat(mac)
             await self._update_heartbeat(mac, data.get("ip"))
 
     # Procesa el aviso de apagado del agente y lo marca como offline

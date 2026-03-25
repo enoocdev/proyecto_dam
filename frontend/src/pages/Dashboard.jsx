@@ -12,11 +12,12 @@ import DeviceCard from "../components/DeviceCard";
 import useDashboardSocket from "../hooks/useDashboardSocket";
 import { useStore } from "@nanostores/react";
 import { $screenshots } from "../stores/screenshotStore";
-import { $userClassrooms } from "../stores/userClassroomsStore";
 import "../styles/Dashboard.css";
 import useAuth from '../hooks/useAuth';
 
-import {API_PATH_DEVICES, API_PATH_CLASSROOMS_WITHOUT_PAGINATION} from '../constants';
+import {API_PATH_DEVICES, API_PATH_CLASSROOMS, API_PATH_CLASSROOMS_WITHOUT_PAGINATION} from '../constants';
+import WifiIcon from '@mui/icons-material/Wifi';
+import WifiOffIcon from '@mui/icons-material/WifiOff';
 import {
     Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions, Button
 } from '@mui/material';
@@ -39,14 +40,16 @@ function DashboardPage() {
     // Mapa de network_device_url -> nombre del switch
     const [networkDeviceNames, setNetworkDeviceNames] = useState({});
 
+    // Estado de bloqueo global de internet por aula
+    const [classroomInternetBlocked, setClassroomInternetBlocked] = useState({});
+    const [togglingGlobalInternet, setTogglingGlobalInternet] = useState(false);
+
     const [notification, setNotification] = useState({ open: false, message: '', severity: 'success' });
 
     // Capturas de pantalla persistidas en sessionStorage via nanostores
     const screenshots = useStore($screenshots);
 
-    // Aulas asignadas al usuario actual (persistidas en nanostore)
-    const userClassrooms = useStore($userClassrooms);
-    const { isSuperuser } = useAuth();
+    const { isSuperuser, isStaff } = useAuth();
 
 
     useEffect(() => {
@@ -61,13 +64,18 @@ function DashboardPage() {
         try {
             const response = await api.get(API_PATH_CLASSROOMS_WITHOUT_PAGINATION);
             const allData = Array.isArray(response.data) ? response.data : [];
+            setClassrooms(allData);
 
-            // Superusuarios ven todas las aulas, el resto solo las asignadas
-            if (isSuperuser) {
-                setClassrooms(allData);
-            } else {
-                const assignedIds = (userClassrooms || []).map(c => c.id);
-                setClassrooms(allData.filter(c => assignedIds.includes(c.id)));
+            // Inicializar estado de bloqueo global desde datos del aula
+            const blockedState = {};
+            allData.forEach(c => {
+                blockedState[c.id] = !!c.is_global_internet_blocked;
+            });
+            setClassroomInternetBlocked(blockedState);
+
+            // Usuarios no admin: seleccionar la primera aula automaticamente
+            if (!isSuperuser && !isStaff && allData.length > 0 && selectedClassroomRef.current === null) {
+                handleClassroomChange(allData[0].id);
             }
         } catch (err) {
             setNotification({ open: true, message: 'Error al cargar las Aulas', severity: 'error' });
@@ -146,6 +154,11 @@ function DashboardPage() {
     const [deviceToDelete, setDeviceToDelete] = useState(null);
 
     const fetchDevices = async () => {
+        // Usuarios no admin deben tener un aula seleccionada
+        if (!isSuperuser && !isStaff && selectedClassroom === null) {
+            setLoading(false);
+            return;
+        }
 
         setLoading(true);
         try {
@@ -198,6 +211,37 @@ function DashboardPage() {
         }
     };
 
+    // Bloquear/desbloquear internet global del aula seleccionada
+    const handleToggleGlobalInternet = async () => {
+        if (selectedClassroom === null) return;
+        const classroom = classrooms.find(c => c.id === selectedClassroom);
+        const isBlocked = classroomInternetBlocked[selectedClassroom];
+        const action = isBlocked ? 'desbloquear' : 'bloquear';
+        setTogglingGlobalInternet(true);
+        try {
+            const response = await api.post(`${API_PATH_CLASSROOMS}${selectedClassroom}/toggle-global-internet/`);
+            // Leer el estado real del backend antes de actualizar la UI
+            const newBlocked = response.data?.is_global_internet_blocked ?? !isBlocked;
+            setClassroomInternetBlocked(prev => ({ ...prev, [selectedClassroom]: newBlocked }));
+
+            // Actualizar estado de internet de los dispositivos del aula
+            setDevices(prev => prev.map(d =>
+                d.classroom === selectedClassroom ? { ...d, is_internet_blocked: newBlocked } : d
+            ));
+
+            setNotification({
+                open: true,
+                message: response.data?.detail || `Internet ${newBlocked ? 'bloqueado' : 'desbloqueado'} globalmente en ${classroom?.name || 'aula'}`,
+                severity: 'success'
+            });
+        } catch (err) {
+            const detail = err.response?.data?.detail || `Error al ${action} internet del aula`;
+            setNotification({ open: true, message: detail, severity: 'error' });
+        } finally {
+            setTogglingGlobalInternet(false);
+        }
+    };
+
     const handleOpenDeleteDialog = (device) => {
         setDeviceToDelete(device);
         setDeleteDialogOpen(true);
@@ -235,12 +279,14 @@ function DashboardPage() {
 
             {/* Filtro por aula */}
             <div className="dashboard-filter">
-                <button
-                    className={`dashboard-filter__btn ${selectedClassroom === null ? 'dashboard-filter__btn--active' : ''}`}
-                    onClick={() => handleClassroomChange(null)}
-                >
-                    Todos
-                </button>
+                {(isSuperuser || isStaff) && (
+                    <button
+                        className={`dashboard-filter__btn ${selectedClassroom === null ? 'dashboard-filter__btn--active' : ''}`}
+                        onClick={() => handleClassroomChange(null)}
+                    >
+                        Todos
+                    </button>
+                )}
                 {classrooms.map((classroom) => (
                     <button
                         key={classroom.id}
@@ -250,6 +296,22 @@ function DashboardPage() {
                         {classroom.name}
                     </button>
                 ))}
+
+                <div className="dashboard-filter__spacer" />
+
+                <button
+                    className={`dashboard-filter__global-toggle ${classroomInternetBlocked[selectedClassroom] ? 'dashboard-filter__global-toggle--blocked' : ''}`}
+                    onClick={handleToggleGlobalInternet}
+                    disabled={togglingGlobalInternet || selectedClassroom === null}
+                    title={selectedClassroom === null ? 'Selecciona un aula' : (classroomInternetBlocked[selectedClassroom] ? 'Desbloquear internet del aula' : 'Bloquear internet del aula')}
+                >
+                    {togglingGlobalInternet
+                        ? <CircularProgress size={16} sx={{ color: 'inherit' }} />
+                        : (classroomInternetBlocked[selectedClassroom]
+                            ? <><WifiOffIcon fontSize="small" /> <span>Desbloq. Internet</span></>
+                            : <><WifiIcon fontSize="small" /> <span>Bloq. Internet</span></>)
+                    }
+                </button>
             </div>
 
             {/* Contenido scrollable */}

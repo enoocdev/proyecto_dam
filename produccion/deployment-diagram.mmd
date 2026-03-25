@@ -1,0 +1,31 @@
+flowchart TB
+    U[Usuario / Navegador]
+
+    subgraph HOST[Servidor Docker]
+        C[Caddy<br/>Proxy inverso + TLS]
+        B[Backend<br/>Django + DRF + Daphne<br/>:8000]
+        DB[(PostgreSQL 16)]
+        R[(Redis 7)]
+        FE[(Volumen frontend_build<br/>/var/www/frontend)]
+        ST[(Volumen django_static<br/>/var/www/django_static)]
+    end
+
+    U -->|HTTP 80 / HTTPS 443| C
+    C -->|/api/*| B
+    C -->|/ws/*| B
+    C -->|/admin/*| B
+    C -->|/static/*| ST
+    C -->|/* SPA| FE
+
+    B -->|ORM| DB
+    B -->|Channels / Heartbeat| R
+
+    C -. conectado a .-> FN[frontend_net]
+    B -. conectado a .-> FN
+    C -. conectado a .-> BN[backend_net]
+    B -. conectado a .-> BN
+    DB -. conectado a .-> BN
+    R -. conectado a .-> BN
+
+    classDef net fill:#eef6ff,stroke:#1d4ed8,stroke-width:1px,color:#0f172a;
+    class FN,BN net;

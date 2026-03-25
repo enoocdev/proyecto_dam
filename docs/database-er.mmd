@@ -1,0 +1,98 @@
+erDiagram
+    USERS_USER {
+        bigint id PK
+        string username UK
+        string password
+        string first_name
+        string last_name
+        string email
+        boolean is_superuser
+        boolean is_staff
+        boolean is_active
+        datetime last_login
+        datetime date_joined
+    }
+
+    DEVICES_CLASSROOM {
+        bigint id PK
+        string name UK
+        boolean is_internet_blocked
+    }
+
+    DEVICES_NETWORKDEVICE {
+        bigint id PK
+        string name
+        string ip_address UK
+        string username
+        string password
+        int api_port
+    }
+
+    DEVICES_DEVICE {
+        bigint id PK
+        string mac UK
+        string ip
+        string hostname
+        string switch_port
+        boolean is_online
+        boolean is_internet_blocked
+        bigint classroom_id FK
+        bigint connected_device_id FK
+    }
+
+    DEVICES_ALLOWEDHOST {
+        bigint id PK
+        string ip_address UK
+        string name
+    }
+
+    AUTH_GROUP {
+        bigint id PK
+        string name UK
+    }
+
+    AUTH_PERMISSION {
+        bigint id PK
+        string name
+        string codename
+        bigint content_type_id FK
+    }
+
+    USERS_USER_CLASSROOMS {
+        bigint id PK
+        bigint user_id FK
+        bigint classroom_id FK
+    }
+
+    USERS_USER_GROUPS {
+        bigint id PK
+        bigint user_id FK
+        bigint group_id FK
+    }
+
+    USERS_USER_USER_PERMISSIONS {
+        bigint id PK
+        bigint user_id FK
+        bigint permission_id FK
+    }
+
+    AUTH_GROUP_PERMISSIONS {
+        bigint id PK
+        bigint group_id FK
+        bigint permission_id FK
+    }
+
+    DEVICES_CLASSROOM ||--o{ DEVICES_DEVICE : contains
+    DEVICES_NETWORKDEVICE ||--o{ DEVICES_DEVICE : connects
+
+    USERS_USER ||--o{ USERS_USER_CLASSROOMS : has
+    DEVICES_CLASSROOM ||--o{ USERS_USER_CLASSROOMS : assigned_to
+
+    USERS_USER ||--o{ USERS_USER_GROUPS : belongs_to
+    AUTH_GROUP ||--o{ USERS_USER_GROUPS : groups
+
+    USERS_USER ||--o{ USERS_USER_USER_PERMISSIONS : has
+    AUTH_PERMISSION ||--o{ USERS_USER_USER_PERMISSIONS : grants
+
+    AUTH_GROUP ||--o{ AUTH_GROUP_PERMISSIONS : has
+    AUTH_PERMISSION ||--o{ AUTH_GROUP_PERMISSIONS : grants

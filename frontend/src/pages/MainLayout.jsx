@@ -35,9 +35,9 @@ function MainLayout() {
 
     const menuOptions = [
         { text: "Dashboard", icon: <DashboardIcon />, path: "/", requiredPermission: "view_device" },
-        { text: "Classroom", icon: <SchoolIcon />, path: "/classroom", requiredPermission: "view_classroom" },
-        { text: "Switchs / routers", icon: <RouterIcon />, path: "/network-device", requiredPermission: "view_networkdevice" },
-        { text: "Hosts Permitidos", icon: <DnsIcon />, path: "/allowed-hosts", requiredPermission: "view_allowedhost" },
+        { text: "Classroom", icon: <SchoolIcon />, path: "/classroom", requiredPermission: "view_classroom", requireStaff: true },
+        { text: "Switchs / routers", icon: <RouterIcon />, path: "/network-device", requiredPermission: "view_networkdevice", requireStaff: true },
+        { text: "Hosts Permitidos", icon: <DnsIcon />, path: "/allowed-hosts", requiredPermission: "view_allowedhost", requireStaff: true },
         { text: "Usuarios", icon: <PeopleIcon />, path: "/users", requiredPermission: "view_user", requireStaff: true },
         { text: "Grupos", icon: <GroupsIcon />, path: "/users-groups", requiredPermission: "view_group", requireStaff: true },
     ];

@@ -73,6 +73,52 @@
     color: var(--text-on-accent);
 }
 
+/* Spacer empuja el boton de toggle al extremo derecho */
+.dashboard-filter__spacer {
+    flex: 1 1 auto;
+    min-width: 8px;
+}
+
+/* Boton de bloqueo global de internet del aula */
+.dashboard-filter__global-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 14px;
+    border: 1px solid var(--accent-color);
+    border-radius: 20px;
+    background: transparent;
+    color: var(--accent-color);
+    font-size: 0.8rem;
+    font-weight: 600;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: all 0.25s ease;
+    flex-shrink: 0;
+}
+
+.dashboard-filter__global-toggle:hover:not(:disabled) {
+    background: var(--accent-color);
+    color: var(--text-on-accent);
+}
+
+.dashboard-filter__global-toggle:disabled {
+    opacity: 0.35;
+    cursor: not-allowed;
+}
+
+.dashboard-filter__global-toggle--blocked {
+    border-color: var(--danger-color, #e74c3c);
+    color: var(--danger-color, #e74c3c);
+    background: rgba(231, 76, 60, 0.1);
+}
+
+.dashboard-filter__global-toggle--blocked:hover:not(:disabled) {
+    background: var(--danger-color, #e74c3c);
+    border-color: var(--danger-color, #e74c3c);
+    color: white;
+}
+
 .devices-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));

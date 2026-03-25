@@ -1,0 +1,45 @@
+# ── Etapa 1: Dependencias ────────────────────────────────────
+FROM python:3.11-slim AS builder
+
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1
+
+WORKDIR /app
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    gcc \
+    libpq-dev \
+    && rm -rf /var/lib/apt/lists/*
+
+COPY requirements.txt .
+RUN pip install --no-cache-dir --prefix=/install -r requirements.txt
+
+
+# ── Etapa 2: Runtime ────────────────────────────────────────
+FROM python:3.11-slim
+
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1
+
+WORKDIR /app
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    libpq5 \
+    && rm -rf /var/lib/apt/lists/* \
+    && addgroup --system django \
+    && adduser --system --ingroup django django
+
+# Copia las dependencias compiladas desde la etapa builder
+COPY --from=builder /install /usr/local
+
+COPY . .
+
+# Directorio para ficheros estaticos recopilados
+RUN mkdir -p /app/staticfiles && chown django:django /app/staticfiles
+
+USER django
+
+EXPOSE 8000
+
+# Daphne como servidor ASGI de produccion
+CMD ["daphne", "-b", "0.0.0.0", "-p", "8000", "config.asgi:application"]

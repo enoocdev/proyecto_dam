@@ -7,11 +7,24 @@ import { setScreenshot } from "../stores/screenshotStore";
 
 const useWebSocket = useWebSocketLib.default || useWebSocketLib;
 
-// Construye la URL del WebSocket a partir de la URL de la API
+// Construye la URL del WebSocket a partir de window.location (produccion)
+// o la variable de entorno VITE_API_URL (desarrollo local)
 function buildWsUrl() {
-    const apiUrl = import.meta.env.VITE_API_URL || "http://127.0.0.1:8000";
-    const wsProtocol = apiUrl.startsWith("https") ? "wss" : "ws";
-    const host = apiUrl.replace(/^https?:\/\//, "").replace(/\/+$/, "");
+    let wsProtocol;
+    let host;
+
+    const apiUrl = import.meta.env.VITE_API_URL || "";
+
+    if (apiUrl.startsWith("http")) {
+        // Desarrollo: URL absoluta definida en .env
+        wsProtocol = apiUrl.startsWith("https") ? "wss" : "ws";
+        host = apiUrl.replace(/^https?:\/\//, "").replace(/\/+$/, "");
+    } else {
+        // Produccion: URL relativa — usar window.location
+        wsProtocol = window.location.protocol === "https:" ? "wss" : "ws";
+        host = window.location.host;
+    }
+
     const token = localStorage.getItem(ACCESS_TOKEN);
     const base = `${wsProtocol}://${host}/ws/dashboard/`;
     return token ? `${base}?token=${token}` : base;

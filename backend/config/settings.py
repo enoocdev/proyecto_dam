@@ -15,9 +15,10 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.getenv('SECRET_KEY')
 
 # Activar modo debug solo en desarrollo
-DEBUG = True
+DEBUG = os.getenv('DEBUG', 'False').lower() in ('true', '1', 'yes')
 
-ALLOWED_HOSTS = ["*"]
+# Hosts permitidos separados por coma en la variable de entorno
+ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', '*').split(',')
 
 # Modelo de usuario personalizado
 AUTH_USER_MODEL = 'users.User'
@@ -141,14 +142,35 @@ USE_TZ = True
 
 STATIC_URL = 'static/'
 
+# Directorio donde collectstatic recopila todos los ficheros estaticos
+STATIC_ROOT = BASE_DIR / 'staticfiles'
+
 # Tipo de clave primaria por defecto
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # Configuracion de CORS para permitir conexiones desde el frontend
-CORS_ALLOW_ALL_ORIGINS = True
+# En produccion se leen los origenes permitidos de la variable de entorno
+_cors_origins = os.getenv('CORS_ALLOWED_ORIGINS', '')
+if DEBUG:
+    CORS_ALLOW_ALL_ORIGINS = True
+else:
+    CORS_ALLOW_ALL_ORIGINS = False
+    CORS_ALLOWED_ORIGINS = [o.strip() for o in _cors_origins.split(',') if o.strip()]
+
 CORS_ALLOW_CREDENTIALS = True
+CORS_ALLOW_HEADERS = [
+    'accept',
+    'authorization',
+    'content-type',
+    'origin',
+    'x-csrftoken',
+    'x-requested-with',
+]
 CORS_EXPOSE_HEADERS = ['Allow', 'Content-Type']
+
+# Origenes confiables para CSRF (necesario cuando Caddy hace proxy)
+CSRF_TRUSTED_ORIGINS = [o.strip() for o in _cors_origins.split(',') if o.strip()] if _cors_origins else []
 
 # Configuracion de Channel Layers con Redis para WebSockets en tiempo real
 CHANNEL_LAYERS = {

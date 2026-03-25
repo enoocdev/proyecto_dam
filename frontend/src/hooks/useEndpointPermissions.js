@@ -53,7 +53,7 @@ const useEndpointPermission = (endpoint) => {
 
         fetchPermissions()
         
-    }, [endpoint])
+    }}, [endpoint])
 
     return permissions
 }
