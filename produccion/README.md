@@ -1,3 +1,4 @@
+
 # Despliegue en Producción — NetManagement
 
 Guía completa para levantar el proyecto en un entorno de producción usando Docker Compose.
@@ -19,24 +20,27 @@ Guía completa para levantar el proyecto en un entorno de producción usando Doc
 
 ## Arquitectura
 
-```
+```text
 Internet ──80/443──▶ Caddy (proxy inverso + TLS automático)
-                        ├─ /api/*        ──▶ backend:8000  (Django REST Framework)
-                        ├─ /ws/*         ──▶ backend:8000  (Daphne — WebSockets)
-                        ├─ /admin/*      ──▶ backend:8000  (Django Admin)
-                        ├─ /static/*     ──▶ ficheros estáticos de Django
-                        └─ /*            ──▶ React SPA (Vite build)
+                        ├─ /api/* ──▶ backend:8000  (Django REST Framework)
+                        ├─ /ws/* ──▶ backend:8000  (Daphne — WebSockets)
+                        ├─ /admin/* ──▶ backend:8000  (Django Admin)
+                        ├─ /static/* ──▶ ficheros estáticos de Django
+                        └─ /* ──▶ React SPA (Vite build)
 
                      Backend ──▶ PostgreSQL 16
                              ──▶ Redis 7 (Channel Layers + Heartbeat)
+                             ──▶ Routers MikroTik (API TLS por puerto 8729)
 ```
 
 ### Redes Docker
 
-| Red            | Tipo     | Servicios conectados        |
-| -------------- | -------- | --------------------------- |
-| `backend_net`  | internal | db, redis, backend, caddy   |
-| `frontend_net` | externa  | backend, caddy              |
+| Red            | Tipo                | Servicios conectados        | Propósito |
+| -------------- | ------------------- | --------------------------- | --------- |
+| `backend_net`  | bridge (no interna) | db, redis, backend, caddy   | Comunicación entre servicios base y salida hacia la red local para la gestión de los switches MikroTik. |
+| `frontend_net` | bridge              | backend, caddy              | Exposición del proxy Caddy hacia el exterior. |
+
+*Nota Crítica:* La red `backend_net` **no debe ser `internal: true`**. El backend necesita salir del entorno aislado de Docker para comunicarse con las direcciones IP de la red local donde residen los routers MikroTik.
 
 Solo **Caddy** expone puertos al exterior (80 y 443).
 
@@ -47,7 +51,7 @@ Solo **Caddy** expone puertos al exterior (80 y 443).
 ### 1. Clonar el repositorio
 
 ```bash
-git clone <url-del-repositorio> proyecto_dam
+git clone https://github.com/enoocdev/proyecto_dam.git
 cd proyecto_dam
 ```
 
@@ -69,8 +73,8 @@ POSTGRES_PASSWORD=tu_password_segura
 # --- Django ---
 SECRET_KEY=genera-una-con-python-generar_clave.py
 DEBUG=False
-ALLOWED_HOSTS=tu-dominio.com,www.tu-dominio.com
-CORS_ALLOWED_ORIGINS=https://tu-dominio.com,https://www.tu-dominio.com
+ALLOWED_HOSTS=tu-dominio.com,[www.tu-dominio.com](https://www.tu-dominio.com),localhost,127.0.0.1
+CORS_ALLOWED_ORIGINS=[https://tu-dominio.com](https://tu-dominio.com),[https://www.tu-dominio.com](https://www.tu-dominio.com)
 
 # --- Superusuario ---
 DJANGO_SUPERUSER_USERNAME=admin
@@ -134,7 +138,7 @@ docker compose -f docker-compose.prod.yml exec backend python manage.py migrate 
 # 5. Recopilar archivos estáticos
 docker compose -f docker-compose.prod.yml exec backend python manage.py collectstatic --noinput
 
-# 6. Crear superusuario
+# 6. Crear superusuario (si no existe)
 docker compose -f docker-compose.prod.yml exec backend python manage.py createsuperuser --noinput
 ```
 
@@ -154,15 +158,18 @@ docker compose -f docker-compose.prod.yml ps
 # Todos los servicios
 docker compose -f docker-compose.prod.yml logs -f
 
-# Solo un servicio
+# Solo un servicio (ej: ver si falla la conexión TLS con MikroTik)
 docker compose -f docker-compose.prod.yml logs -f backend
 docker compose -f docker-compose.prod.yml logs -f caddy
 ```
 
-### Reiniciar un servicio
+### Aplicar cambios de código sin destruir la base de datos
+
+Si realizas cambios en el código de Python (ej: modificar serializadores o `mikrotik_service.py`), debes forzar la recreación del contenedor para evitar hilos "zombies" en memoria:
 
 ```bash
-docker compose -f docker-compose.prod.yml restart backend
+docker compose -f docker-compose.prod.yml down
+docker compose -f docker-compose.prod.yml up -d --build --force-recreate backend
 ```
 
 ### Detener todo
@@ -183,20 +190,14 @@ docker compose -f docker-compose.prod.yml down -v
 docker compose -f docker-compose.prod.yml exec backend sh
 ```
 
-### Ejecutar un comando de Django
-
-```bash
-docker compose -f docker-compose.prod.yml exec backend python manage.py <comando>
-```
-
 ---
 
 ## Estructura de archivos
 
-```
+```text
 produccion/
 ├── .env.example              # Plantilla de variables de entorno
-├── .env                      # Variables reales (NO subir a git)
+├── .env                      # Variables reales
 ├── docker-compose.prod.yml   # Orquestación de servicios
 ├── Caddyfile                 # Configuración del proxy inverso
 ├── deploy.sh                 # Script de despliegue (Linux/macOS)
@@ -206,29 +207,20 @@ produccion/
 
 ---
 
-## TLS / HTTPS
+## TLS / HTTPS y MikroTik
 
-- **Con dominio real:** Establece `DOMAIN=tu-dominio.com` en `.env`. Caddy obtiene y renueva certificados Let's Encrypt automáticamente. Asegúrate de que los puertos 80 y 443 son accesibles desde Internet.
-- **Pruebas locales:** Establece `DOMAIN=:80` para servir solo HTTP sin certificado.
+- **Caddy (Web):** Establece `DOMAIN=tu-dominio.com` en `.env`. Caddy obtiene y renueva certificados Let's Encrypt automáticamente. Asegúrate de que los puertos 80 y 443 son accesibles desde Internet. Para pruebas locales, usa `DOMAIN=:80`.
+- **Backend a MikroTik (API):** La conexión entre el backend y los routers se realiza por el puerto `8729` (TLS). El backend está configurado con `OP_LEGACY_SERVER_CONNECT` y `SECLEVEL=0` para evitar "cuelgues" durante el apretón de manos con versiones antiguas de OpenSSL en RouterOS. Asegúrate de que el certificado en el MikroTik esté marcado como de confianza (`Trusted=yes` o flag **T** en WinBox).
 
 ---
 
-## Solución de problemas
+## Solución de problemas frecuentes
 
 | Problema | Solución |
 |---|---|
-| `ERROR: No se encontro .env` | Copia `.env.example` como `.env` y rellena los valores |
-| El backend no conecta con PostgreSQL | Verifica que `POSTGRES_HOST=db` en `.env` y que el contenedor `db` esté healthy: `docker compose -f docker-compose.prod.yml ps` |
-| WebSocket no conecta | Comprueba que `DOMAIN` es correcto y que Caddy hace proxy de `/ws/*`. Revisa logs con `docker compose -f docker-compose.prod.yml logs caddy` |
-| `collectstatic` falla con permisos | El directorio `/app/staticfiles` debe ser propiedad del usuario `django` dentro del contenedor. El Dockerfile.prod ya lo configura |
-| Certificado TLS no se genera | Asegúrate de que los puertos 80 y 443 están abiertos y el dominio apunta al servidor |
-| Frontend muestra página en blanco | Verifica que el build se copió correctamente: `docker compose -f docker-compose.prod.yml exec caddy ls /var/www/frontend/` |
-
----
-
-## Seguridad
-
-- **`SECRET_KEY`**: Genera siempre una clave única para producción (`python generar_clave.py`).
-- **`DEBUG=False`**: Nunca dejes Debug activo en producción.
-- **Contraseñas**: Usa contraseñas fuertes para PostgreSQL y el superusuario.
-- **Redes aisladas**: Solo Caddy es accesible externamente. db y redis no exponen puertos.
+| `ERROR: No se encontro .env` | Copia `.env.example` como `.env` y rellena los valores. |
+| El backend no conecta con PostgreSQL | Verifica que `POSTGRES_HOST=db` en `.env` y que el contenedor `db` esté *healthy* usando `docker compose ps`. |
+| Las URLs de la API devuelven el dominio de Docker en vez del real | Asegúrate de usar `serializers.ModelSerializer` y `PrimaryKeyRelatedField` en Django en lugar de `HyperlinkedModelSerializer`. Caddy altera el host al hacer proxy. |
+| El backend se queda colgado infinitamente al conectar con MikroTik | Verifica que en el `docker-compose.prod.yml`, la red `backend_net` tenga `internal: false`. Revisa que la librería `librouteros` use el parámetro `ssl_wrapper=ctx.wrap_socket`. |
+| La web no se actualiza con los puertos de los PCs | Asegúrate de tener al menos un cliente enviando un "latido" (Heartbeat) al servidor para disparar la búsqueda en la tabla ARP/Bridge. |
+| Frontend muestra página en blanco | Verifica que el build de Vite se copió correctamente: `docker compose exec caddy ls /var/www/frontend/`. |
