@@ -1,12 +1,13 @@
 #!/usr/bin/env bash
 # deploy.sh — Script de despliegue para produccion
-# Ejecutar desde la carpeta produccion del proyecto
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 PROD_DIR="$SCRIPT_DIR"
 FRONTEND_DIR="$PROJECT_ROOT/frontend"
+DOCKER_FILE="docker-compose.prod.yml"
+MIKROTIK_CERTS_DIR="$PROD_DIR/mikrotik_certs"
 
 # Colores para salida por consola
 GREEN='\033[0;32m'
@@ -40,27 +41,41 @@ fi
 info "Construyendo y levantando contenedores..."
 cd "$PROD_DIR"
 
-docker compose -f docker-compose.prod.yml build
-docker compose -f docker-compose.prod.yml up -d --wait
+docker compose -f "$DOCKER_FILE" build
+docker compose -f "$DOCKER_FILE" up -d --wait
 
 # Migraciones y ficheros estaticos 
 info "Ejecutando migraciones de base de datos..."
-docker compose -f docker-compose.prod.yml exec backend python manage.py migrate --noinput
+docker compose -f "$DOCKER_FILE" exec backend python manage.py migrate --noinput
 
 info "Recopilando ficheros estaticos..."
-docker compose -f docker-compose.prod.yml exec backend python manage.py collectstatic --noinput
+docker compose -f "$DOCKER_FILE" exec backend python manage.py collectstatic --noinput
 
 # Crear superusuario automaticamente
 info "Creando superusuario (si no existe)..."
-docker compose -f docker-compose.prod.yml exec backend python manage.py createsuperuser --noinput 2>/dev/null || true
+docker compose -f "$DOCKER_FILE" exec backend python manage.py createsuperuser --noinput 2>/dev/null || true
 
 # Recargar Caddy para que lea los nuevos ficheros 
 info "Recargando Caddy..."
-docker compose -f docker-compose.prod.yml exec caddy caddy reload --config /etc/caddy/Caddyfile 2>/dev/null || true
+docker compose -f "$DOCKER_FILE" exec caddy caddy reload --config /etc/caddy/Caddyfile 2>/dev/null || true
+
+# SECCION DE CERTIFICADOS PARA MIKROTIK
+info "Extrayendo certificados de Caddy para MikroTik (API SSL)..."
+mkdir -p "$MIKROTIK_CERTS_DIR"
+
+# Extraer certificados
+docker compose -f "$DOCKER_FILE" cp caddy:/data/caddy/pki/authorities/local/root.crt "$MIKROTIK_CERTS_DIR/caddy_root.crt"
+
+docker compose -f "$DOCKER_FILE" cp caddy:/data/caddy/pki/authorities/local/intermediate.crt "$MIKROTIK_CERTS_DIR/server.crt"
+docker compose -f "$DOCKER_FILE" cp caddy:/data/caddy/pki/authorities/local/intermediate.key "$MIKROTIK_CERTS_DIR/server.key"
+
+info "Certificados extraidos en: $MIKROTIK_CERTS_DIR"
+info "Sube estos 3 archivos a tu MikroTik e importalos."
+
 
 # Resumen
 echo ""
-info "  Despliegue completado con exito!"
+info "Despliegue completado con exito!"
 info "Servicios activos:"
-docker compose -f docker-compose.prod.yml ps --format "table {{.Name}}\t{{.Status}}\t{{.Ports}}"
+docker compose -f "$DOCKER_FILE" ps --format "table {{.Name}}\t{{.Status}}\t{{.Ports}}"
 echo ""

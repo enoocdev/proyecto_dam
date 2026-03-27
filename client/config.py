@@ -12,8 +12,7 @@ CONFIG_FILE = CONFIG_DIR / "client_config.json"
 # Valores por defecto del agente
 DEFAULTS = {
     # URL del WebSocket del backend Django Channels
-    "WS_URL": "ws://127.0.0.1:8000/ws/client/",
-
+    "WS_URL": "wss://localhost/ws/client/",
     # Segundos entre cada heartbeat
     "HEARTBEAT_INTERVAL": 30,
 
@@ -30,7 +29,7 @@ DEFAULTS = {
     "LOG_FILE": str(CONFIG_DIR / "client_errors.log"),
 
     # Segundos entre cada captura de pantalla (600 = 10 minutos)
-    "SCREENSHOT_INTERVAL": 600,
+    "SCREENSHOT_INTERVAL": 15,
 }
 
 # Mapeo de clave interna a variable de entorno

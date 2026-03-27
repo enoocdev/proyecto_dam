@@ -50,7 +50,3 @@ class AllowedHost(models.Model):
     def __str__(self):
         return f"{self.name} ({self.ip_address})" if self.name else str(self.ip_address)
 
-
-# Modelo para registrar logs de actividad
-class Log(models.Model):
-    pass

@@ -1,7 +1,7 @@
 # Servicio de comunicacion con la API de RouterOS de MikroTik
 # Gestiona reglas de bridge filter (Capa 2) para bloquear y desbloquear
 # el acceso a internet y el trafico entre dispositivos de la misma subred
-# El bloqueo se realiza por PUERTO FISICO del bridge (in-interface / out-interface)
+# El bloqueo  por PUERTO FISICO del bridge (in-interface / out-interface)
 # usando /interface/bridge/filter en lugar de /ip/firewall/filter
 # Esto garantiza aislamiento total: ni internet, ni otras subredes, ni trafico local
 # Las reglas se identifican mediante comentarios con el prefijo MONITOR

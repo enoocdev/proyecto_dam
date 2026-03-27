@@ -1,5 +1,4 @@
 services:
-  # Base de datos PostgreSQL
   db:
     image: postgres:16-alpine
     restart: unless-stopped
@@ -17,7 +16,6 @@ services:
       timeout: 5s
       retries: 10
 
-  # Redis (Channel Layers + Heartbeat)
   redis:
     image: redis:7-alpine
     restart: unless-stopped
@@ -32,7 +30,6 @@ services:
       timeout: 3s
       retries: 5
 
-  # Backend Django (Daphne ASGI)
   backend:
     build:
       context: ../backend
@@ -64,14 +61,13 @@ services:
       - backend_net
       - frontend_net
 
-  # Caddy (Proxy inverso + ficheros estaticos)
   caddy:
     image: caddy:2-alpine
     restart: unless-stopped
     ports:
       - "80:80"
       - "443:443"
-      - "443:443/udp"   # HTTP/3
+      - "443:443/udp"
     volumes:
       - ./Caddyfile:/etc/caddy/Caddyfile:ro
       - ../frontend/dist:/var/www/frontend:ro
@@ -83,8 +79,7 @@ services:
     depends_on:
       - backend
     networks:
-      - backend_net
-      - frontend_net
+      - frontend_net # Caddy NO necesita entrar a la red de la base de datos
 
 volumes:
   postgres_data:
@@ -94,8 +89,12 @@ volumes:
   caddy_config:
 
 networks:
-  # Red interna para backend, db y redis (sin acceso externo)
+  # CAPA DE DATOS: Totalmente aislada. Solo Backend <-> DB/Redis.
   backend_net:
+    driver: bridge
     internal: true
-  # Red para Caddy <-> backend (Caddy es el unico que expone puertos)
+  
+  # CAPA DE GESTION: Conecta Caddy con Backend y permite salida a MikroTiks.
   frontend_net:
+    driver: bridge
+    internal: false

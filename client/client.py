@@ -6,6 +6,14 @@ import sys
 from datetime import datetime
 from pathlib import Path
 
+# Necesario para 
+if sys.platform.startswith("linux"):
+    if "DISPLAY" not in os.environ:
+        os.environ["DISPLAY"] = ":0"
+
+        # NOTA: Si tras esto te da un error de "Access denied" o "Connection refused",
+        # descomenta la siguiente linea y cambia 'tu_usuario' por el usuario de Arch Linux:
+        # os.environ["XAUTHORITY"] = "/home/tu_usuario/.Xauthority"
 
 # Fija el directorio de trabajo al del propio script
 # Necesario cuando se ejecuta como tarea programada del sistema
@@ -44,6 +52,7 @@ try:
     import asyncio
     import json
     import signal
+    import ssl
 
     import websockets
     from config import load_config
@@ -93,8 +102,6 @@ logger.info("Configuracion cargada correctamente. Log level=%s", config["LOG_LEV
 
 
 # Clase principal del agente que gestiona la conexion WebSocket
-# Envia la informacion del equipo al conectarse y mantiene un heartbeat
-# Se reconecta automaticamente si se pierde la conexion
 class DeviceClient:
 
     def __init__(self):
@@ -114,7 +121,14 @@ class DeviceClient:
                 url = self.config["WS_URL"]
                 logger.info("Conectando a %s ...", url)
 
-                async with websockets.connect(url) as ws:
+                # Ignorar SSL estricto (Metodo a prueba de balas)
+                ssl_context = None
+                if url.startswith("wss://"):
+                    ssl_context = ssl._create_unverified_context()
+                    ssl_context.check_hostname = False
+                    ssl_context.verify_mode = ssl.CERT_NONE
+
+                async with websockets.connect(url, ssl=ssl_context) as ws:
                     self.ws = ws
                     self.reconnect_attempts = 0
                     logger.info("Conexion WebSocket establecida con %s", url)
@@ -133,7 +147,6 @@ class DeviceClient:
             except (
                 websockets.exceptions.ConnectionClosed,
                 websockets.exceptions.ConnectionClosedError,
-                websockets.exceptions.InvalidStatusCode,
                 ConnectionRefusedError,
                 OSError,
             ) as exc:
@@ -163,7 +176,6 @@ class DeviceClient:
 
     # Recopila la informacion completa del sistema y la envia al servidor
     async def _send_startup(self):
-        # Ejecuta la recopilacion en un hilo aparte porque bloquea brevemente
         info = await asyncio.to_thread(collect_system_info)
         self._mac = info["mac"]
         self._ip = info["ip"]
@@ -181,27 +193,21 @@ class DeviceClient:
                 msg = json.loads(raw)
                 msg_type = msg.get("type", "desconocido")
 
-                # Registra cada mensaje recibido en el log
                 logger.info(
                     "RECIBIDO del servidor -> type=%s  contenido=%s",
                     msg_type, json.dumps(msg, ensure_ascii=False)[:300],
                 )
 
-                # Responde a pings del servidor con un pong
                 if msg_type == "ping":
                     await self._send({
                         "type": "pong",
                         "timestamp": datetime.now().isoformat(),
                     })
-
-                # Procesa comandos enviados desde el servidor
                 elif msg_type == "command":
                     await self._handle_command(msg)
 
             except json.JSONDecodeError:
-                logger.error(
-                    "Mensaje recibido NO es JSON valido: %s", str(raw)[:200]
-                )
+                logger.error("Mensaje recibido NO es JSON valido: %s", str(raw)[:200])
 
     # Envia un heartbeat periodico al servidor con la MAC y la IP
     async def _heartbeat_loop(self):
@@ -209,18 +215,12 @@ class DeviceClient:
         while self.running:
             await asyncio.sleep(interval)
             try:
-                # Actualiza la IP por si ha cambiado desde el ultimo envio
                 self._ip = get_ip_address()
-
                 await self._send({
                     "type": "heartbeat",
                     "timestamp": datetime.now().isoformat(),
-                    "data": {
-                        "mac": self._mac,
-                        "ip": self._ip,
-                    },
+                    "data": {"mac": self._mac, "ip": self._ip},
                 })
-
             except websockets.exceptions.ConnectionClosed:
                 logger.warning("Conexion cerrada durante heartbeat.")
                 break
@@ -228,7 +228,6 @@ class DeviceClient:
     # Captura y envia una captura de pantalla periodicamente
     async def _screenshot_loop(self):
         interval = self.config["SCREENSHOT_INTERVAL"]
-        # Espera un poco antes de la primera captura para que el sistema se estabilice
         await asyncio.sleep(min(30, interval))
         while self.running:
             try:
@@ -247,10 +246,7 @@ class DeviceClient:
             await self._send({
                 "type": "screenshot",
                 "timestamp": datetime.now().isoformat(),
-                "data": {
-                    "mac": self._mac,
-                    "image": img_b64,
-                },
+                "data": {"mac": self._mac, "image": img_b64},
             })
             logger.info("Captura de pantalla enviada (%d KB)", len(img_b64) // 1024)
         else:
@@ -284,80 +280,45 @@ class DeviceClient:
         import subprocess
 
         logger.info("Ejecutando orden de apagado del equipo...")
-
-        # Notifica al servidor que se va a apagar antes de ejecutar
         await self._send({
             "type": "command_result",
-            "data": {
-                "command": "shutdown",
-                "success": True,
-                "message": "Apagado iniciado.",
-            },
+            "data": {"command": "shutdown", "success": True, "message": "Apagado iniciado."},
         })
-
-        # Envia aviso de apagado y cierra la conexion limpiamente
         await self.disconnect()
 
-        # Determina el comando de apagado segun el SO
         system = platform.system().lower()
         try:
             if system == "windows":
                 subprocess.Popen(["shutdown", "/s", "/t", "5"])
             elif system == "linux":
-                # Apagado via DBus → logind, autorizado por polkit.
-                # El instalador crea una regla polkit que permite SOLO
-                # la accion de apagar al usuario del servicio (sin sudo,
-                # sin acceso root, sin riesgo de escalada de privilegios).
                 shutdown_cmds = [
-                    # DBus directo a logind 
-                    ["busctl", "call", "org.freedesktop.login1",
-                     "/org/freedesktop/login1",
-                     "org.freedesktop.login1.Manager", "PowerOff", "b", "true"],
-                    # systemctl poweroff 
+                    ["busctl", "call", "org.freedesktop.login1", "/org/freedesktop/login1", "org.freedesktop.login1.Manager", "PowerOff", "b", "true"],
                     ["systemctl", "poweroff"],
                 ]
                 apagado_ok = False
                 for cmd in shutdown_cmds:
                     try:
-                        r = subprocess.run(
-                            cmd, capture_output=True, text=True, timeout=10,
-                        )
+                        r = subprocess.run(cmd, capture_output=True, text=True, timeout=10)
                         if r.returncode == 0:
                             logger.info("Apagado ejecutado con: %s", " ".join(cmd))
                             apagado_ok = True
                             break
-                        logger.warning(
-                            "Fallo %s (rc=%d): %s",
-                            " ".join(cmd), r.returncode, r.stderr.strip(),
-                        )
-                    except (FileNotFoundError, subprocess.TimeoutExpired) as e:
-                        logger.warning("No disponible %s: %s", " ".join(cmd), e)
+                    except (FileNotFoundError, subprocess.TimeoutExpired):
+                        pass
                 if not apagado_ok:
-                    logger.error(
-                        "No se pudo apagar el equipo. Verifica que polkit "
-                        "esta configurado: sudo python install_service.py install"
-                    )
-            elif system == "darwin":  # macOS inecesario
+                    logger.error("No se pudo apagar el equipo.")
+            elif system == "darwin": 
                 subprocess.Popen(["sudo", "shutdown", "-h", "now"])
-            else:
-                logger.error("Sistema operativo no soportado para apagado: %s", system)
         except Exception as exc:
-            logger.error("Error al ejecutar shutdown del SO: %s", exc)
+            logger.error("Error al ejecutar shutdown: %s", exc)
 
     # Serializa los datos a JSON y los envia por WebSocket
-    # Registra cada envio en el log con el tipo de mensaje
     async def _send(self, data: dict):
         if not self.ws:
             return
-
         payload = json.dumps(data)
         await self.ws.send(payload)
-
-        # Registra cada mensaje enviado en el log
-        logger.info(
-            "ENVIADO al servidor   -> type=%s  contenido=%s",
-            data.get("type", "?"), payload[:300],
-        )
+        logger.info("ENVIADO al servidor   -> type=%s  contenido=%s", data.get("type", "?"), payload[:300])
 
     # Avisa al servidor del apagado y cierra la conexion limpiamente
     async def disconnect(self):
@@ -367,10 +328,7 @@ class DeviceClient:
                 await self._send({
                     "type": "shutdown_notice",
                     "timestamp": datetime.now().isoformat(),
-                    "data": {
-                        "mac": self._mac,
-                        "message": "El equipo se esta apagando.",
-                    },
+                    "data": {"mac": self._mac, "message": "El equipo se esta apagando."},
                 })
                 await self.ws.close()
                 logger.info("Desconexion limpia completada.")
@@ -378,13 +336,11 @@ class DeviceClient:
                 logger.error("Error durante desconexion: %s", exc)
 
 
-
 # Punto de entrada principal del agente
 async def _main():
     client = DeviceClient()
     loop = asyncio.get_event_loop()
 
-    # Captura senales de cierre del sistema para desconexion limpia
     def handle_signal():
         logger.info("Senal de cierre recibida.")
         asyncio.ensure_future(client.disconnect())
@@ -393,7 +349,7 @@ async def _main():
         try:
             loop.add_signal_handler(sig, handle_signal)
         except NotImplementedError:
-            pass  # Windows no soporta add_signal_handler
+            pass 
 
     try:
         await client.run()

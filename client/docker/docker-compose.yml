@@ -7,9 +7,7 @@ services:
     restart: always
     environment:
       # URL del servidor WebSocket
-      #   Desde Docker en Linux  ws host docker internal 8000 ws client
-      #   Si el server esta en otro host  ws IP DEL SERVER 8000 ws client
-      - CLIENT_WS_URL=ws://host.docker.internal:8000/ws/client/
+      - CLIENT_WS_URL=wss://localhost/ws/client/
       - CLIENT_HEARTBEAT_INTERVAL=30
       - CLIENT_RECONNECT_DELAY=5
       - CLIENT_MAX_RECONNECT_ATTEMPTS=0
@@ -20,7 +18,7 @@ services:
       - client-logs:/app/logs
     # Permitir acceso al host desde el contenedor (Linux)
     extra_hosts:
-      - "host.docker.internal:host-gateway"
+      - "localhost:host-gateway"
     # Acceso a info del sistema del host (opcional, mejora la info reportada)
     # Descomentar si quieres que el cliente reporte info real del host:
     # privileged: true

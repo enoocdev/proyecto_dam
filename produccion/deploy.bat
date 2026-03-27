@@ -1,12 +1,13 @@
 @echo off
 REM deploy.bat — Script de despliegue para produccion (Windows)
-REM Ejecutar desde la carpeta produccion del proyecto
 setlocal enabledelayedexpansion
 
 set "SCRIPT_DIR=%~dp0"
 set "PROJECT_ROOT=%SCRIPT_DIR%.."
 set "PROD_DIR=%SCRIPT_DIR%"
 set "FRONTEND_DIR=%PROJECT_ROOT%\frontend"
+set "DOCKER_FILE=docker-compose.prod.yml"
+set "CERTS_DIR=%PROD_DIR%mikrotik_certs"
 
 REM  Comprobar que existe .env 
 if not exist "%PROD_DIR%.env" (
@@ -40,30 +41,47 @@ REM Levantar los contenedores
 echo [INFO] Levantando contenedores con Docker Compose...
 cd /d "%PROD_DIR%"
 
-docker compose -f docker-compose.prod.yml down --remove-orphans 2>nul
-docker compose -f docker-compose.prod.yml build --no-cache backend
-docker compose -f docker-compose.prod.yml up -d --wait
+docker compose -f %DOCKER_FILE% down --remove-orphans 2>nul
+docker compose -f %DOCKER_FILE% build --no-cache backend
+docker compose -f %DOCKER_FILE% up -d --wait
 
 REM Copiar frontend build al volumen de Caddy 
 echo [INFO] Copiando build del frontend al volumen...
-docker compose -f docker-compose.prod.yml cp "%FRONTEND_DIR%\dist\." caddy:/var/www/frontend/
+docker compose -f %DOCKER_FILE% cp "%FRONTEND_DIR%\dist\." caddy:/var/www/frontend/
 
 REM Migraciones y ficheros estaticos
 echo [INFO] Ejecutando migraciones de base de datos...
-docker compose -f docker-compose.prod.yml exec backend python manage.py migrate --noinput
+docker compose -f %DOCKER_FILE% exec backend python manage.py migrate --noinput
 
 echo [INFO] Recopilando ficheros estaticos...
-docker compose -f docker-compose.prod.yml exec backend python manage.py collectstatic --noinput
+docker compose -f %DOCKER_FILE% exec backend python manage.py collectstatic --noinput
 
 REM Crear superusuario automaticamente
 echo [INFO] Creando superusuario (si no existe)...
-docker compose -f docker-compose.prod.yml exec backend python manage.py createsuperuser --noinput 2>nul
+docker compose -f %DOCKER_FILE% exec backend python manage.py createsuperuser --noinput 2>nul
+
+REM --- NUEVA SECCION: EXTRAER CERTIFICADOS PARA MIKROTIK ---
+echo [INFO] Extrayendo certificados para MikroTik (TLS)...
+if not exist "%CERTS_DIR%" mkdir "%CERTS_DIR%"
+
+REM 1. Extraer la CA Raiz (root.crt)
+docker compose -f %DOCKER_FILE% cp caddy:/data/caddy/pki/authorities/local/root.crt "%CERTS_DIR%\caddy_root.crt"
+
+REM 2. Extraer el Certificado del Servidor y su Llave
+REM Nota: Caddy guarda los certificados emitidos en /data/caddy/certificates/local/tu_dominio/
+REM Como usamos la variable DOMAIN del .env, intentamos sacarlos de la ruta local
+docker compose -f %DOCKER_FILE% cp caddy:/data/caddy/pki/authorities/local/intermediate.crt "%CERTS_DIR%\server.crt" 2>nul
+docker compose -f %DOCKER_FILE% cp caddy:/data/caddy/pki/authorities/local/intermediate.key "%CERTS_DIR%\server.key" 2>nul
+
+echo [INFO] Certificados guardados en: %CERTS_DIR%
+echo [INFO] Sube caddy_root.crt, server.crt y server.key a tu MikroTik.
+REM ---------------------------------------------------------
 
 REM Resumen
 echo.
 echo [INFO] ======================================
 echo [INFO]   Despliegue completado con exito!
 echo [INFO] ======================================
-docker compose -f docker-compose.prod.yml ps
+docker compose -f %DOCKER_FILE% ps
 
 endlocal
