@@ -108,6 +108,7 @@ class DevicesViewSet(viewsets.ModelViewSet):
                     network_device=device.connected_device,
                     switch_port=device.switch_port,
                     device_id=device.id,
+                    device_ip=str(device.ip),
                 )
             else:
                 mikrotik_service.unblock_device_internet(

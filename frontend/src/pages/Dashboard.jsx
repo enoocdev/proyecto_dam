@@ -15,7 +15,7 @@ import { $screenshots } from "../stores/screenshotStore";
 import "../styles/Dashboard.css";
 import useAuth from '../hooks/useAuth';
 
-import {API_PATH_DEVICES, API_PATH_CLASSROOMS, API_PATH_CLASSROOMS_WITHOUT_PAGINATION} from '../constants';
+import {API_PATH_DEVICES, API_PATH_CLASSROOMS, API_PATH_CLASSROOMS_WITHOUT_PAGINATION, API_PATH_NETWORK_DEVICES} from '../constants';
 import WifiIcon from '@mui/icons-material/Wifi';
 import WifiOffIcon from '@mui/icons-material/WifiOff';
 import {
@@ -37,7 +37,7 @@ function DashboardPage() {
     const [selectedClassroom, setSelectedClassroom] = useState(null);
     const selectedClassroomRef = useRef(selectedClassroom);
 
-    // Mapa de network_device_url -> nombre del switch
+    // Mapa de connected_device (ID) -> nombre del switch
     const [networkDeviceNames, setNetworkDeviceNames] = useState({});
 
     // Estado de bloqueo global de internet por aula
@@ -82,26 +82,26 @@ function DashboardPage() {
         }
     };
 
-    // Resuelve los nombres de los switches a partir de las URLs de cada dispositivo
+    // Resuelve los nombres de los switches a partir del ID numerico de cada dispositivo
     const resolveNetworkDeviceNames = async (deviceList) => {
-        const urls = [...new Set(
+        const ids = [...new Set(
             deviceList
-                .map(d => d.network_device_url)
+                .map(d => d.connected_device)
                 .filter(Boolean)
         )];
 
-        // Solo fetchear URLs que aun no estan resueltas
-        const newUrls = urls.filter(url => !networkDeviceNames[url]);
-        if (newUrls.length === 0) return;
+        // Solo fetchear IDs que aun no estan resueltos
+        const newIds = ids.filter(id => !networkDeviceNames[id]);
+        if (newIds.length === 0) return;
 
         const resolved = { ...networkDeviceNames };
         await Promise.all(
-            newUrls.map(async (url) => {
+            newIds.map(async (id) => {
                 try {
-                    const { data } = await api.get(url);
-                    resolved[url] = data.name || 'Desconocido';
+                    const { data } = await api.get(`${API_PATH_NETWORK_DEVICES}${id}/`);
+                    resolved[id] = data.name || 'Desconocido';
                 } catch {
-                    resolved[url] = 'Error';
+                    resolved[id] = 'Error';
                 }
             })
         );

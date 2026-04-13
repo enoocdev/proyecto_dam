@@ -28,9 +28,9 @@ import "../styles/DeviceCard.css";
 function DeviceCard({ device, screenshot, networkDeviceNames = {}, onShutdown, onToggleInternet, onDelete }) {
     const [sheetOpen, setSheetOpen] = useState(false);
 
-    // Nombre del switch resuelto desde la URL del dispositivo
-    const switchName = device.network_device_url
-        ? networkDeviceNames[device.network_device_url] || null
+    // Nombre del switch resuelto desde el ID del dispositivo de red
+    const switchName = device.connected_device
+        ? networkDeviceNames[device.connected_device] || null
         : null;
     const switchPort = device.switch_port?.trim() || null;
 
