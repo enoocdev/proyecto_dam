@@ -1,0 +1,1850 @@
+
+\documentclass[12pt, a4paper, twoside]{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[spanish]{babel}
+\usepackage{geometry}
+\usepackage{graphicx}
+\usepackage{hyperref}
+\usepackage[table]{xcolor}
+\usepackage{listings}
+\usepackage{booktabs}
+\usepackage{longtable}
+\usepackage{tabularx}
+\usepackage{array}
+\usepackage{enumitem}
+\usepackage{fancyhdr}
+\usepackage{titlesec}
+\usepackage{tocloft}
+\usepackage{parskip}
+\usepackage{caption}
+\usepackage{subcaption}
+\usepackage{float}
+\usepackage{pdfpages}
+\usepackage{pdflscape}
+\usepackage{tikz}
+\usetikzlibrary{shapes.geometric, arrows.meta, positioning, calc, fit, shapes.symbols}
+
+\geometry{
+  left=2.5cm,
+  right=2.5cm,
+  top=2.5cm,
+  bottom=2.5cm,
+  headheight=15pt
+}
+
+% --- Colores corporativos ---
+\definecolor{primary}{HTML}{1565C0}
+\definecolor{secondary}{HTML}{0D47A1}
+\definecolor{accent}{HTML}{FF6F00}
+\definecolor{codebg}{HTML}{F5F5F5}
+\definecolor{codeframe}{HTML}{DDDDDD}
+\definecolor{linkcolor}{HTML}{1565C0}
+
+\hypersetup{
+  colorlinks=true,
+  linkcolor=secondary,
+  urlcolor=linkcolor,
+  citecolor=secondary,
+  pdfauthor={},
+  pdftitle={NetManagement — Memoria del Proyecto},
+  pdfsubject={Proyecto Final DAM},
+}
+
+\lstset{
+  backgroundcolor=\color{codebg},
+  frame=single,
+  rulecolor=\color{codeframe},
+  basicstyle=\ttfamily\small,
+  breaklines=true,
+  breakatwhitespace=true,
+  tabsize=2,
+  showstringspaces=false,
+  captionpos=b,
+  numbers=left,
+  numberstyle=\tiny\color{gray},
+  keywordstyle=\color{primary}\bfseries,
+  commentstyle=\color{gray}\itshape,
+  stringstyle=\color{accent},
+}
+
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[LE,RO]{\thepage}
+\fancyhead[RE]{\textit{NetManagement}}
+\fancyhead[LO]{\textit{\nouppercase{\leftmark}}}
+\renewcommand{\headrulewidth}{0.4pt}
+\renewcommand{\footrulewidth}{0.4pt}
+\fancyfoot[C]{\small Proyecto Final — Desarrollo de Aplicaciones Multiplataforma}
+
+\titleformat{\section}
+  {\Large\bfseries\color{primary}}{\thesection}{1em}{}[\titlerule]
+\titleformat{\subsection}
+  {\large\bfseries\color{secondary}}{\thesubsection}{1em}{}
+\titleformat{\subsubsection}
+  {\normalsize\bfseries\color{secondary!80!black}}{\thesubsubsection}{1em}{}
+
+\renewcommand{\cftsecleader}{\cftdotfill{\cftdotsep}}
+
+\newcommand{\nota}[1]{\textcolor{gray}{\textit{#1}}}
+
+\begin{document}
+
+\begin{titlepage}
+  \centering
+  \vspace*{2cm}
+
+  {\Huge\bfseries\color{primary} NetManagement\par}
+  \vspace{0.5cm}
+  {\LARGE Sistema de Monitorización y Control\\de Equipos en Aulas Informáticas\par}
+
+  \vspace{2cm}
+
+  \begin{tikzpicture}
+    \draw[primary, line width=2pt] (0,0) -- (12,0);
+  \end{tikzpicture}
+
+  \vspace{2cm}
+
+  {\Large\bfseries Memoria Justificativa del Proyecto Final de Ciclo\par}
+  \vspace{0.5cm}
+  {\large Ciclo Formativo de Grado Superior\\
+  \textbf{Desarrollo de Aplicaciones Multiplataforma (DAM)}\par}
+
+  \vspace{2cm}
+
+  \begin{tabular}{rl}
+    \textbf{Autor:}  & Enooc Domínguez Quiroga \\[0.3cm]
+    \textbf{Centro:} & IES San Mamede \\[0.3cm]
+    \textbf{Curso:}  & 2025 / 2026 \\[0.3cm]
+    \textbf{Fecha:}  & Junio de 2026 \\
+  \end{tabular}
+
+  \vfill
+
+  {\small Versión 1.0 — Junio 2026\par}
+\end{titlepage}
+
+\newpage
+\thispagestyle{empty}
+\section*{Historial de versiones}
+\begin{tabularx}{\textwidth}{ccX}
+  \toprule
+  \textbf{Versión} & \textbf{Fecha} & \textbf{Descripción} \\
+  \midrule
+  0.1 & Enero 2026  & Estructura inicial del proyecto: backend Django con modelos de dispositivos y usuarios, API REST básica con autenticación JWT. \\
+  0.2 & Febrero 2026 & Agente cliente Python funcional con WebSocket, heartbeat y capturas de pantalla. Frontend React con dashboard básico. \\
+  0.3 & Marzo 2026   & Integración con API de MikroTik: bloqueo/desbloqueo de internet por dispositivo y por aula (Network Fencing L2+L3). \\
+  0.4 & Abril 2026   & Sistema RBAC completo, gestión de aulas, equipos de red, hosts permitidos. Tema claro/oscuro en el frontend. \\
+  0.5 & Mayo 2026    & Monitor de heartbeat con Redis keyspace notifications. Auto-descubrimiento de puertos del switch. Instalador del agente como servicio del SO. \\
+  1.0 & Junio 2026   & Despliegue en producción con Docker Compose y Caddy como proxy inverso con TLS automático. Documentación final completa. \\
+  \bottomrule
+\end{tabularx}
+
+\newpage
+\tableofcontents
+\newpage
+
+\section{Introducción}
+
+\subsection{Motivación del proyecto}
+
+La gestión de aulas informáticas en centros educativos supone un reto recurrente para los docentes y administradores de sistemas. Las tareas cotidianas —como comprobar qué equipos están encendidos, enviar órdenes de apagado remoto, o restringir el acceso a internet durante un examen— requieren herramientas específicas que, en muchos casos, no están disponibles o resultan costosas y difíciles de integrar con la infraestructura existente.
+
+Las soluciones comerciales de gestión de aula (por ejemplo, \textit{Veyon}, \textit{LanSchool} o \textit{NetSupport School}) proporcionan funcionalidades de monitorización de pantallas y control básico, pero carecen de una característica crítica para entornos con evaluaciones presenciales: el \textbf{control de red a nivel físico}. Es decir, la capacidad de bloquear o aislar el tráfico de red de un equipo actuando directamente sobre el puerto del switch al que está conectado.
+
+Este proyecto nace de la necesidad real de un centro educativo que dispone de infraestructura de red \textbf{MikroTik} y busca una solución que integre:
+
+\begin{itemize}
+  \item Monitorización en tiempo real del estado de los equipos de un aula.
+  \item Control remoto de los equipos (apagado, reinicio).
+  \item Visualización de capturas de pantalla de los equipos de los alumnos.
+  \item \textbf{Aislamiento dinámico de red} (``Network Fencing'') mediante la API de MikroTik, actuando sobre reglas de firewall y \textit{split-horizon} de los puertos del bridge.
+\end{itemize}
+
+\subsection{Objetivos del proyecto}
+
+Los objetivos principales de \textbf{NetManagement} son:
+
+\begin{enumerate}
+  \item \textbf{Centralizar la gestión de aulas informáticas} en una única interfaz web accesible desde cualquier navegador.
+  \item \textbf{Proporcionar monitorización en tiempo real} del estado de los equipos mediante WebSockets, incluyendo detección automática de encendido/apagado y visualización de capturas de pantalla.
+  \item \textbf{Permitir el control remoto} de los equipos del aula: apagado, reinicio y otras acciones.
+  \item \textbf{Implementar el aislamiento de red dinámico} (\textit{Network Fencing}) interactuando con equipos de red MikroTik, permitiendo bloquear internet a nivel individual o por aula completa.
+  \item \textbf{Gestionar usuarios con control de acceso basado en roles} (RBAC), diferenciando entre administradores y profesores con aulas asignadas.
+  \item \textbf{Facilitar el despliegue} mediante contenedores Docker y un proxy inverso con TLS automático.
+\end{enumerate}
+
+\subsection{Descripción general del sistema}
+
+\textbf{NetManagement} es un sistema distribuido compuesto por cuatro capas:
+
+\begin{enumerate}
+  \item \textbf{Capa de gestión (Frontend):} Aplicación web SPA desarrollada con React 19, Material UI 7 y Vite. Permite a los profesores y administradores visualizar el estado de los equipos, enviar comandos y gestionar la configuración del sistema.
+
+  \item \textbf{Servidor central (Backend):} API REST y servidor de WebSockets basado en Django 5, Django REST Framework y Django Channels (Daphne). Recibe las peticiones del frontend, gestiona la lógica de negocio, y se comunica tanto con los agentes como con los equipos de red MikroTik.
+
+  \item \textbf{Capa de infraestructura de red:} Los routers y switches MikroTik ejecutan las reglas de firewall y aislamiento de red dictadas por el backend a través de su API nativa (librouteros).
+
+  \item \textbf{Capa de aula (Agentes):} Un cliente ligero en Python se instala en cada equipo del aula. Se conecta al servidor por WebSocket, reporta información del sistema, envía capturas de pantalla periódicas y ejecuta los comandos recibidos (apagado, reinicio, etc.).
+\end{enumerate}
+
+\section{Definición del alcance}
+
+\subsection{Qué hace el proyecto}
+
+NetManagement cubre las siguientes funcionalidades:
+
+\begin{itemize}
+  \item \textbf{Gestión de aulas:} Creación, edición y eliminación de aulas. Asignación de dispositivos a aulas.
+  \item \textbf{Gestión de dispositivos monitorizados:} Registro automático de equipos al conectarse el agente. Visualización del estado (online/offline), IP, hostname, MAC y puerto del switch.
+  \item \textbf{Monitorización en tiempo real:} Actualización instantánea del estado de los equipos vía WebSocket. Capturas de pantalla periódicas retransmitidas al dashboard sin almacenamiento persistente.
+  \item \textbf{Control remoto de equipos:} Apagado remoto de equipos individuales.
+  \item \textbf{Network Fencing — Bloqueo de internet:}
+  \begin{itemize}
+    \item Bloqueo individual por dispositivo (reglas IP firewall + split-horizon en el puerto del switch).
+    \item Bloqueo por aula completa (aplica reglas a todos los dispositivos del aula).
+    \item Hosts permitidos configurables (IPs que permanecen accesibles durante el bloqueo, por ejemplo, el servidor de exámenes).
+  \end{itemize}
+  \item \textbf{Gestión de equipos de red:} CRUD de switches/routers MikroTik con credenciales cifradas (Fernet).
+  \item \textbf{Gestión de usuarios y permisos:}
+  \begin{itemize}
+    \item Autenticación JWT con refresco automático de tokens.
+    \item Modelo RBAC con grupos y permisos granulares de Django.
+    \item Administradores: acceso completo a toda la configuración.
+    \item Profesores: acceso limitado a las aulas que tienen asignadas.
+  \end{itemize}
+  \item \textbf{Detección automática de equipos offline:} Sistema de heartbeat basado en claves TTL de Redis con notificaciones \textit{keyspace}.
+  \item \textbf{Auto-descubrimiento de puertos de red:} Al conectarse un agente, el backend consulta la tabla L2 del bridge MikroTik para mapear la MAC al puerto físico del switch.
+\end{itemize}
+
+\subsection{Qué NO hace el proyecto}
+
+Es importante delimitar claramente las funciones que quedan fuera del alcance de este sistema:
+
+\begin{itemize}
+  \item \textbf{No es un software de control de aula tradicional:} No permite ver la pantalla de los alumnos en tiempo real con vídeo en streaming de alta calidad. Las capturas de pantalla son imágenes estáticas periódicas (JPEG comprimido).
+  \item \textbf{No gestiona la configuración de los equipos de red MikroTik:} El sistema solo crea y elimina reglas de firewall y modifica el split-horizon de puertos específicos. No configura VLANs, enrutamiento ni otros aspectos de la infraestructura de red.
+  \item \textbf{No incluye inventario completo de hardware/software:} Recoge información básica del sistema (SO, CPU, RAM, disco), pero no sustituye a herramientas de inventario como GLPI o OCS Inventory.
+  \item \textbf{No implementa Wake-on-LAN:} El encendido remoto de equipos queda fuera del MVP.
+  \item \textbf{No tiene chat ni mensajería integrada:} No se puede enviar mensajes a los equipos del aula.
+  \item \textbf{No es multiplataforma en el frontend:} La interfaz de administración es exclusivamente web. No existe una aplicación móvil nativa.
+\end{itemize}
+
+\subsection{Interacción con sistemas externos}
+
+El único sistema externo con el que interactúa NetManagement es la \textbf{infraestructura de red MikroTik}. Esta interacción se realiza de la siguiente manera:
+
+\begin{itemize}
+  \item El backend se conecta a la API de MikroTik RouterOS mediante la librería Python \texttt{librouteros}.
+  \item La conexión se realiza por el puerto API estándar (8728) o por el puerto API-SSL (8729) con TLS.
+  \item Las operaciones se limitan a:
+  \begin{itemize}
+    \item Consulta de la tabla \texttt{/interface/bridge/host} para auto-descubrir puertos.
+    \item Consulta de la tabla \texttt{/ip/arp} como alternativa.
+    \item Creación y eliminación de reglas en \texttt{/ip/firewall/filter}.
+    \item Modificación del \texttt{horizon} en \texttt{/interface/bridge/port}.
+    \item Activación/desactivación de \texttt{use-ip-firewall} en \texttt{/interface/bridge/settings}.
+  \end{itemize}
+  \item Los equipos de red MikroTik \textbf{no forman parte del proyecto}; son infraestructura preexistente del centro. El proyecto asume que están correctamente configurados con un bridge y acceso API habilitado.
+\end{itemize}
+
+\subsection{Definición del MVP (Producto Mínimo Viable)}
+
+Las funcionalidades que conforman el MVP son:
+
+\begin{enumerate}
+  \item Registro automático y monitorización de equipos (online/offline) en tiempo real.
+  \item Dashboard web con visualización por aulas y capturas de pantalla periódicas.
+  \item Apagado remoto de equipos individuales.
+  \item Bloqueo/desbloqueo de internet por dispositivo y por aula (Network Fencing vía MikroTik).
+  \item Gestión de aulas, dispositivos de red, hosts permitidos y usuarios.
+  \item Autenticación JWT y sistema de permisos por roles.
+  \item Despliegue en producción con Docker Compose y Caddy.
+\end{enumerate}
+
+\textbf{Funcionalidades fuera del MVP} (ampliaciones futuras):
+
+\begin{itemize}
+  \item Wake-on-LAN para encendido remoto.
+  \item Streaming de pantalla en vídeo en tiempo real.
+  \item Envío de mensajes y notificaciones a los equipos.
+  \item Chat entre profesor y alumno.
+  \item Transferencia de archivos al equipo del alumno.
+  \item Registro de historial de actividad y auditoría.
+  \item Aplicación móvil nativa para profesores.
+  \item Integración con sistemas de directorio (LDAP/Active Directory).
+\end{itemize}
+
+\section{Análisis de requisitos}
+
+\subsection{Requisitos funcionales}
+
+\begin{longtable}{cp{11cm}}
+  \toprule
+  \textbf{ID} & \textbf{Descripción} \\
+  \midrule
+  \endhead
+  RF-01 & El sistema debe permitir el registro automático de equipos al conectarse el agente. \\
+  RF-02 & El sistema debe mostrar el estado en tiempo real de cada equipo (online/offline). \\
+  RF-03 & El sistema debe permitir la visualización de capturas de pantalla periódicas. \\
+  RF-04 & El sistema debe permitir el apagado remoto de equipos individuales. \\
+  RF-05 & El sistema debe permitir bloquear/desbloquear el acceso a internet de un equipo individual actuando sobre el equipo de red MikroTik. \\
+  RF-06 & El sistema debe permitir bloquear/desbloquear el acceso a internet de todos los equipos de un aula simultáneamente. \\
+  RF-07 & El sistema debe permitir configurar hosts permitidos (IPs accesibles durante el bloqueo). \\
+  RF-08 & El sistema debe gestionar aulas: crear, editar, eliminar y asignar dispositivos. \\
+  RF-09 & El sistema debe gestionar equipos de red (switches/routers MikroTik): crear, editar y eliminar, almacenando credenciales de forma cifrada. \\
+  RF-10 & El sistema debe implementar autenticación basada en tokens JWT con refresco automático. \\
+  RF-11 & El sistema debe implementar RBAC con permisos granulares basados en grupos de Django. \\
+  RF-12 & Los administradores deben poder gestionar usuarios, grupos y permisos. \\
+  RF-13 & Los profesores solo deben poder ver y actuar sobre las aulas que tienen asignadas. \\
+  RF-14 & El sistema debe auto-descubrir el puerto físico del switch al que está conectado cada equipo, consultando la tabla L2 del bridge MikroTik. \\
+  RF-15 & El sistema debe detectar automáticamente cuando un equipo deja de responder (heartbeat expirado) y marcarlo como offline. \\
+  RF-16 & El sistema debe proporcionar un agente multiplataforma (Windows y Linux) que se instale como servicio del sistema. \\
+  \bottomrule
+\end{longtable}
+
+\subsection{Requisitos no funcionales}
+
+\begin{longtable}{cp{11cm}}
+  \toprule
+  \textbf{ID} & \textbf{Descripción} \\
+  \midrule
+  \endhead
+  RNF-01 & La interfaz web debe ser responsiva y compatible con navegadores modernos (Chrome, Firefox, Edge). \\
+  RNF-02 & La comunicación en tiempo real debe tener una latencia inferior a 2 segundos en red local. \\
+  RNF-03 & Las credenciales de los equipos de red deben almacenarse cifradas con Fernet (AES-128-CBC). \\
+  RNF-04 & El sistema debe soportar al menos 50 equipos conectados simultáneamente. \\
+  RNF-05 & El despliegue debe realizarse con contenedores Docker para facilitar la instalación. \\
+  RNF-06 & El proxy inverso debe gestionar el TLS de forma automática (certificados Let's Encrypt vía Caddy). \\
+  RNF-07 & La aplicación debe seguir los principios REST en el diseño de la API. \\
+  RNF-08 & Las contraseñas de usuario deben almacenarse con hash seguro (PBKDF2 de Django). \\
+  RNF-09 & El agente cliente debe funcionar en Windows 10+ y distribuciones Linux con escritorio. \\
+  RNF-10 & El sistema debe ser escalable horizontalmente añadiendo más instancias del backend detrás del proxy. \\
+  \bottomrule
+\end{longtable}
+
+\section{Casos de uso}
+
+\subsection{Actores del sistema}
+
+\begin{itemize}
+  \item \textbf{Administrador:} Usuario con acceso completo. Puede gestionar toda la configuración del sistema: usuarios, grupos, permisos, aulas, equipos de red, hosts permitidos y dispositivos.
+  \item \textbf{Profesor:} Usuario con permisos limitados. Solo puede visualizar y actuar sobre las aulas que tiene asignadas: ver el estado de los equipos, apagar equipos, bloquear/desbloquear internet, y ver capturas de pantalla.
+  \item \textbf{Agente (sistema):} Programa instalado en cada equipo del aula. Se conecta automáticamente al servidor, envía información del sistema, capturas de pantalla y ejecuta los comandos recibidos.
+  \item \textbf{Equipo de red MikroTik (sistema externo):} Infraestructura de switching a la que el backend se conecta para aplicar reglas de aislamiento de red.
+\end{itemize}
+
+\subsection{Diagrama de casos de uso}
+
+\begin{figure}[H]
+\centering
+\resizebox{\textwidth}{!}{%
+\begin{tikzpicture}[
+  actor/.style={
+    draw, minimum width=1.5cm, minimum height=1cm, align=center, font=\small\bfseries, fill=primary!10, rounded corners
+  },
+  usecase/.style={
+    draw, ellipse, minimum width=3.5cm, minimum height=1.2cm, align=center, font=\small, fill=white, text width=3cm
+  },
+  system/.style={
+    draw, dashed, rounded corners=5pt, inner sep=15pt, color=primary!60
+  },
+  arrow/.style={-{Stealth[length=3mm]}, thick}
+]
+
+\node[actor] (admin) at (-7, 0) {Administrador};
+\node[actor] (prof) at (-7, -7) {Profesor};
+\node[actor] (agent) at (9, -2) {Agente\\(Sistema)};
+\node[actor] (mikrotik) at (9, -6) {MikroTik\\(Externo)};
+
+\node[usecase] (uc1) at (1, 2) {Gestionar usuarios y grupos};
+\node[usecase] (uc2) at (1, 0.5) {Gestionar equipos de red};
+\node[usecase] (uc3) at (1, -1) {Gestionar hosts permitidos};
+\node[usecase] (uc4) at (1, -2.5) {Gestionar aulas};
+\node[usecase] (uc5) at (1, -4.2) {Ver dashboard en tiempo real};
+\node[usecase] (uc6) at (1, -5.7) {Apagar equipo remoto};
+\node[usecase] (uc7) at (1, -7.2) {Bloquear internet (dispositivo)};
+\node[usecase] (uc8) at (1, -8.7) {Bloquear internet (aula)};
+\node[usecase] (uc9) at (1, -10.2) {Ver capturas de pantalla};
+
+\node[system, fit=(uc1)(uc2)(uc3)(uc4)(uc5)(uc6)(uc7)(uc8)(uc9), label={[font=\large\bfseries, color=primary]above:NetManagement}] {};
+
+\draw[arrow] (admin) -- (uc1);
+\draw[arrow] (admin) -- (uc2);
+\draw[arrow] (admin) -- (uc3);
+\draw[arrow] (admin) -- (uc4);
+\draw[arrow] (admin) -- (uc5);
+\draw[arrow] (admin) -- (uc6);
+\draw[arrow] (admin) -- (uc7);
+\draw[arrow] (admin) -- (uc8);
+
+% Conexiones Profesor
+\draw[arrow] (prof) -- (uc5);
+\draw[arrow] (prof) -- (uc6);
+\draw[arrow] (prof) -- (uc7);
+\draw[arrow] (prof) -- (uc8);
+\draw[arrow] (prof) -- (uc9);
+
+\draw[arrow, dashed] (agent) -- (uc5);
+\draw[arrow, dashed] (agent) -- (uc6);
+\draw[arrow, dashed] (agent) -- (uc9);
+
+\draw[arrow, dashed] (mikrotik) -- (uc7);
+\draw[arrow, dashed] (mikrotik) -- (uc8);
+
+\end{tikzpicture}
+}
+\caption{Diagrama de casos de uso del sistema NetManagement.}
+\label{fig:casos-uso}
+\end{figure}
+
+\subsection{Descripción de los casos de uso principales}
+
+\subsubsection{CU-01: Ver dashboard en tiempo real}
+
+\begin{tabularx}{\textwidth}{lX}
+  \toprule
+  \textbf{Actor principal} & Profesor / Administrador \\
+  \textbf{Precondiciones}  & El usuario está autenticado y tiene permisos de visualización. \\
+  \textbf{Flujo principal}  &
+  \begin{enumerate}[nosep]
+    \item El usuario accede al dashboard.
+    \item El sistema carga la lista de aulas (todas si es admin; solo las asignadas si es profesor).
+    \item El usuario selecciona un aula.
+    \item El sistema muestra los dispositivos del aula en una cuadrícula con su estado (online/offline), hostname, IP y la última captura de pantalla.
+    \item El sistema actualiza el estado automáticamente vía WebSocket.
+  \end{enumerate} \\
+  \textbf{Postcondiciones} & El usuario visualiza el estado actualizado de los equipos. \\
+  \bottomrule
+\end{tabularx}
+
+\subsubsection{CU-02: Bloquear internet de un dispositivo}
+
+\begin{tabularx}{\textwidth}{lX}
+  \toprule
+  \textbf{Actor principal} & Profesor / Administrador \\
+  \textbf{Precondiciones}  & El dispositivo tiene un equipo de red asignado y un puerto detectado. \\
+  \textbf{Flujo principal}  &
+  \begin{enumerate}[nosep]
+    \item El usuario pulsa el botón de bloqueo de internet en la tarjeta del dispositivo.
+    \item El backend se conecta a la API del router MikroTik asignado.
+    \item El backend crea reglas \texttt{accept} para cada host permitido y reglas \texttt{drop} para el resto del tráfico.
+    \item El backend aplica \textit{split-horizon} en el puerto del bridge correspondiente.
+    \item El sistema notifica al dashboard del cambio de estado vía WebSocket.
+  \end{enumerate} \\
+  \textbf{Flujo alternativo} & Si el equipo de red no responde, se devuelve un error 502 (Bad Gateway). \\
+  \textbf{Postcondiciones} & El dispositivo pierde acceso a internet excepto a los hosts permitidos. \\
+  \bottomrule
+\end{tabularx}
+
+\subsubsection{CU-03: Bloquear internet de un aula completa}
+
+\begin{tabularx}{\textwidth}{lX}
+  \toprule
+  \textbf{Actor principal} & Profesor / Administrador \\
+  \textbf{Precondiciones}  & El aula tiene dispositivos con equipos de red asignados. \\
+  \textbf{Flujo principal}  &
+  \begin{enumerate}[nosep]
+    \item El usuario pulsa el botón de bloqueo global en la barra del aula.
+    \item El backend agrupa los dispositivos del aula por equipo de red.
+    \item Para cada equipo de red, abre una conexión API y crea las reglas de firewall y split-horizon para todos los dispositivos del aula.
+    \item Se actualiza el estado de bloqueo del aula y de cada dispositivo en la base de datos.
+    \item El dashboard recibe la notificación vía WebSocket.
+  \end{enumerate} \\
+  \textbf{Postcondiciones} & Todos los equipos del aula pierden acceso a internet excepto a los hosts permitidos. \\
+  \bottomrule
+\end{tabularx}
+
+\subsubsection{CU-04: Apagar equipo remoto}
+
+\begin{tabularx}{\textwidth}{lX}
+  \toprule
+  \textbf{Actor principal} & Profesor / Administrador \\
+  \textbf{Precondiciones}  & El dispositivo está online. \\
+  \textbf{Flujo principal}  &
+  \begin{enumerate}[nosep]
+    \item El usuario pulsa el botón de apagado en la tarjeta del dispositivo.
+    \item El backend envía un mensaje al grupo de canales del agente (identificado por su MAC).
+    \item El agente recibe el comando \texttt{shutdown} y ejecuta el apagado del sistema operativo.
+    \item El agente envía un aviso de apagado al servidor antes de cerrar la conexión.
+    \item El dispositivo se marca como offline en el dashboard.
+  \end{enumerate} \\
+  \textbf{Flujo alternativo} & Si el dispositivo no está online, se devuelve un error 409 (Conflict). \\
+  \textbf{Postcondiciones} & El equipo físico se apaga. \\
+  \bottomrule
+\end{tabularx}
+
+\section{Arquitectura del sistema}
+
+\subsection{Visión general de la arquitectura}
+
+NetManagement sigue una arquitectura distribuida orientada a eventos con cuatro capas bien diferenciadas. La comunicación entre el frontend y el backend combina peticiones REST para operaciones CRUD con WebSockets para la transmisión en tiempo real.
+
+\subsection{Diagrama de despliegue}
+
+\begin{figure}[H]
+\centering
+\resizebox{\textwidth}{!}{%
+\begin{tikzpicture}[
+  node distance=1.5cm,
+  component/.style={draw, rounded corners, minimum width=3cm, minimum height=1.2cm, align=center, font=\small, fill=primary!8},
+  database/.style={draw, cylinder, shape border rotate=90, minimum width=2cm, minimum height=1.2cm, align=center, font=\small, fill=accent!10, aspect=0.3},
+  external/.style={draw, rounded corners, minimum width=2.5cm, minimum height=1cm, align=center, font=\small, fill=red!8, dashed},
+  network/.style={draw, rounded corners=10pt, minimum width=3cm, minimum height=1.2cm, align=center, font=\small\bfseries, fill=gray!15, thick},
+  container/.style={draw, dashed, rounded corners=8pt, inner sep=12pt, color=primary!50, fill=primary!3},
+  label/.style={font=\small\bfseries, color=primary},
+  arrow/.style={-{Stealth[length=3mm]}, thick},
+  biarrow/.style={{Stealth[length=3mm]}-{Stealth[length=3mm]}, thick}
+]
+
+% Internet
+\node[network] (internet) at (0, 8) {Internet};
+
+% Navegador
+\node[component, fill=green!8, text width=3cm] (browser) at (-5, 6) {Navegador (React SPA)};
+
+% Docker Compose
+\node[container, minimum width=13cm, minimum height=7cm] (docker) at (0, 1.5) {};
+\node[label, anchor=north west] at (docker.north west) {Docker Compose (Producción)};
+
+% Caddy
+\node[component, fill=green!15, text width=3.5cm] (caddy) at (0, 4.5) {Caddy 2 (Proxy + TLS)};
+
+% Backend
+\node[component, text width=3.5cm] (backend) at (0, 2) {Django 5 + Daphne (ASGI)};
+
+% PostgreSQL
+\node[database] (postgres) at (-4, -0.5) {PostgreSQL 16};
+
+% Redis
+\node[database] (redis) at (4, -0.5) {Redis 7};
+
+% Agentes
+\node[component, fill=yellow!15, text width=3cm] (agents) at (7, 6) {Agentes Python (PCs Aula)};
+
+% MikroTik
+\node[external, text width=3cm] (mikrotik) at (7, 2) {Routers / Switches MikroTik};
+
+% Flechas
+\draw[biarrow] (browser) -- node[above, font=\scriptsize] {HTTPS} (caddy);
+\draw[biarrow] (caddy) -- node[right, font=\scriptsize] {HTTP/WS} (backend);
+\draw[biarrow] (backend) -- node[above, font=\scriptsize] {SQL} (postgres);
+\draw[biarrow] (backend) -- node[above, font=\scriptsize] {Pub/Sub} (redis);
+\draw[biarrow] (agents) -- node[right, font=\scriptsize] {WSS} (caddy);
+\draw[arrow] (backend) -- node[above, font=\scriptsize] {API MikroTik} (mikrotik);
+\draw[arrow] (internet) -- (caddy);
+
+% Red Docker
+\node[font=\tiny\itshape, color=gray] at (-4, 0.8) {backend\_net (internal)};
+\node[font=\tiny\itshape, color=gray] at (2, 3.5) {frontend\_net};
+
+\end{tikzpicture}
+}
+\caption{Diagrama de despliegue del sistema NetManagement.}
+\label{fig:despliegue}
+\end{figure}
+
+\subsection{Componentes del sistema}
+
+\subsubsection{Backend (Django 5 + DRF + Channels)}
+
+El backend es el núcleo del sistema. Está desarrollado en Python con el framework Django 5 y expone:
+
+\begin{itemize}
+  \item Una \textbf{API REST} mediante Django REST Framework para todas las operaciones CRUD.
+  \item Un servidor \textbf{WebSocket} mediante Django Channels y Daphne (ASGI) para comunicación bidireccional en tiempo real.
+  \item Un módulo de \textbf{servicio MikroTik} (\texttt{mikrotik\_service.py}) que encapsula toda la lógica de interacción con la API de los equipos de red.
+  \item Un \textbf{monitor de heartbeat} basado en claves TTL de Redis con notificaciones \textit{keyspace} para detección de equipos offline.
+\end{itemize}
+
+El backend se ejecuta con \textbf{Daphne} como servidor ASGI, que maneja tanto las peticiones HTTP como las conexiones WebSocket de forma asíncrona.
+
+\subsubsection{Frontend (React 19 + Vite + Material UI 7)}
+
+La interfaz de usuario es una Single Page Application (SPA) desarrollada con:
+
+\begin{itemize}
+  \item \textbf{React 19:} Biblioteca de UI con hooks y componentes funcionales.
+  \item \textbf{Vite:} Bundler de nueva generación con HMR instantáneo.
+  \item \textbf{Material UI 7:} Biblioteca de componentes con soporte para tema claro/oscuro.
+  \item \textbf{Nanostores:} Gestión de estado ligera con persistencia en \texttt{sessionStorage}.
+  \item \textbf{react-use-websocket:} Hook declarativo para la conexión WebSocket del dashboard.
+  \item \textbf{Axios:} Cliente HTTP con interceptores para gestión automática de tokens JWT.
+\end{itemize}
+
+\subsubsection{Agente cliente (Python)}
+
+Un programa ligero en Python que se instala en cada equipo del aula:
+
+\begin{itemize}
+  \item Se conecta al backend por WebSocket (\texttt{wss://}).
+  \item Envía un reporte completo del sistema al conectarse (\textit{startup}).
+  \item Envía heartbeats periódicos con MAC e IP.
+  \item Envía capturas de pantalla periódicas (JPEG comprimido en base64).
+  \item Escucha y ejecuta comandos del servidor (apagado, reinicio, etc.).
+  \item Se instala como servicio del sistema (tarea programada en Windows, servicio systemd en Linux).
+  \item Reconexión automática con backoff exponencial.
+\end{itemize}
+
+\subsubsection{Proxy inverso (Caddy 2)}
+
+Caddy actúa como punto de entrada único al sistema:
+
+\begin{itemize}
+  \item \texttt{/api/*} → Backend Django REST (eliminando el prefijo \texttt{/api}).
+  \item \texttt{/ws/*} → Backend Daphne (WebSockets).
+  \item \texttt{/admin/*} → Panel de administración de Django.
+  \item \texttt{/static/*} → Archivos estáticos recopilados con \texttt{collectstatic}.
+  \item \texttt{/*} → SPA de React (con \texttt{try\_files} para soportar el enrutamiento del lado del cliente).
+  \item TLS automático con certificados Let's Encrypt.
+  \item Compresión gzip y zstd.
+  \item Cabeceras de seguridad (X-Content-Type-Options, X-Frame-Options, Referrer-Policy).
+\end{itemize}
+
+\subsection{Redes Docker}
+
+El despliegue en producción utiliza dos redes Docker aisladas:
+
+\begin{table}[H]
+\centering
+\begin{tabularx}{\textwidth}{llX}
+  \toprule
+  \textbf{Red} & \textbf{Tipo} & \textbf{Propósito} \\
+  \midrule
+  \texttt{backend\_net} & bridge (no internal) & Conecta backend, PostgreSQL y Redis. No es \textit{internal} porque el backend necesita alcanzar los routers MikroTik en la red local. \\
+  \texttt{frontend\_net} & bridge & Conecta Caddy con el backend. Caddy es el único servicio que expone puertos al exterior (80 y 443). \\
+  \bottomrule
+\end{tabularx}
+\caption{Redes Docker del despliegue en producción.}
+\end{table}
+
+\section{Diseño de la base de datos}
+
+A continuación se presentan los diagramas del modelo de datos del sistema. El primero sigue la \textbf{notación de Chen} (modelo conceptual con entidades, atributos y relaciones), y el segundo la \textbf{notación crow's foot} (modelo relacional más cercano a la implementación física).
+
+\begin{landscape}
+\begin{figure}[H]
+\centering
+\resizebox{\linewidth}{!}{%
+\begin{tikzpicture}[
+  entity/.style={draw, rectangle, minimum width=3.2cm, minimum height=1.3cm, align=center, font=\normalsize\bfseries, fill=primary!10, rounded corners=2pt, line width=0.8pt},
+  attribute/.style={draw, ellipse, minimum width=2cm, minimum height=0.8cm, align=center, font=\scriptsize, fill=white, line width=0.5pt},
+  key/.style={draw, ellipse, minimum width=2cm, minimum height=0.8cm, align=center, font=\scriptsize\bfseries, fill=yellow!20, line width=0.5pt},
+  relationship/.style={draw, diamond, minimum width=2.5cm, minimum height=1.2cm, align=center, font=\small, fill=accent!15, aspect=2, line width=0.8pt},
+  arrow/.style={-, line width=0.6pt},
+  card/.style={font=\small, color=red!70!black, font=\bfseries}
+]
+
+% ── Entidades principales (distribuidas en rejilla amplia) ──
+\node[entity] (user) at (0, 0) {User};
+\node[entity] (classroom) at (11, 0) {Classroom};
+\node[entity] (device) at (11, -10) {Device};
+\node[entity] (netdev) at (22, -10) {NetworkDevice};
+\node[entity] (allowed) at (22, 0) {AllowedHost};
+\node[entity] (group) at (0, -10) {Group};
+
+% ── Relaciones ──
+\node[relationship] (r1) at (5.5, 0) {asignado\_a};
+\node[relationship] (r2) at (11, -5) {contiene};
+\node[relationship] (r3) at (16.5, -10) {conectado\_a};
+\node[relationship] (r4) at (0, -5) {pertenece\_a};
+
+% ── Flechas con cardinalidad ──
+\draw[arrow] (user) -- (r1) node[midway, above, card] {N};
+\draw[arrow] (r1) -- (classroom) node[midway, above, card] {M};
+\draw[arrow] (classroom) -- (r2) node[midway, right, card] {1};
+\draw[arrow] (r2) -- (device) node[midway, right, card] {N};
+\draw[arrow] (device) -- (r3) node[midway, above, card] {N};
+\draw[arrow] (r3) -- (netdev) node[midway, above, card] {1};
+\draw[arrow] (user) -- (r4) node[midway, left, card] {N};
+\draw[arrow] (r4) -- (group) node[midway, left, card] {M};
+
+% ── Atributos User (arriba y a la izquierda) ──
+\node[key] (u_id) at (-3, 2) {\underline{id} (PK)};
+\node[attribute] (u_user) at (-0.5, 2.5) {username};
+\node[attribute] (u_pass) at (2, 2) {password};
+\node[attribute] (u_email) at (-3.5, 0) {email};
+\node[attribute] (u_staff) at (-3, -1.5) {is\_staff};
+
+\draw[arrow] (user) -- (u_id);
+\draw[arrow] (user) -- (u_user);
+\draw[arrow] (user) -- (u_pass);
+\draw[arrow] (user) -- (u_email);
+\draw[arrow] (user) -- (u_staff);
+
+% ── Atributos Classroom (arriba) ──
+\node[key] (c_id) at (8.5, 2.2) {\underline{id} (PK)};
+\node[attribute] (c_name) at (11, 2.5) {name};
+\node[attribute] (c_block) at (13.5, 2.2) {is\_internet\_blocked};
+
+\draw[arrow] (classroom) -- (c_id);
+\draw[arrow] (classroom) -- (c_name);
+\draw[arrow] (classroom) -- (c_block);
+
+% ── Atributos Device (abajo, muy espaciados) ──
+\node[key] (d_id) at (7.5, -9) {\underline{id} (PK)};
+\node[attribute] (d_mac) at (7.5, -11.5) {mac};
+\node[attribute] (d_ip) at (9.5, -12.5) {ip};
+\node[attribute] (d_host) at (11.5, -12.5) {hostname};
+\node[attribute] (d_port) at (13.5, -11.5) {switch\_port};
+\node[attribute] (d_on) at (14.5, -9) {is\_online};
+
+\draw[arrow] (device) -- (d_id);
+\draw[arrow] (device) -- (d_mac);
+\draw[arrow] (device) -- (d_ip);
+\draw[arrow] (device) -- (d_host);
+\draw[arrow] (device) -- (d_port);
+\draw[arrow] (device) -- (d_on);
+
+% ── Atributos NetworkDevice (abajo y a la derecha) ──
+\node[key] (n_id) at (19, -8.5) {\underline{id} (PK)};
+\node[attribute] (n_name) at (22, -8) {name};
+\node[attribute] (n_ip) at (25, -8.5) {ip\_address};
+\node[attribute] (n_user) at (25.5, -10.5) {username};
+\node[attribute] (n_pass) at (22, -12.5) {password (cifrada)};
+
+\draw[arrow] (netdev) -- (n_id);
+\draw[arrow] (netdev) -- (n_name);
+\draw[arrow] (netdev) -- (n_ip);
+\draw[arrow] (netdev) -- (n_user);
+\draw[arrow] (netdev) -- (n_pass);
+
+% ── Atributos AllowedHost (arriba y a la derecha) ──
+\node[key] (a_id) at (19.5, 2.2) {\underline{id} (PK)};
+\node[attribute] (a_ip) at (22, 2.5) {ip\_address};
+\node[attribute] (a_name) at (24.5, 2.2) {name};
+
+\draw[arrow] (allowed) -- (a_id);
+\draw[arrow] (allowed) -- (a_ip);
+\draw[arrow] (allowed) -- (a_name);
+
+\node[key] (g_id) at (-3, -9.5) {\underline{id} (PK)};
+\node[attribute] (g_name) at (-3, -11.5) {name};
+
+\draw[arrow] (group) -- (g_id);
+\draw[arrow] (group) -- (g_name);
+
+\end{tikzpicture}
+}% end resizebox
+\caption{Diagrama Entidad-Relación en notación de Chen.}
+\label{fig:er-chen}
+\end{figure}
+
+\newsavebox{\boxU}
+\savebox{\boxU}{\scriptsize%
+  \begin{tabular}{|l|}
+  \hline
+  \rowcolor{primary!20}\multicolumn{1}{|c|}{\textbf{\textsf{users\_user}}} \\
+  \hline
+  \textbf{PK} id : bigint \\
+  username : varchar(150) \textbf{UK} \\
+  password : varchar(128) \\
+  first\_name : varchar(150) \\
+  last\_name : varchar(150) \\
+  email : varchar(254) \\
+  is\_superuser : boolean \\
+  is\_staff : boolean \\
+  is\_active : boolean \\
+  last\_login : datetime \\
+  date\_joined : datetime \\
+  \hline
+  \end{tabular}%
+}
+
+\newsavebox{\boxCL}
+\savebox{\boxCL}{\scriptsize%
+  \begin{tabular}{|l|}
+  \hline
+  \rowcolor{primary!20}\multicolumn{1}{|c|}{\textbf{\textsf{devices\_classroom}}} \\
+  \hline
+  \textbf{PK} id : bigint \\
+  name : varchar \textbf{UK} \\
+  is\_internet\_blocked : boolean \\
+  \hline
+  \end{tabular}%
+}
+
+\newsavebox{\boxAH}
+\savebox{\boxAH}{\scriptsize%
+  \begin{tabular}{|l|}
+  \hline
+  \rowcolor{primary!20}\multicolumn{1}{|c|}{\textbf{\textsf{devices\_allowedhost}}} \\
+  \hline
+  \textbf{PK} id : bigint \\
+  ip\_address : inet \textbf{UK} \\
+  name : varchar(100) \\
+  \hline
+  \end{tabular}%
+}
+
+\newsavebox{\boxPM}
+\savebox{\boxPM}{\scriptsize%
+  \begin{tabular}{|l|}
+  \hline
+  \rowcolor{primary!20}\multicolumn{1}{|c|}{\textbf{\textsf{auth\_permission}}} \\
+  \hline
+  \textbf{PK} id : bigint \\
+  name : varchar \\
+  codename : varchar \\
+  content\_type\_id : bigint \textbf{FK} \\
+  \hline
+  \end{tabular}%
+}
+
+\newsavebox{\boxUC}
+\savebox{\boxUC}{\scriptsize%
+  \begin{tabular}{|l|}
+  \hline
+  \rowcolor{gray!30}\multicolumn{1}{|c|}{\textbf{\textsf{users\_user\_classrooms}}} \\
+  \hline
+  \textbf{PK} id : bigint \\
+  \textit{FK} user\_id : bigint \\
+  \textit{FK} classroom\_id : bigint \\
+  \hline
+  \end{tabular}%
+}
+
+\newsavebox{\boxUG}
+\savebox{\boxUG}{\scriptsize%
+  \begin{tabular}{|l|}
+  \hline
+  \rowcolor{gray!30}\multicolumn{1}{|c|}{\textbf{\textsf{users\_user\_groups}}} \\
+  \hline
+  \textbf{PK} id : bigint \\
+  \textit{FK} user\_id : bigint \\
+  \textit{FK} group\_id : bigint \\
+  \hline
+  \end{tabular}%
+}
+
+\newsavebox{\boxUP}
+\savebox{\boxUP}{\scriptsize%
+  \begin{tabular}{|l|}
+  \hline
+  \rowcolor{gray!30}\multicolumn{1}{|c|}{\textbf{\textsf{user\_user\_permissions}}} \\
+  \hline
+  \textbf{PK} id : bigint \\
+  \textit{FK} user\_id : bigint \\
+  \textit{FK} permission\_id : bigint \\
+  \hline
+  \end{tabular}%
+}
+
+\newsavebox{\boxGP}
+\savebox{\boxGP}{\scriptsize%
+  \begin{tabular}{|l|}
+  \hline
+  \rowcolor{gray!30}\multicolumn{1}{|c|}{\textbf{\textsf{auth\_group\_permissions}}} \\
+  \hline
+  \textbf{PK} id : bigint \\
+  \textit{FK} group\_id : bigint \\
+  \textit{FK} permission\_id : bigint \\
+  \hline
+  \end{tabular}%
+}
+
+\newsavebox{\boxGR}
+\savebox{\boxGR}{\scriptsize%
+  \begin{tabular}{|l|}
+  \hline
+  \rowcolor{primary!20}\multicolumn{1}{|c|}{\textbf{\textsf{auth\_group}}} \\
+  \hline
+  \textbf{PK} id : bigint \\
+  name : varchar \textbf{UK} \\
+  \hline
+  \end{tabular}%
+}
+
+\newsavebox{\boxDV}
+\savebox{\boxDV}{\scriptsize%
+  \begin{tabular}{|l|}
+  \hline
+  \rowcolor{primary!20}\multicolumn{1}{|c|}{\textbf{\textsf{devices\_device}}} \\
+  \hline
+  \textbf{PK} id : bigint \\
+  mac : varchar(17) \textbf{UK} \\
+  ip : inet \\
+  hostname : varchar(100) \\
+  switch\_port : varchar(50) \\
+  is\_online : boolean \\
+  is\_internet\_blocked : boolean \\
+  \textit{FK} classroom\_id : bigint \\
+  \textit{FK} connected\_device\_id : bigint \\
+  \hline
+  \end{tabular}%
+}
+
+\newsavebox{\boxND}
+\savebox{\boxND}{\scriptsize%
+  \begin{tabular}{|l|}
+  \hline
+  \rowcolor{primary!20}\multicolumn{1}{|c|}{\textbf{\textsf{devices\_networkdevice}}} \\
+  \hline
+  \textbf{PK} id : bigint \\
+  name : varchar(50) \\
+  ip\_address : inet \textbf{UK} \\
+  username : varchar(50) \\
+  password : varchar(255) \\
+  api\_port : integer \\
+  \hline
+  \end{tabular}%
+}
+
+\begin{figure}[H]
+\centering
+\resizebox{\linewidth}{!}{%
+\begin{tikzpicture}[
+  rel/.style={thick, gray!70!black},
+]
+
+% Fila 0
+\node[inner sep=0pt, outer sep=0pt, anchor=north west] (U)  at (0,0)     {\usebox{\boxU}};
+\node[inner sep=0pt, outer sep=0pt, anchor=north west] (CL) at (7,0)     {\usebox{\boxCL}};
+\node[inner sep=0pt, outer sep=0pt, anchor=north west] (AH) at (13,0)    {\usebox{\boxAH}};
+\node[inner sep=0pt, outer sep=0pt, anchor=north west] (PM) at (19,0)    {\usebox{\boxPM}};
+
+% Fila 1
+\node[inner sep=0pt, outer sep=0pt, anchor=north west] (UG) at (0,-7)     {\usebox{\boxUG}};
+\node[inner sep=0pt, outer sep=0pt, anchor=north west] (UC) at (5.5,-7)   {\usebox{\boxUC}};
+\node[inner sep=0pt, outer sep=0pt, anchor=north west] (UP) at (11,-7)    {\usebox{\boxUP}};
+\node[inner sep=0pt, outer sep=0pt, anchor=north west] (GP) at (16.5,-7)  {\usebox{\boxGP}};
+
+% Fila 2
+\node[inner sep=0pt, outer sep=0pt, anchor=north west] (GR) at (0,-12.5)   {\usebox{\boxGR}};
+\node[inner sep=0pt, outer sep=0pt, anchor=north west] (DV) at (5.5,-12.5) {\usebox{\boxDV}};
+\node[inner sep=0pt, outer sep=0pt, anchor=north west] (ND) at (12,-12.5)  {\usebox{\boxND}};
+
+% ==============================================================
+%  MACROS crow's foot
+% ==============================================================
+
+\newcommand{\cfOneBot}[1]{%
+  \draw[rel] ([xshift=-5pt,yshift=-2pt]#1)--([xshift=5pt,yshift=-2pt]#1);
+  \draw[rel] ([xshift=-5pt,yshift=-5pt]#1)--([xshift=5pt,yshift=-5pt]#1);
+}
+\newcommand{\cfOneTop}[1]{%
+  \draw[rel] ([xshift=-5pt,yshift=2pt]#1)--([xshift=5pt,yshift=2pt]#1);
+  \draw[rel] ([xshift=-5pt,yshift=5pt]#1)--([xshift=5pt,yshift=5pt]#1);
+}
+\newcommand{\cfOneRight}[1]{%
+  \draw[rel] ([yshift=-5pt,xshift=2pt]#1)--([yshift=5pt,xshift=2pt]#1);
+  \draw[rel] ([yshift=-5pt,xshift=5pt]#1)--([yshift=5pt,xshift=5pt]#1);
+}
+\newcommand{\cfOneLeft}[1]{%
+  \draw[rel] ([yshift=-5pt,xshift=-2pt]#1)--([yshift=5pt,xshift=-2pt]#1);
+  \draw[rel] ([yshift=-5pt,xshift=-5pt]#1)--([yshift=5pt,xshift=-5pt]#1);
+}
+\newcommand{\cfManyUp}[1]{%
+  \draw[rel] ([yshift=2pt]#1)--([xshift=-6pt,yshift=10pt]#1);
+  \draw[rel] ([yshift=2pt]#1)--([yshift=10pt]#1);
+  \draw[rel] ([yshift=2pt]#1)--([xshift=6pt,yshift=10pt]#1);
+}
+\newcommand{\cfManyDown}[1]{%
+  \draw[rel] ([yshift=-2pt]#1)--([xshift=-6pt,yshift=-10pt]#1);
+  \draw[rel] ([yshift=-2pt]#1)--([yshift=-10pt]#1);
+  \draw[rel] ([yshift=-2pt]#1)--([xshift=6pt,yshift=-10pt]#1);
+}
+\newcommand{\cfManyRight}[1]{%
+  \draw[rel] ([xshift=2pt]#1)--([yshift=-6pt,xshift=10pt]#1);
+  \draw[rel] ([xshift=2pt]#1)--([xshift=10pt]#1);
+  \draw[rel] ([xshift=2pt]#1)--([yshift=6pt,xshift=10pt]#1);
+}
+\newcommand{\cfManyLeft}[1]{%
+  \draw[rel] ([xshift=-2pt]#1)--([yshift=-6pt,xshift=-10pt]#1);
+  \draw[rel] ([xshift=-2pt]#1)--([xshift=-10pt]#1);
+  \draw[rel] ([xshift=-2pt]#1)--([yshift=6pt,xshift=-10pt]#1);
+}
+\newcommand{\cfCirc}[1]{%
+  \fill[white] (#1) circle(4pt);
+  \draw[rel]   (#1) circle(4pt);
+}
+
+
+% ── R1  users_user ||--o{ users_user_groups ──
+\path (U.south -| 1.2,0) coordinate (R1a);
+\path (UG.north -| 1.2,0) coordinate (R1b);
+\draw[rel] (R1a) -- (R1b);
+\cfOneBot{R1a}
+\cfManyUp{R1b}
+\cfCirc{$(R1b)+(0,0.14)$}
+
+% ── R2  auth_group ||--o{ users_user_groups ──
+\path (GR.north -| 1.2,0) coordinate (R2a);
+\path (UG.south -| 1.2,0) coordinate (R2b);
+\draw[rel] (R2a) -- (R2b);
+\cfOneTop{R2a}
+\cfManyDown{R2b}
+\cfCirc{$(R2b)+(0,-0.14)$}
+
+% ── R3  users_user ||--o{ users_user_classrooms ──
+\path (U.south -| 3.2,0) coordinate (R3a);
+\path (UC.north -| 6.8,0) coordinate (R3b);
+\draw[rel] (R3a) -- ++(0,-0.5) -| (R3b);
+\cfOneBot{R3a}
+\cfManyUp{R3b}
+\cfCirc{$(R3b)+(0,0.14)$}
+
+% ── R4  devices_classroom ||--o{ users_user_classrooms ──
+\path (CL.south -| 8.5,0) coordinate (R4a);
+\path (UC.north -| 8.3,0) coordinate (R4b);
+\draw[rel] (R4a) -- ++(0,-0.5) -| (R4b);
+\cfOneBot{R4a}
+\cfManyUp{R4b}
+\cfCirc{$(R4b)+(0,0.14)$}
+
+% ── R5  users_user ||--o{ users_user_user_permissions ──
+\path (U.south -| 4.2,0) coordinate (R5a);
+\path (UP.north -| 12.3,0) coordinate (R5b);
+\draw[rel] (R5a) -- ++(0,-1.5) -| (R5b);
+\cfOneBot{R5a}
+\cfManyUp{R5b}
+\cfCirc{$(R5b)+(0,0.14)$}
+
+% ── R6  auth_permission ||--o{ users_user_user_permissions ──
+\path (PM.south -| 20.5,0) coordinate (R6a);
+\path (UP.north -| 13.8,0) coordinate (R6b);
+\draw[rel] (R6a) -- ++(0,-0.5) -| (R6b);
+\cfOneBot{R6a}
+\cfManyUp{R6b}
+\cfCirc{$(R6b)+(0,0.14)$}
+
+% ── R7  devices_classroom ||--o{ devices_device  ──
+\path (CL.south -| 9.5,0) coordinate (R7a);
+\path (DV.north -| 7,0) coordinate (R7b);
+\draw[rel] (R7a) -- ++(0,-9.0) -| (R7b);
+\cfOneBot{R7a}
+\cfManyUp{R7b}
+\cfCirc{$(R7b)+(0,0.14)$}
+
+% ── R8  devices_networkdevice ||--o{ devices_device ──
+\path (ND.west) ++(0,-1.2) coordinate (R8a);
+\path (DV.east) ++(0,-1.2) coordinate (R8b);
+\draw[rel] (R8a) -- (R8b);
+\cfOneLeft{R8a}
+\cfManyRight{R8b}
+\cfCirc{$(R8b)+(0.14,0)$}
+
+% ── R9  auth_group ||--o{ auth_group_permissions ──
+% Ruta: GR.north → canal B (y≈-10, entre fila-1 y fila-2) → derecha → GP.south
+\path (GR.north -| 1.5,0) coordinate (R9a);
+\path (GP.south -| 18,0) coordinate (R9b);
+\draw[rel] (R9a) -- ++(0,2.5) -| (R9b);
+\cfOneTop{R9a}
+\cfManyUp{R9b}
+\cfCirc{$(R9b)+(0,-0.14)$}
+
+% ── R10  auth_permission ||--o{ auth_group_permissions ──
+\path (PM.south -| 21.5,0) coordinate (R10a);
+\path (GP.north -| 18,0) coordinate (R10b);
+\draw[rel] (R10a) -- ++(0,-0.5) -| (R10b);
+\cfOneBot{R10a}
+\cfManyUp{R10b}
+\cfCirc{$(R10b)+(0,0.14)$}
+
+\node[anchor=north west, font=\small, text width=24cm, inner sep=4pt]
+  at (0,-17.5) {%
+  \textbf{Leyenda --- Notación Crow's Foot:}\quad
+  \tikz[baseline=-0.5ex]{
+    \draw[thick,gray!70!black](0,0)--(0.8,0);
+    \draw[thick,gray!70!black](0.85,-0.12)--(0.85,0.12);
+    \draw[thick,gray!70!black](0.92,-0.12)--(0.92,0.12);
+  }\;Uno (exactamente 1)
+  \qquad
+  \tikz[baseline=-0.5ex]{
+    \draw[thick,gray!70!black](0,0)--(0.5,0);
+    \draw[thick,gray!70!black](0.5,0)--(0.85,0.14);
+    \draw[thick,gray!70!black](0.5,0)--(0.85,0);
+    \draw[thick,gray!70!black](0.5,0)--(0.85,-0.14);
+  }\;Muchos
+  \qquad
+  \tikz[baseline=-0.5ex]{
+    \fill[white](0,0)circle(3pt);
+    \draw[thick,gray!70!black](0,0)circle(3pt);
+  }\;Cero (opcional)
+  \qquad
+  \colorbox{primary!20}{\phantom{ab}}\;Tabla principal
+  \qquad
+  \colorbox{gray!30}{\phantom{ab}}\;Tabla intermedia (M:N)
+};
+
+\end{tikzpicture}
+}% end resizebox
+\caption{Diagrama relacional en notación crow's foot.}
+\label{fig:er-crowsfoot}
+\end{figure}
+\end{landscape}
+
+El modelo relacional se presenta a continuación en formato tabular detallado. Las claves primarias se indican con \textbf{PK}, las claves foráneas con \textit{FK} y los campos únicos con \textbf{UK}.
+
+\begin{table}[H]
+\centering
+\caption{Tabla \texttt{users\_user}}
+\begin{tabularx}{\textwidth}{llX}
+  \toprule
+  \textbf{Campo} & \textbf{Tipo} & \textbf{Restricciones} \\
+  \midrule
+  id           & BIGINT       & PK \\
+  username     & VARCHAR(150) & UNIQUE, NOT NULL \\
+  password     & VARCHAR(128) & NOT NULL \\
+  first\_name  & VARCHAR(150) & \\
+  last\_name   & VARCHAR(150) & \\
+  email        & VARCHAR(254) & \\
+  is\_superuser & BOOLEAN     & DEFAULT FALSE \\
+  is\_staff    & BOOLEAN      & DEFAULT FALSE \\
+  is\_active   & BOOLEAN      & DEFAULT TRUE \\
+  last\_login  & DATETIME     & NULL \\
+  date\_joined & DATETIME     & NOT NULL \\
+  \bottomrule
+\end{tabularx}
+\end{table}
+
+\begin{table}[H]
+\centering
+\caption{Tabla \texttt{devices\_classroom}}
+\begin{tabularx}{\textwidth}{llX}
+  \toprule
+  \textbf{Campo} & \textbf{Tipo} & \textbf{Restricciones} \\
+  \midrule
+  id                   & BIGINT  & PK \\
+  name                 & VARCHAR & UNIQUE, NOT NULL \\
+  is\_internet\_blocked & BOOLEAN & DEFAULT FALSE \\
+  \bottomrule
+\end{tabularx}
+\end{table}
+
+\begin{table}[H]
+\centering
+\caption{Tabla \texttt{devices\_device}}
+\begin{tabularx}{\textwidth}{llX}
+  \toprule
+  \textbf{Campo} & \textbf{Tipo} & \textbf{Restricciones} \\
+  \midrule
+  id                   & BIGINT       & PK \\
+  mac                  & VARCHAR(17)  & UNIQUE, NOT NULL \\
+  ip                   & INET         & NOT NULL \\
+  hostname             & VARCHAR(100) & NOT NULL \\
+  switch\_port         & VARCHAR(50)  & DEFAULT '' \\
+  is\_online           & BOOLEAN      & DEFAULT FALSE \\
+  is\_internet\_blocked & BOOLEAN     & DEFAULT FALSE \\
+  classroom\_id        & BIGINT       & FK $\rightarrow$ devices\_classroom.id, NULL \\
+  connected\_device\_id & BIGINT      & FK $\rightarrow$ devices\_networkdevice.id, NULL \\
+  \bottomrule
+\end{tabularx}
+\end{table}
+
+\begin{table}[H]
+\centering
+\caption{Tabla \texttt{devices\_networkdevice}}
+\begin{tabularx}{\textwidth}{llX}
+  \toprule
+  \textbf{Campo} & \textbf{Tipo} & \textbf{Restricciones} \\
+  \midrule
+  id          & BIGINT       & PK \\
+  name        & VARCHAR(50)  & NOT NULL \\
+  ip\_address & INET         & UNIQUE, NOT NULL \\
+  username    & VARCHAR(50)  & NOT NULL \\
+  password    & VARCHAR(255) & NOT NULL (cifrada con Fernet) \\
+  api\_port   & INTEGER      & DEFAULT 8728 \\
+  \bottomrule
+\end{tabularx}
+\end{table}
+
+\begin{table}[H]
+\centering
+\caption{Tabla \texttt{devices\_allowedhost}}
+\begin{tabularx}{\textwidth}{llX}
+  \toprule
+  \textbf{Campo} & \textbf{Tipo} & \textbf{Restricciones} \\
+  \midrule
+  id          & BIGINT       & PK \\
+  ip\_address & INET         & UNIQUE, NOT NULL \\
+  name        & VARCHAR(100) & BLANK \\
+  \bottomrule
+\end{tabularx}
+\end{table}
+
+\begin{table}[H]
+\centering
+\caption{Tabla \texttt{auth\_group}}
+\begin{tabularx}{\textwidth}{llX}
+  \toprule
+  \textbf{Campo} & \textbf{Tipo} & \textbf{Restricciones} \\
+  \midrule
+  id   & BIGINT  & PK \\
+  name & VARCHAR & UNIQUE, NOT NULL \\
+  \bottomrule
+\end{tabularx}
+\end{table}
+
+\begin{table}[H]
+\centering
+\caption{Tablas intermedias (relaciones N:M)}
+\begin{tabularx}{\textwidth}{lllX}
+  \toprule
+  \textbf{Tabla} & \textbf{FK 1} & \textbf{FK 2} & \textbf{Descripción} \\
+  \midrule
+  users\_user\_classrooms & user\_id & classroom\_id & Aulas asignadas a cada usuario \\
+  users\_user\_groups     & user\_id & group\_id     & Grupos de permisos del usuario \\
+  users\_user\_user\_permissions & user\_id & permission\_id & Permisos individuales \\
+  auth\_group\_permissions & group\_id & permission\_id & Permisos asignados a cada grupo \\
+  \bottomrule
+\end{tabularx}
+\end{table}
+
+\textbf{Relaciones principales:}
+\begin{itemize}
+  \item \texttt{devices\_classroom} $\longleftrightarrow$ \texttt{devices\_device}: 1:N (un aula contiene muchos dispositivos).
+  \item \texttt{devices\_networkdevice} $\longleftrightarrow$ \texttt{devices\_device}: 1:N (un equipo de red conecta muchos dispositivos).
+  \item \texttt{users\_user} $\longleftrightarrow$ \texttt{devices\_classroom}: N:M (un usuario puede tener varias aulas asignadas).
+  \item \texttt{users\_user} $\longleftrightarrow$ \texttt{auth\_group}: N:M (un usuario puede pertenecer a varios grupos).
+\end{itemize}
+
+\subsection{Descripción de las entidades}
+
+\begin{longtable}{p{4.5cm}p{10.5cm}}
+  \toprule
+  \textbf{Entidad} & \textbf{Descripción} \\
+  \midrule
+  \endhead
+  \texttt{users\_user} & Modelo de usuario personalizado que extiende \texttt{AbstractUser} de Django. Añade una relación muchos-a-muchos con las aulas (\texttt{classrooms}), permitiendo asignar a cada profesor las aulas que puede gestionar. \\
+  \addlinespace
+  \texttt{devices\_classroom} & Representa un aula del centro. Agrupa dispositivos y almacena el estado global de bloqueo de internet. \\
+  \addlinespace
+  \texttt{devices\_device} & Dispositivo individual (equipo de un alumno) monitorizado por el sistema. Se identifica por su dirección MAC (única). Registra el equipo de red al que está conectado, el puerto del switch, y los estados de conexión y bloqueo. \\
+  \addlinespace
+  \texttt{devices\_networkdevice} & Equipo de red MikroTik (switch o router) al que el backend se conecta por API para aplicar reglas de aislamiento. La contraseña se almacena cifrada con Fernet (AES). \\
+  \addlinespace
+  \texttt{devices\_allowedhost} & IP de un host que siempre será accesible aunque se bloquee internet. Cuando se crea una regla de bloqueo, se añaden reglas \texttt{accept} para cada host permitido antes de la regla \texttt{drop}. \\
+  \addlinespace
+  \texttt{auth\_group} & Grupos de permisos de Django. Permite definir roles (por ejemplo, ``Profesor'') con un conjunto específico de permisos. \\
+  \addlinespace
+  \texttt{users\_user\_classrooms} & Tabla intermedia de la relación N:M entre usuarios y aulas. \\
+  \addlinespace
+  \texttt{users\_user\_groups} & Tabla intermedia de la relación N:M entre usuarios y grupos. \\
+  \bottomrule
+\end{longtable}
+
+\section{Diseño técnico y justificación de tecnologías}
+
+\subsection{Stack tecnológico}
+
+\begin{longtable}{llp{7cm}}
+  \toprule
+  \textbf{Capa} & \textbf{Tecnología} & \textbf{Justificación} \\
+  \midrule
+  \endhead
+  Backend & Python 3.11, Django 5, DRF & Django ofrece un ORM robusto, sistema de autenticación y permisos integrado, y una comunidad amplia. DRF proporciona serialización, validación y vistas genéricas para APIs REST con mínima configuración. \\
+  \addlinespace
+  Tiempo real & Django Channels + Daphne & Channels extiende Django para soportar WebSockets mediante el protocolo ASGI. Daphne es el servidor ASGI oficial del proyecto Django. Permite manejar HTTP y WebSockets en el mismo proceso. \\
+  \addlinespace
+  Frontend & React 19 + Vite + MUI 7 & React es la biblioteca de UI más extendida del ecosistema. Vite ofrece tiempos de recarga instantáneos. Material UI proporciona componentes de alta calidad con soporte de temas claro/oscuro. \\
+  \addlinespace
+  Estado (frontend) & Nanostores & Librería de gestión de estado ultra-ligera ($<$1 KB). Permite persistir datos en \texttt{sessionStorage} de forma declarativa. Se usa para cachear las capturas de pantalla sin llamadas adicionales al servidor. \\
+  \addlinespace
+  Base de datos & PostgreSQL 16 & Base de datos relacional con alta concurrencia transaccional, fiabilidad probada y rendimiento excelente para cargas mixtas de lectura/escritura. \\
+  \addlinespace
+  Caché / Bus & Redis 7 & Se usa como broker de Django Channel Layers (pub/sub para WebSockets) y como almacén de claves TTL para el sistema de heartbeat. \\
+  \addlinespace
+  Redes & librouteros (Python) & Biblioteca oficial para comunicarse con la API de MikroTik RouterOS desde Python. Soporta conexiones planas y SSL. \\
+  \addlinespace
+  Agente & Python (websockets, mss, psutil) & Python permite escribir un cliente ligero y multiplataforma. \texttt{mss} captura pantallas de forma eficiente. \texttt{psutil} recoge información del sistema. \\
+  \addlinespace
+  Proxy inverso & Caddy 2 & TLS automático con Let's Encrypt sin configuración manual. Soporta HTTP/3, proxy de WebSockets y servicio de ficheros estáticos. Configuración declarativa mínima. \\
+  \addlinespace
+  Infraestructura & Docker Compose & Permite definir todos los servicios (backend, BD, Redis, Caddy) en un solo fichero y desplegarlos con un único comando. Garantiza entornos reproducibles. \\
+  \addlinespace
+  Cifrado & cryptography (Fernet) & Cifrado simétrico AES-128-CBC para almacenar las contraseñas de los equipos de red en la base de datos. La clave se deriva de la SECRET\_KEY de Django. \\
+  \bottomrule
+\end{longtable}
+
+\subsection{API REST — Endpoints principales}
+
+La API sigue las convenciones REST. Los endpoints están organizados por recurso y utilizan los ViewSets de DRF con enrutamiento automático.
+
+\subsubsection{Autenticación}
+
+\begin{longtable}{llp{6cm}}
+  \toprule
+  \textbf{Método} & \textbf{Endpoint} & \textbf{Descripción} \\
+  \midrule
+  POST & \texttt{/api/token/} & Obtener par de tokens JWT (access + refresh). Incluye \texttt{is\_staff}, \texttt{is\_superuser}, permisos y aulas asignadas en la respuesta. \\
+  POST & \texttt{/api/token/refresh/} & Refrescar el token de acceso usando el token de refresco. \\
+  \bottomrule
+\end{longtable}
+
+\subsubsection{Usuarios y grupos}
+
+\begin{longtable}{llp{6cm}}
+  \toprule
+  \textbf{Método} & \textbf{Endpoint} & \textbf{Descripción} \\
+  \midrule
+  GET & \texttt{/api/users/} & Listar usuarios (admin: todos; usuario normal: solo él mismo). \\
+  POST & \texttt{/api/users/} & Crear usuario (solo admin). \\
+  PUT/PATCH & \texttt{/api/users/\{id\}/} & Actualizar usuario. \\
+  DELETE & \texttt{/api/users/\{id\}/} & Eliminar usuario (solo admin). \\
+  GET & \texttt{/api/users-groups/} & Listar grupos con sus permisos (solo admin). \\
+  POST & \texttt{/api/users-groups/} & Crear grupo (solo admin). \\
+  PUT/PATCH & \texttt{/api/users-groups/\{id\}/} & Actualizar grupo (solo admin). \\
+  DELETE & \texttt{/api/users-groups/\{id\}/} & Eliminar grupo (solo admin). \\
+  GET & \texttt{/api/permissions/} & Listar permisos disponibles (solo admin). \\
+  \bottomrule
+\end{longtable}
+
+\subsubsection{Dispositivos}
+
+\begin{longtable}{llp{6cm}}
+  \toprule
+  \textbf{Método} & \textbf{Endpoint} & \textbf{Descripción} \\
+  \midrule
+  GET & \texttt{/api/devices/} & Listar dispositivos (con filtro opcional \texttt{?classroom=ID}). Los no-admin solo ven los de sus aulas. \\
+  POST & \texttt{/api/devices/\{id\}/shutdown/} & Enviar orden de apagado al agente del dispositivo. \\
+  POST & \texttt{/api/devices/\{id\}/toggle-internet/} & Alternar el bloqueo de internet del dispositivo en el router MikroTik. \\
+  PUT/PATCH & \texttt{/api/devices/\{id\}/} & Actualizar dispositivo (asignar aula, puerto, etc.). \\
+  DELETE & \texttt{/api/devices/\{id\}/} & Eliminar dispositivo (solo admin). \\
+  \bottomrule
+\end{longtable}
+
+\subsubsection{Aulas}
+
+\begin{longtable}{>{\raggedright\arraybackslash}p{2.4cm}@{\hspace{0.8cm}}>{\raggedright\arraybackslash}p{4.6cm}@{\hspace{0.5cm}}>{\raggedright\arraybackslash}p{5.8cm}}
+  \toprule
+  \textbf{Método} & \textbf{Endpoint} & \textbf{Descripción} \\
+  \midrule
+  GET & \path|/api/classroom/| & Listar aulas (admin: todas; profesor: solo las asignadas). \\
+  POST & \path|/api/classroom/| & Crear aula (solo admin). \\
+  PUT / PATCH & \path|/api/classroom/{id}/| & Actualizar aula (solo admin). \\
+  DELETE & \path|/api/classroom/{id}/| & Eliminar aula (solo admin). \\
+  POST & \shortstack[l]{\path|/api/classroom/{id}/|\\\path|toggle-global-internet/|} & Alternar el bloqueo de internet para todos los equipos del aula. \\
+  \bottomrule
+\end{longtable}
+
+\subsubsection{Equipos de red y hosts permitidos}
+
+\begin{longtable}{llp{6cm}}
+  \toprule
+  \textbf{Método} & \textbf{Endpoint} & \textbf{Descripción} \\
+  \midrule
+  GET & \texttt{/api/network-device/} & Listar equipos de red. \\
+  POST & \texttt{/api/network-device/} & Crear equipo de red (solo admin). Contraseña cifrada con Fernet. \\
+  PUT/PATCH & \texttt{/api/network-device/\{id\}/} & Actualizar equipo de red (solo admin). \\
+  DELETE & \texttt{/api/network-device/\{id\}/} & Eliminar equipo de red (solo admin). \\
+  \addlinespace
+  GET & \texttt{/api/allowed-hosts/} & Listar hosts permitidos. \\
+  POST & \texttt{/api/allowed-hosts/} & Crear host permitido (solo admin). \\
+  PUT/PATCH & \texttt{/api/allowed-hosts/\{id\}/} & Actualizar host permitido (solo admin). \\
+  DELETE & \texttt{/api/allowed-hosts/\{id\}/} & Eliminar host permitido (solo admin). \\
+  \bottomrule
+\end{longtable}
+
+\subsection{Protocolo WebSocket}
+
+El sistema utiliza dos endpoints WebSocket:
+
+\begin{itemize}
+  \item \texttt{/ws/client/} — Conexión de los agentes (PCs del aula).
+  \item \texttt{/ws/dashboard/} — Conexión del frontend (navegador del profesor).
+\end{itemize}
+
+\subsubsection{Mensajes del Agente → Servidor}
+
+\begin{longtable}{lp{9cm}}
+  \toprule
+  \textbf{Tipo} & \textbf{Descripción} \\
+  \midrule
+  \texttt{startup} & Reporte de encendido con información completa del sistema (MAC, IP, hostname, SO, CPU, RAM, disco). \\
+  \texttt{heartbeat} & Latido periódico con MAC e IP. Renueva la clave TTL en Redis. \\
+  \texttt{shutdown\_notice} & Aviso de que el equipo se está apagando. \\
+  \texttt{screenshot} & Captura de pantalla en formato JPEG base64. \\
+  \texttt{command\_result} & Resultado de un comando ejecutado. \\
+  \bottomrule
+\end{longtable}
+
+\subsubsection{Mensajes del Servidor → Agente}
+
+\begin{longtable}{lp{9cm}}
+  \toprule
+  \textbf{Tipo} & \textbf{Descripción} \\
+  \midrule
+  \texttt{command} & Orden enviada al agente (shutdown, request\_screenshot, etc.). \\
+  \texttt{ping} & Comprobación de que el agente sigue respondiendo. \\
+  \bottomrule
+\end{longtable}
+
+\subsubsection{Mensajes del Servidor → Dashboard}
+
+\begin{longtable}{lp{9cm}}
+  \toprule
+  \textbf{Tipo (\texttt{event})} & \textbf{Descripción} \\
+  \midrule
+  \texttt{online} & Un dispositivo se ha conectado. \\
+  \texttt{offline} & Un dispositivo se ha desconectado o su heartbeat ha expirado. \\
+  \texttt{internet\_blocked} & Se ha bloqueado internet a un dispositivo. \\
+  \texttt{internet\_unblocked} & Se ha desbloqueado internet a un dispositivo. \\
+  \texttt{classroom\_block} & Se ha bloqueado internet a toda un aula. \\
+  \texttt{classroom\_unblock} & Se ha desbloqueado internet a toda un aula. \\
+  \texttt{screenshot} & Captura de pantalla reenviada desde un agente. \\
+  \bottomrule
+\end{longtable}
+
+\subsection{Flujo de datos detallado}
+
+\begin{figure}[H]
+\centering
+\resizebox{\textwidth}{!}{%
+\begin{tikzpicture}[
+  box/.style={draw, rounded corners, minimum width=2.5cm, minimum height=1cm, align=center, font=\small, fill=primary!8},
+  arrow/.style={-{Stealth[length=3mm]}, thick},
+  label/.style={font=\tiny, color=gray, align=center}
+]
+
+% Componentes
+\node[box, fill=yellow!15] (agent) at (0, 0) {Agente\\(PC Alumno)};
+\node[box, fill=green!8] (browser) at (0, -5) {Navegador\\(Profesor)};
+\node[box] (daphne) at (5, -2.5) {Daphne\\(ASGI)};
+\node[box] (channels) at (10, -1) {Django\\Channels};
+\node[box] (drf) at (10, -4) {Django\\REST};
+\node[box, fill=accent!10] (redis) at (15, -1) {Redis\\Channel Layer};
+\node[box, fill=accent!10] (pg) at (15, -4) {PostgreSQL};
+\node[box, fill=red!8] (mk) at (15, -6.5) {MikroTik\\API};
+
+% Flechas
+\draw[arrow] (agent) -- node[label, above, sloped] {WSS startup/heartbeat/screenshot} (daphne);
+\draw[arrow] (browser) -- node[label, below, sloped] {HTTPS (REST) + WSS} (daphne);
+\draw[arrow] (daphne) -- node[label, above] {WebSocket} (channels);
+\draw[arrow] (daphne) -- node[label, below] {HTTP} (drf);
+\draw[arrow] (channels) -- node[label, above] {pub/sub} (redis);
+\draw[arrow] (drf) -- node[label, above] {ORM} (pg);
+\draw[arrow] (drf) -- node[label, right] {librouteros} (mk);
+\draw[arrow, dashed] (redis) -- node[label, above, sloped] {keyspace events} (channels);
+
+\end{tikzpicture}
+}
+\caption{Flujo de datos entre los componentes del sistema.}
+\label{fig:flujo-datos}
+\end{figure}
+
+\subsection{Seguridad}
+
+\subsubsection{Autenticación y autorización}
+
+\begin{itemize}
+  \item \textbf{JWT (JSON Web Tokens):} Autenticación sin estado. El token de acceso tiene una validez de 30 minutos y el de refresco 24 horas. El frontend los almacena en \texttt{localStorage} y los adjunta automáticamente con un interceptor de Axios.
+  \item \textbf{RBAC con permisos granulares:} Se utiliza el sistema de permisos de Django extendido con \texttt{StrictDjangoModelPermissions}, que exige permisos incluso para peticiones GET (a diferencia del comportamiento por defecto de DRF).
+  \item \textbf{Permiso IsStaffForWrite:} Las operaciones CRUD de escritura en recursos de infraestructura (aulas, equipos de red, hosts) requieren que el usuario sea \texttt{is\_staff}. Sin embargo, las acciones personalizadas (toggle-internet, shutdown) están disponibles para cualquier usuario autenticado con permisos de visualización sobre el recurso.
+  \item \textbf{IsOwnerOrAdmin:} Los usuarios no administradores solo pueden editar su propio perfil.
+\end{itemize}
+
+\subsubsection{Cifrado y almacenamiento seguro}
+
+\begin{itemize}
+  \item \textbf{Contraseñas de equipos de red:} Se almacenan cifradas con Fernet (AES-128-CBC con HMAC) mediante un campo personalizado \texttt{EncryptedCharField}. La clave de cifrado se deriva de la \texttt{SECRET\_KEY} del proyecto.
+  \item \textbf{Contraseñas de usuarios:} Hash PBKDF2 con SHA-256 (mecanismo estándar de Django).
+  \item \textbf{Comunicación TLS:} Todo el tráfico entre el navegador y el servidor pasa por HTTPS/WSS gracias a Caddy. La comunicación con la API de MikroTik también soporta TLS (puerto 8729).
+\end{itemize}
+
+\subsubsection{CORS y CSRF}
+
+\begin{itemize}
+  \item En desarrollo, \texttt{CORS\_ALLOW\_ALL\_ORIGINS = True} para facilitar las pruebas.
+  \item En producción, los orígenes permitidos se configuran explícitamente en la variable de entorno \texttt{CORS\_ALLOWED\_ORIGINS}.
+  \item Los orígenes de confianza CSRF se configuran automáticamente a partir de la misma variable.
+\end{itemize}
+
+\newpage
+\section{Estructura del proyecto}
+
+\begin{lstlisting}[language={}, caption={Estructura de directorios del proyecto.}]
+proyecto_dam/
+|-- backend/                 # Django 5 + DRF + Channels (Daphne)
+|   |-- apps/
+|   |   |-- devices/         # Dispositivos, aulas, red, WebSocket consumers
+|   |   |   |-- models.py    # Device, Classroom, NetworkDevice, AllowedHost
+|   |   |   |-- views.py     # ViewSets con acciones toggle-internet, shutdown
+|   |   |   |-- serializer.py
+|   |   |   |-- consumers.py # AgentConsumer, DashboardConsumer
+|   |   |   |-- mikrotik_service.py  # Logica de interaccion con API MikroTik
+|   |   |   |-- heartbeat_monitor.py # Monitor Redis keyspace TTL
+|   |   |   |-- fields.py    # EncryptedCharField (Fernet)
+|   |   |   |-- permissions.py
+|   |   |   |-- routing.py   # Rutas WebSocket
+|   |   |   +-- urls.py      # Rutas REST
+|   |   +-- users/           # Usuarios, grupos, permisos, JWT
+|   |       |-- models.py    # User (extends AbstractUser)
+|   |       |-- views.py     # UserViewSet, GroupViewSet, JWT
+|   |       |-- serializers.py
+|   |       |-- permissions.py
+|   |       +-- urls.py
+|   |-- config/              # Configuracion del proyecto
+|   |   |-- settings.py      # Configuracion Django
+|   |   |-- urls.py          # Rutas principales
+|   |   +-- asgi.py          # Punto de entrada ASGI
+|   |-- Dockerfile.prod      # Imagen Docker multi-stage
+|   +-- requirements.txt
+|-- frontend/                # React 19 + Vite + Material UI 7
+|   |-- src/
+|   |   |-- components/      # Tarjetas, modales, rutas protegidas
+|   |   |-- hooks/           # useAuth, useDashboardSocket
+|   |   |-- pages/           # Dashboard, Classrooms, Users, etc.
+|   |   |-- stores/          # Nanostores (screenshots)
+|   |   |-- styles/          # CSS + tema claro/oscuro
+|   |   |-- api.js           # Axios con interceptores JWT
+|   |   +-- App.jsx          # Rutas de la aplicacion
+|   +-- package.json
+|-- client/                  # Agente Python para PCs de alumnos
+|   |-- client.py            # Clase DeviceClient (WebSocket)
+|   |-- system_info.py       # Recopilacion de info del sistema
+|   |-- config.py            # Carga de configuracion
+|   |-- install_service.py   # Instalador como servicio del SO
+|   +-- requirements.txt
+|-- produccion/              # Configuracion de despliegue
+|   |-- docker-compose.prod.yml
+|   |-- Caddyfile
+|   |-- deploy.sh / deploy.bat
+|   +-- README.md
++-- docs/                    # Documentacion
+    |-- database-er.mmd      # Modelo ER (Mermaid)
+    +-- memoria.tex           # Este documento
+\end{lstlisting}
+
+% =============================================================================
+% 9. IMPLEMENTACIÓN
+% =============================================================================
+\section{Implementación}
+
+\subsection{Backend — Aspectos destacados}
+
+\subsubsection{Cifrado transparente de contraseñas de red}
+
+Se ha implementado un campo de modelo personalizado \texttt{EncryptedCharField} que cifra automáticamente el valor al guardarlo en la base de datos y lo descifra al leerlo, de forma completamente transparente para el resto de la aplicación:
+
+\begin{lstlisting}[language=Python, caption={Campo cifrado con Fernet (fields.py).}]
+class EncryptedCharField(models.CharField):
+    def get_prep_value(self, value):
+        if value is None or value == '':
+            return value
+        f = _get_fernet()
+        return f.encrypt(value.encode()).decode()
+
+    def from_db_value(self, value, expression, connection):
+        if value is None or value == '':
+            return value
+        f = _get_fernet()
+        try:
+            return f.decrypt(value.encode()).decode()
+        except InvalidToken:
+            return value
+\end{lstlisting}
+
+\subsubsection{Monitor de heartbeat con Redis keyspace}
+
+El sistema de detección de equipos offline se basa en las notificaciones \textit{keyspace} de Redis. Cada agente renueva una clave con TTL de 2 minutos en cada heartbeat. Cuando la clave expira (el agente dejó de enviar heartbeats), Redis notifica la expiración y un hilo demonio marca el dispositivo como offline:
+
+\begin{lstlisting}[language=Python, caption={Fragmento del monitor de heartbeat.}]
+def set_heartbeat(mac: str):
+    r = _get_redis()
+    r.set(f"{HEARTBEAT_PREFIX}{mac}", "1", ex=HEARTBEAT_TTL)
+
+def _handle_expired_key(mac: str):
+    device = Device.objects.get(mac=mac)
+    if not device.is_online:
+        return
+    device.is_online = False
+    device.save()
+    # Notificar al dashboard via WebSocket
+    channel_layer = get_channel_layer()
+    async_to_sync(channel_layer.group_send)(
+        "dashboard_updates", {...}
+    )
+\end{lstlisting}
+
+\subsubsection{Servicio MikroTik — Network Fencing}
+
+El módulo \texttt{mikrotik\_service.py} encapsula toda la lógica de interacción con la API de MikroTik. La estrategia de bloqueo combina dos capas:
+
+\begin{enumerate}
+  \item \textbf{Capa L2 (Split-Horizon):} Se modifica el \texttt{horizon} del puerto del bridge para impedir el forwarding entre puertos con el mismo valor de horizon.
+  \item \textbf{Capa L3 (IP Firewall Filter):} Se crean reglas \texttt{accept} para cada host permitido seguidas de reglas \texttt{drop} para todo el tráfico restante del dispositivo.
+\end{enumerate}
+
+Todas las reglas creadas se etiquetan con un comentario identificativo (\texttt{MONITOR\_BLOCK\_\{id\}}, \texttt{MONITOR\_CLASS\_BLOCK\_\{id\}}) para poder eliminarlas selectivamente al desbloquear.
+
+\subsection{Frontend — Aspectos destacados}
+
+\subsubsection{Gestión de tokens JWT con interceptores}
+
+El módulo \texttt{api.js} configura una instancia de Axios con interceptores que:
+
+\begin{enumerate}
+  \item Adjuntan automáticamente el token de acceso en la cabecera \texttt{Authorization} de cada petición.
+  \item Si una petición recibe un error 401, intentan refrescar el token automáticamente y reintentan la petición original.
+  \item Si el refresco falla, redirigen al usuario a la página de login.
+\end{enumerate}
+
+\subsubsection{Capturas de pantalla con Nanostores}
+
+Las capturas de pantalla recibidas por WebSocket se almacenan en un \texttt{nanostore} persistente en \texttt{sessionStorage}. Esto permite que al cambiar de aula y volver, las últimas capturas se muestren inmediatamente sin esperar a que el agente envíe una nueva.
+
+\subsubsection{Rutas protegidas y permisos}
+
+El componente \texttt{ProtectedRoute} verifica:
+
+\begin{itemize}
+  \item Que el usuario está autenticado (tiene token válido).
+  \item Que tiene el permiso requerido (mediante el hook \texttt{useAuth}).
+  \item Si la ruta requiere \texttt{requireStaff}, que el usuario es staff.
+\end{itemize}
+
+\subsection{Agente cliente — Aspectos destacados}
+
+\subsubsection{Instalación como servicio del sistema}
+
+El script \texttt{install\_service.py} automatiza la instalación del agente como:
+
+\begin{itemize}
+  \item \textbf{Windows:} Tarea programada del Task Scheduler que se ejecuta al iniciar sesión.
+  \item \textbf{Linux:} Servicio systemd que se inicia con el sistema.
+\end{itemize}
+
+El instalador crea automáticamente un entorno virtual, instala las dependencias y registra el servicio.
+
+\subsubsection{Reconexión automática}
+
+El agente implementa reconexión automática con backoff configurable. Si la conexión WebSocket se pierde, reintenta la conexión cada \texttt{RECONNECT\_DELAY} segundos (configurable, por defecto 5) hasta alcanzar el máximo de reintentos (configurable, 0 = infinito).
+
+\section{Despliegue}
+
+\subsection{Requisitos del entorno}
+
+\begin{table}[H]
+\centering
+\begin{tabularx}{\textwidth}{lll}
+  \toprule
+  \textbf{Herramienta} & \textbf{Versión mínima} & \textbf{Uso} \\
+  \midrule
+  Docker & 24+ & Contenedores de servicios \\
+  Docker Compose & v2+ & Orquestación \\
+  Bun (o Node.js 18+) & 1.0+ & Compilación del frontend \\
+  Git & 2.x & Clonado del repositorio \\
+  Router MikroTik & RouterOS 7.x & Infraestructura de red (opcional) \\
+  \bottomrule
+\end{tabularx}
+\caption{Requisitos del entorno de despliegue.}
+\end{table}
+
+\subsection{Servicios Docker}
+
+El fichero \texttt{docker-compose.prod.yml} define los siguientes servicios:
+
+\begin{longtable}{lp{4cm}p{5cm}}
+  \toprule
+  \textbf{Servicio} & \textbf{Imagen} & \textbf{Función} \\
+  \midrule
+  \texttt{db} & postgres:16-alpine & Base de datos PostgreSQL con volumen persistente y healthcheck. \\
+  \texttt{redis} & redis:7-alpine & Channel Layers y heartbeat. Persistencia RDB cada 60 segundos. \\
+  \texttt{backend} & Build desde \texttt{Dockerfile.prod} & Django + Daphne. Imagen multi-stage para producción. \\
+  \texttt{caddy} & caddy:2-alpine & Proxy inverso con TLS automático. Único servicio que expone puertos (80, 443). \\
+  \bottomrule
+\end{longtable}
+
+\subsection{Proceso de despliegue}
+
+El script \texttt{deploy.sh} automatiza todo el proceso:
+
+\begin{enumerate}
+  \item Verifica la existencia del fichero \texttt{.env} con las variables de entorno.
+  \item Instala dependencias y compila el frontend con Bun (\texttt{bun install \&\& bun run build}).
+  \item Construye las imágenes Docker y levanta los contenedores.
+  \item Ejecuta las migraciones de base de datos.
+  \item Recopila los ficheros estáticos de Django (\texttt{collectstatic}).
+  \item Crea el superusuario inicial si no existe.
+\end{enumerate}
+
+\subsection{Variables de entorno}
+
+\begin{longtable}{lp{8cm}}
+  \toprule
+  \textbf{Variable} & \textbf{Descripción} \\
+  \midrule
+  \texttt{POSTGRES\_DB} & Nombre de la base de datos. \\
+  \texttt{POSTGRES\_USER} & Usuario de PostgreSQL. \\
+  \texttt{POSTGRES\_PASSWORD} & Contraseña de PostgreSQL. \\
+  \texttt{SECRET\_KEY} & Clave secreta de Django (se genera con \texttt{generar\_clave.py}). \\
+  \texttt{DEBUG} & Modo debug (False en producción). \\
+  \texttt{ALLOWED\_HOSTS} & Hosts permitidos separados por coma. \\
+  \texttt{CORS\_ALLOWED\_ORIGINS} & Orígenes CORS permitidos. \\
+  \texttt{DOMAIN} & Dominio para Caddy (TLS automático). \\
+  \texttt{DJANGO\_SUPERUSER\_*} & Credenciales del superusuario inicial. \\
+  \bottomrule
+\end{longtable}
+
+% =============================================================================
+% 11. PRUEBAS
+% =============================================================================
+\section{Pruebas}
+
+\subsection{Pruebas funcionales realizadas}
+
+Se han realizado pruebas manuales exhaustivas de todas las funcionalidades del sistema:
+
+\begin{longtable}{cp{3cm}p{7cm}c}
+  \toprule
+  \textbf{ID} & \textbf{Funcionalidad} & \textbf{Descripción de la prueba} & \textbf{Resultado} \\
+  \midrule
+  T-01 & Registro automático & Un agente se conecta y aparece en el dashboard automáticamente. & OK \\
+  T-02 & Detección offline & Se cierra el agente y el dispositivo pasa a offline tras expirar el heartbeat. & OK \\
+  T-03 & Apagado remoto & Se envía la orden de apagado y el equipo se apaga correctamente. & OK \\
+  T-04 & Bloqueo individual & Se bloquea internet a un equipo y se verifica que pierde conectividad. & OK \\
+  T-05 & Desbloqueo individual & Se desbloquea internet y se verifica la restauración de conectividad. & OK \\
+  T-06 & Bloqueo por aula & Se bloquea internet a toda un aula y se verifica en todos los equipos. & OK \\
+  T-07 & Hosts permitidos & Durante un bloqueo, los hosts permitidos siguen siendo accesibles. & OK \\
+  T-08 & Capturas de pantalla & Se reciben capturas periódicas en el dashboard. & OK \\
+  T-09 & RBAC & Un profesor solo ve las aulas asignadas y no puede acceder a configuración. & OK \\
+  T-10 & Refresco JWT & El token se refresca automáticamente sin interrumpir la sesión. & OK \\
+  T-11 & Reconexión agente & El agente reconecta automáticamente tras una caída del servidor. & OK \\
+  T-12 & Auto-descubrimiento puerto & Al conectarse un equipo, se detecta su puerto del switch automáticamente. & OK \\
+  \bottomrule
+\end{longtable}
+
+\subsection{Entornos de prueba}
+
+\begin{itemize}
+  \item \textbf{Desarrollo local:} Backend con \texttt{runserver}/Daphne, PostgreSQL y Redis en Docker, frontend con \texttt{vite dev}.
+  \item \textbf{Producción:} Docker Compose completo con Caddy, desplegado en servidor con acceso a router MikroTik real.
+  \item \textbf{Equipos cliente:} Probado en Windows 10/11, Ubuntu 24.04 y Arch Linux con escritorio.
+\end{itemize}
+
+\section{Complicaciones encontradas}
+
+A lo largo del desarrollo del proyecto se encontraron diversas dificultades técnicas que requirieron investigación adicional y, en algunos casos, soluciones alternativas o limitaciones aceptadas.
+
+\subsection{Instalación del agente como servicio en Windows}
+
+Uno de los objetivos del agente cliente era poder ejecutarse como un servicio del sistema operativo, de forma que se iniciase automáticamente al arrancar el equipo sin necesidad de que el usuario interactuase.
+
+En \textbf{Linux} esto se resolvió de forma sencilla mediante un fichero de unidad \texttt{systemd} que ejecuta el intérprete de Python del entorno virtual con el script del agente.
+
+En \textbf{Windows}, sin embargo, la situación fue considerablemente más compleja. Se intentaron varias aproximaciones:
+
+\begin{itemize}
+  \item \textbf{Tarea programada del Task Scheduler:} Fue la primera opción, creando una tarea que se ejecutase al iniciar sesión (\texttt{ONLOGON}). El problema principal fue que el Task Scheduler tiene dificultades para localizar y ejecutar correctamente el intérprete de Python dentro de un entorno virtual, especialmente cuando la ruta contiene espacios o caracteres especiales. Los permisos de ejecución en el contexto del usuario local también generaron problemas intermitentes.
+  \item \textbf{NSSM (Non-Sucking Service Manager):} Se evaluó el uso de \texttt{nssm}, una herramienta de terceros que permite envolver cualquier ejecutable como un servicio nativo de Windows. Aunque conceptualmente era la solución ideal, la configuración programática desde Python resultó problemática: la detección del entorno virtual, la propagación de variables de entorno y la gestión de la salida estándar del proceso no funcionaban de forma fiable en todos los entornos probados.
+\end{itemize}
+
+Finalmente, se optó por mantener la instalación como \textbf{tarea programada del Task Scheduler} como la opción más compatible, aunque con limitaciones conocidas en cuanto a la fiabilidad de inicio automático en todas las configuraciones de Windows.
+
+\subsection{Capturas de pantalla en Linux con Wayland}
+
+La librería \texttt{mss} (python-mss) se utiliza para la captura de pantalla en el agente. Esta librería funciona accediendo directamente al servidor gráfico del sistema operativo para obtener una imagen del escritorio.
+
+En \textbf{Linux con X11/Xorg} (el servidor gráfico tradicional), \texttt{mss} funciona correctamente, ya que X11 permite a cualquier proceso conectado al servidor X acceder a los pixeles del framebuffer de la pantalla sin restricciones significativas.
+
+Sin embargo, en \textbf{Linux con Wayland} (el protocolo de servidor gráfico más moderno que está sustituyendo a X11 en distribuciones recientes como Ubuntu 22.04+, Fedora o GNOME en Arch), la captura de pantalla \textbf{no funciona}. Esto se debe a que Wayland implementa un modelo de seguridad fundamentalmente diferente:
+
+\begin{itemize}
+  \item En \textbf{X11}, cualquier cliente X puede leer los pixeles de cualquier ventana. No existe aislamiento entre aplicaciones gráficas. Esto facilita las capturas, pero es un problema de seguridad.
+  \item En \textbf{Wayland}, cada cliente solo tiene acceso a sus propios buffers. Para capturar la pantalla completa, se requiere utilizar portales de escritorio (\texttt{xdg-desktop-portal}) y la API de PipeWire/ScreenCast, que exigen interacción del usuario (un diálogo de consentimiento) la primera vez.
+\end{itemize}
+
+Dado que \texttt{mss} accede directamente al protocolo X11, no es compatible con Wayland de forma nativa. La solución adoptada fue \textbf{documentar la limitación} e indicar que los equipos del aula donde se instale el agente deben utilizar \textbf{X11/Xorg} como servidor gráfico (en la mayoría de distribuciones se puede seleccionar en la pantalla de inicio de sesión). En entornos educativos, donde los equipos suelen tener configuraciones controladas por el administrador, esto es una restricción asumible.
+
+\subsection{Certificados TLS con Caddy y conexiones WSS del agente}
+
+Caddy 2 gestiona los certificados TLS de forma automática mediante Let's Encrypt. En un entorno de producción con un dominio público, esto funciona sin intervención manual. Sin embargo, durante el desarrollo y las pruebas en \textbf{red local} (sin dominio público), surgieron dificultades:
+
+\begin{itemize}
+  \item \textbf{Certificados autofirmados:} Caddy genera certificados autofirmados cuando no puede obtener un certificado de Let's Encrypt. Los agentes Python, al conectarse por \texttt{wss://} (WebSocket sobre TLS), rechazaban estos certificados al no estar firmados por una Autoridad Certificadora reconocida.
+  \item \textbf{Solución en desarrollo:} Se configuró el agente con la opción \texttt{ssl=False} en las pruebas locales, deshabilitando la verificación TLS. Para pruebas con TLS se exportó el certificado raíz de Caddy y se configuró como CA de confianza en los equipos cliente.
+  \item \textbf{Solución en producción:} Con un dominio público y puertos 80/443 accesibles, Caddy obtiene certificados válidos de Let's Encrypt automáticamente y los agentes se conectan sin problemas.
+\end{itemize}
+
+Esta complicación puso de manifiesto la importancia de planificar la infraestructura de certificados desde las fases iniciales del proyecto.
+
+\subsection{Conexión con la API de MikroTik}
+
+La conexión con la API de MikroTik RouterOS mediante \texttt{librouteros} presentó varios problemas durante la implementación:
+
+\begin{itemize}
+  \item \textbf{Puertos y protocolos:} MikroTik ofrece dos puertos de API: el 8728 (sin TLS) y el 8729 (con TLS/SSL). La conexión TLS requiere configuración adicional tanto en el router (certificado SSL) como en el cliente Python (verificación o deshabilitación de la verificación del certificado). Durante el desarrollo, la conexión sin TLS (puerto 8728) fue más práctica, mientras que en producción se recomienda utilizar el puerto con TLS.
+  \item \textbf{Habilitación de la API:} Por defecto, la API de MikroTik no está habilitada. Es necesario activarla explícitamente en \texttt{/ip/service} del router y configurar las direcciones permitidas que pueden conectarse.
+  \item \textbf{Formato de las consultas:} La API de MikroTik utiliza un protocolo binario propio con una sintaxis de consulta particular (filtros con \texttt{?}, modificadores con \texttt{=}) que difiere significativamente de las APIs REST habituales. La documentación de \texttt{librouteros} fue esencial para comprender la traducción entre las rutas del CLI de RouterOS y las llamadas de la API.
+  \item \textbf{Timeout y reconexión:} Las conexiones a la API pueden cerrarse por inactividad. Se implementó la apertura y cierre de conexión por cada operación en lugar de mantener una conexión persistente, evitando así problemas de timeout.
+\end{itemize}
+
+\subsection{Limitación del bloqueo entre equipos de la misma subred}
+
+La estrategia de \textit{Network Fencing} implementada combina dos mecanismos:
+
+\begin{enumerate}
+  \item \textbf{Split-Horizon (L2):} Se asigna un valor de \texttt{horizon} al puerto del bridge del equipo bloqueado, impidiendo que el tráfico L2 se reenvíe entre puertos con el mismo valor de horizon.
+  \item \textbf{IP Firewall Filter (L3):} Se crean reglas \texttt{drop} en el firewall IP del router para bloquear el tráfico L3 del equipo, exceptuando los hosts permitidos.
+\end{enumerate}
+
+Esta combinación es efectiva para bloquear el acceso a internet y la comunicación con equipos que se encuentran en \textbf{subredes diferentes} (el tráfico pasa por el router y es filtrado por las reglas de firewall).
+
+Sin embargo, se detectó una \textbf{limitación conocida}: si dos equipos están conectados al \textbf{mismo bridge y la misma subred} (lo cual es habitual en un aula), el tráfico entre ellos puede realizarse directamente a nivel L2 sin pasar por el motor de firewall IP del router. Aunque el split-horizon impide el reenvío entre puertos con el mismo valor de horizon, los equipos \textbf{no bloqueados} (con horizon 0, el valor por defecto) siguen pudiendo comunicarse con los equipos bloqueados a nivel de enlace.
+
+Esta limitación es \textbf{inherente a la arquitectura de bridging de MikroTik}: el firewall IP (\texttt{/ip/firewall/filter}) solo actúa sobre paquetes que pasan por la capa L3 del router, y el tráfico bridgeado dentro del mismo segmento no necesariamente pasa por esa capa a menos que se habilite \texttt{use-ip-firewall} en la configuración del bridge.
+
+Se habilitó la opción \texttt{use-ip-firewall} en \texttt{/interface/bridge/settings}, lo que fuerza a que el tráfico bridgeado también sea procesado por las reglas del firewall IP. Sin embargo, esta opción tiene un \textbf{impacto en el rendimiento} del router, ya que todo el tráfico L2 pasa a ser inspeccionado a nivel L3. En entornos con mucho tráfico de red, esto puede generar cuellos de botella.
+
+Esta limitación queda documentada como una \textbf{restricción conocida del sistema} y se recomienda evaluar el rendimiento en cada entorno particular.
+
+\section{Conclusiones}
+
+\subsection{Objetivos alcanzados}
+
+Se han cumplido todos los objetivos definidos para el MVP:
+
+\begin{itemize}
+  \item Se ha desarrollado un sistema completo de monitorización y control de equipos en aulas informáticas con interfaz web.
+  \item Se ha implementado la funcionalidad diferenciadora del proyecto: el \textit{Network Fencing} mediante integración directa con la API de MikroTik, permitiendo el aislamiento de red a nivel físico (L2/L3).
+  \item Se ha diseñado e implementado un agente multiplataforma ligero que se instala como servicio del sistema.
+  \item Se ha implementado un sistema de comunicación en tiempo real con WebSockets para monitorización instantánea.
+  \item Se ha proporcionado un despliegue automatizado con Docker Compose y TLS automático.
+\end{itemize}
+
+\subsection{Lecciones aprendidas}
+
+\begin{itemize}
+  \item La combinación de split-horizon (L2) con reglas de IP firewall (L3) fue la solución más robusta para el aislamiento de red, ya que bloquea tanto el tráfico bridgeado como el enrutado.
+  \item Django Channels con Redis como backend resulta una solución fiable para WebSockets en tiempo real, aunque requiere una configuración cuidadosa de la capacidad del \textit{channel layer} para mensajes grandes (capturas de pantalla).
+  \item El sistema de heartbeat con Redis keyspace notifications es elegante y eficiente, pero depende de que Redis esté configurado con \texttt{notify-keyspace-events} habilitado.
+  \item La instalación del agente como servicio del sistema en diferentes SO requiere un manejo cuidadoso de las particularidades de cada plataforma (Task Scheduler en Windows, systemd en Linux).
+\end{itemize}
+
+\subsection{Líneas futuras}
+
+\begin{itemize}
+  \item \textbf{Wake-on-LAN:} Permitir encender equipos remotamente enviando paquetes WoL a través del router MikroTik.
+  \item \textbf{Streaming de pantalla:} Implementar transmisión de vídeo en tiempo real (WebRTC o MJPEG) para una experiencia de monitorización más completa.
+  \item \textbf{Mensajería y chat:} Permitir al profesor enviar mensajes a los equipos del aula y comunicarse con los alumnos.
+  \item \textbf{Historial y auditoría:} Registro de todas las acciones realizadas en el sistema para trazabilidad.
+  \item \textbf{Integración LDAP/AD:} Sincronización de usuarios con el directorio del centro educativo.
+  \item \textbf{Aplicación móvil:} Panel de control para profesores en dispositivos móviles.
+  \item \textbf{Soporte multi-centro:} Arquitectura multi-tenant para gestionar varios centros desde una única instancia.
+\end{itemize}
+
+\section{Bibliografía y referencias}
+
+\begin{enumerate}
+  \item Django Software Foundation. \textit{Django documentation (v5.2)}. \url{https://docs.djangoproject.com/en/5.2/}
+  \item Django REST Framework. \textit{DRF documentation}. \url{https://www.django-rest-framework.org/}
+  \item Django Channels. \textit{Channels documentation}. \url{https://channels.readthedocs.io/}
+  \item Meta Platforms, Inc. \textit{React documentation (v19)}. \url{https://react.dev/}
+  \item Material UI. \textit{MUI documentation (v7)}. \url{https://mui.com/}
+  \item Vite. \textit{Vite documentation}. \url{https://vitejs.dev/}
+  \item Redis Ltd. \textit{Redis documentation}. \url{https://redis.io/docs/}
+  \item PostgreSQL Global Development Group. \textit{PostgreSQL 16 documentation}. \url{https://www.postgresql.org/docs/16/}
+  \item MikroTik. \textit{RouterOS documentation}. \url{https://help.mikrotik.com/docs/}
+  \item librouteros. \textit{Python MikroTik API client}. \url{https://librouteros.readthedocs.io/}
+  \item Caddy Web Server. \textit{Caddy documentation}. \url{https://caddyserver.com/docs/}
+  \item Docker, Inc. \textit{Docker Compose documentation}. \url{https://docs.docker.com/compose/}
+  \item Nanostores. \textit{Nanostores — tiny state manager}. \url{https://github.com/nanostores/nanostores}
+  \item websockets. \textit{websockets Python library}. \url{https://websockets.readthedocs.io/}
+  \item psutil. \textit{psutil — cross-platform process and system utilities}. \url{https://psutil.readthedocs.io/}
+  \item mss. \textit{python-mss — fast screenshots}. \url{https://python-mss.readthedocs.io/}
+\end{enumerate}
+
+\end{document}
