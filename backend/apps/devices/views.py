@@ -109,6 +109,7 @@ class DevicesViewSet(viewsets.ModelViewSet):
                     switch_port=device.switch_port,
                     device_id=device.id,
                     device_ip=str(device.ip),
+                    classroom_id=device.classroom_id,
                 )
             else:
                 mikrotik_service.unblock_device_internet(
@@ -193,8 +194,9 @@ class ClassroomViewSet(viewsets.ModelViewSet):
     def toggle_global_internet(self, request, pk=None):
         classroom = self.get_object()
 
-        # Decide si bloquear o desbloquear segun el estado actual del aula
-        will_block = not classroom.is_internet_blocked
+        # Si algun dispositivo esta desbloqueado, bloqueamos todos; si todos estan bloqueados, desbloqueamos
+        any_unblocked = classroom.device_set.filter(is_internet_blocked=False).exists()
+        will_block = any_unblocked
 
         try:
             if will_block:
@@ -216,10 +218,9 @@ class ClassroomViewSet(viewsets.ModelViewSet):
                 status=status.HTTP_502_BAD_GATEWAY,
             )
 
+        # Actualiza el estado de cada dispositivo del aula
         classroom.is_internet_blocked = will_block
         classroom.save()
-
-        # Actualiza tambien el estado de cada dispositivo del aula
         classroom.device_set.update(is_internet_blocked=will_block)
 
         event = "classroom_block" if will_block else "classroom_unblock"
@@ -233,7 +234,6 @@ class ClassroomViewSet(viewsets.ModelViewSet):
                 "payload": {
                     "event": event,
                     "classroom_id": classroom.id,
-                    "is_internet_blocked": will_block,
                     "timestamp": datetime.now().isoformat(),
                 },
             },

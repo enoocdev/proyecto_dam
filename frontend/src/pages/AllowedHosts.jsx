@@ -16,10 +16,11 @@ import '../styles/AllowedHosts.css';
 import AllowedHostCard from '../components/AllowedHostCard';
 import AllowedHostModal from '../components/AllowedHostModal';
 
-import { API_PATH_ALLOWED_HOSTS } from '../constants';
+import { API_PATH_ALLOWED_HOSTS, API_PATH_CLASSROOMS_WITHOUT_PAGINATION } from '../constants';
 
 const AllowedHosts = () => {
     const [hosts, setHosts] = useState([]);
+    const [classrooms, setClassrooms] = useState([]);
     const [loading, setLoading] = useState(false);
     const [searchTerm, setSearchTerm] = useState("");
     const [notification, setNotification] = useState({ open: false, message: '', severity: 'success' });
@@ -54,7 +55,17 @@ const AllowedHosts = () => {
 
     useEffect(() => {
         fetchHosts();
+        fetchClassrooms();
     }, [page]);
+
+    const fetchClassrooms = async () => {
+        try {
+            const response = await api.get(API_PATH_CLASSROOMS_WITHOUT_PAGINATION);
+            setClassrooms(Array.isArray(response.data) ? response.data : []);
+        } catch (err) {
+            console.error('Error al cargar aulas', err);
+        }
+    };
 
     const handleOpenModal = (host = null) => {
         setSelectedHost(host);
@@ -204,6 +215,7 @@ const AllowedHosts = () => {
                 host={selectedHost}
                 onClose={handleCloseModal}
                 onSave={handleSaveHost}
+                classrooms={classrooms}
             />
 
             <Dialog open={isDeleteDialogOpen} onClose={handleCloseDeleteDialog} PaperProps={{ className: "modal-paper" }}>

@@ -3,16 +3,18 @@
 import React, { useState, useEffect } from 'react';
 import {
     Dialog, DialogTitle, DialogContent, DialogActions,
-    TextField, Button, IconButton, Box, Grid
+    TextField, Button, IconButton, Box, Grid,
+    Autocomplete
 } from '@mui/material';
 import { Close } from '@mui/icons-material';
 import '../styles/UserModal.css';
 
-const AllowedHostModal = ({ open, onClose, onSave, host }) => {
+const AllowedHostModal = ({ open, onClose, onSave, host, classrooms = [] }) => {
 
     const initialFormState = {
         name: '',
-        ip_address: ''
+        ip_address: '',
+        classroom: null
     };
 
     const [formData, setFormData] = useState(initialFormState);
@@ -25,7 +27,8 @@ const AllowedHostModal = ({ open, onClose, onSave, host }) => {
             if (isEditMode && host) {
                 setFormData({
                     name: host.name || '',
-                    ip_address: host.ip_address || ''
+                    ip_address: host.ip_address || '',
+                    classroom: host.classroom || null
                 });
             } else {
                 setFormData(initialFormState);
@@ -76,7 +79,8 @@ const AllowedHostModal = ({ open, onClose, onSave, host }) => {
 
         const dataToSave = {
             name: formData.name.trim(),
-            ip_address: formData.ip_address.trim()
+            ip_address: formData.ip_address.trim(),
+            classroom: formData.classroom || null
         };
 
         const hostId = host ? host.id : null;
@@ -126,6 +130,24 @@ const AllowedHostModal = ({ open, onClose, onSave, host }) => {
                                 variant="outlined"
                                 error={Boolean(errors.ip_address)}
                                 helperText={errors.ip_address}
+                            />
+                        </Grid>
+                        <Grid item xs={12}>
+                            <Autocomplete
+                                options={classrooms}
+                                getOptionLabel={(opt) => opt.name}
+                                value={classrooms.find(c => c.id === formData.classroom) || null}
+                                onChange={(_, val) => setFormData(prev => ({ ...prev, classroom: val ? val.id : null }))}
+                                renderInput={(params) => (
+                                    <TextField
+                                        {...params}
+                                        placeholder="Aula (opcional — vacío = global)"
+                                        className="dark-input"
+                                        variant="outlined"
+                                    />
+                                )}
+                                isOptionEqualToValue={(opt, val) => opt.id === val.id}
+                                fullWidth
                             />
                         </Grid>
                     </Grid>

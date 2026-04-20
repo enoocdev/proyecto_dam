@@ -1,10 +1,12 @@
 // Tarjeta que muestra la informacion de un host permitido
 import React from 'react';
-import { IconButton, Tooltip } from '@mui/material';
+import { IconButton, Tooltip, Chip } from '@mui/material';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import DnsIcon from '@mui/icons-material/Dns';
 import LanIcon from '@mui/icons-material/Lan';
+import SchoolIcon from '@mui/icons-material/School';
+import PublicIcon from '@mui/icons-material/Public';
 
 const AllowedHostCard = ({ host, onEdit, onDelete }) => {
     return (
@@ -20,6 +22,18 @@ const AllowedHostCard = ({ host, onEdit, onDelete }) => {
                         {host.ip_address}
                     </span>
                 </div>
+                <Chip
+                    icon={host.classroom_name ? <SchoolIcon /> : <PublicIcon />}
+                    label={host.classroom_name || 'Global'}
+                    size="small"
+                    variant="outlined"
+                    sx={{
+                        ml: 2,
+                        borderColor: host.classroom_name ? 'var(--accent-color)' : 'var(--border-color)',
+                        color: 'var(--text-secondary)',
+                        '& .MuiChip-icon': { color: host.classroom_name ? 'var(--accent-color)' : 'var(--text-secondary)' },
+                    }}
+                />
             </div>
 
             <div className="allowed-host-actions">

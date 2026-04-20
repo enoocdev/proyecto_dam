@@ -43,9 +43,15 @@ class Device(models.Model):
 
 # Hosts permitidos que siempre seran accesibles aunque se corte internet
 # Cuando se bloquea un puerto se crean reglas accept para cada uno de estos
+# Si classroom es null se aplica a todas las reglas (global)
+# Si tiene classroom asignada solo se aplica a reglas de esa aula
 class AllowedHost(models.Model):
     ip_address = models.GenericIPAddressField(unique=True)
     name = models.CharField(max_length=100, blank=True)
+    classroom = models.ForeignKey(
+        Classroom, on_delete=models.SET_NULL, null=True, blank=True,
+        related_name='allowed_hosts',
+    )
 
     def __str__(self):
         return f"{self.name} ({self.ip_address})" if self.name else str(self.ip_address)

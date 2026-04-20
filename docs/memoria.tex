@@ -650,6 +650,7 @@ A continuación se presentan los diagramas del modelo de datos del sistema. El p
 \node[relationship] (r2) at (11, -5) {contiene};
 \node[relationship] (r3) at (16.5, -10) {conectado\_a};
 \node[relationship] (r4) at (0, -5) {pertenece\_a};
+\node[relationship] (r5) at (16.5, 0) {restringido\_a};
 
 % ── Flechas con cardinalidad ──
 \draw[arrow] (user) -- (r1) node[midway, above, card] {N};
@@ -660,6 +661,8 @@ A continuación se presentan los diagramas del modelo de datos del sistema. El p
 \draw[arrow] (r3) -- (netdev) node[midway, above, card] {1};
 \draw[arrow] (user) -- (r4) node[midway, left, card] {N};
 \draw[arrow] (r4) -- (group) node[midway, left, card] {M};
+\draw[arrow] (classroom) -- (r5) node[midway, above, card] {1};
+\draw[arrow] (r5) -- (allowed) node[midway, above, card] {N};
 
 % ── Atributos User (arriba y a la izquierda) ──
 \node[key] (u_id) at (-3, 2) {\underline{id} (PK)};
@@ -775,6 +778,7 @@ A continuación se presentan los diagramas del modelo de datos del sistema. El p
   \textbf{PK} id : bigint \\
   ip\_address : inet \textbf{UK} \\
   name : varchar(100) \\
+  \textbf{FK} classroom\_id : bigint (NULL) \\
   \hline
   \end{tabular}%
 }
@@ -1026,6 +1030,14 @@ A continuación se presentan los diagramas del modelo de datos del sistema. El p
 \cfManyRight{R8b}
 \cfCirc{$(R8b)+(0.14,0)$}
 
+% ── R11  devices_classroom ||--o{ devices_allowedhost ──
+\path (CL.east) ++(0,-0.5) coordinate (R11a);
+\path (AH.west) ++(0,-0.5) coordinate (R11b);
+\draw[rel] (R11a) -- (R11b);
+\cfOneRight{R11a}
+\cfManyLeft{R11b}
+\cfCirc{$(R11b)+(-0.14,0)$}
+
 % ── R9  auth_group ||--o{ auth_group_permissions ──
 % Ruta: GR.north → canal B (y≈-10, entre fila-1 y fila-2) → derecha → GP.south
 \path (GR.north -| 1.5,0) coordinate (R9a);
@@ -1158,9 +1170,10 @@ El modelo relacional se presenta a continuación en formato tabular detallado. L
   \toprule
   \textbf{Campo} & \textbf{Tipo} & \textbf{Restricciones} \\
   \midrule
-  id          & BIGINT       & PK \\
-  ip\_address & INET         & UNIQUE, NOT NULL \\
-  name        & VARCHAR(100) & BLANK \\
+  id            & BIGINT       & PK \\
+  ip\_address   & INET         & UNIQUE, NOT NULL \\
+  name          & VARCHAR(100) & BLANK \\
+  classroom\_id & BIGINT       & FK $\to$ devices\_classroom.id, NULL (opcional) \\
   \bottomrule
 \end{tabularx}
 \end{table}
@@ -1196,6 +1209,7 @@ El modelo relacional se presenta a continuación en formato tabular detallado. L
 \textbf{Relaciones principales:}
 \begin{itemize}
   \item \texttt{devices\_classroom} $\longleftrightarrow$ \texttt{devices\_device}: 1:N (un aula contiene muchos dispositivos).
+  \item \texttt{devices\_classroom} $\longleftrightarrow$ \texttt{devices\_allowedhost}: 1:N (un aula puede tener hosts permitidos específicos; si el host no tiene aula asignada, es global).
   \item \texttt{devices\_networkdevice} $\longleftrightarrow$ \texttt{devices\_device}: 1:N (un equipo de red conecta muchos dispositivos).
   \item \texttt{users\_user} $\longleftrightarrow$ \texttt{devices\_classroom}: N:M (un usuario puede tener varias aulas asignadas).
   \item \texttt{users\_user} $\longleftrightarrow$ \texttt{auth\_group}: N:M (un usuario puede pertenecer a varios grupos).
@@ -1216,7 +1230,7 @@ El modelo relacional se presenta a continuación en formato tabular detallado. L
   \addlinespace
   \texttt{devices\_networkdevice} & Equipo de red MikroTik (switch o router) al que el backend se conecta por API para aplicar reglas de aislamiento. La contraseña se almacena cifrada con Fernet (AES). \\
   \addlinespace
-  \texttt{devices\_allowedhost} & IP de un host que siempre será accesible aunque se bloquee internet. Cuando se crea una regla de bloqueo, se añaden reglas \texttt{accept} para cada host permitido antes de la regla \texttt{drop}. \\
+  \texttt{devices\_allowedhost} & IP de un host que siempre será accesible aunque se bloquee internet. Cuando se crea una regla de bloqueo, se añaden reglas \texttt{accept} para cada host permitido antes de la regla \texttt{drop}. Si tiene un aula asignada (\texttt{classroom\_id}), solo se aplica en las reglas de bloqueo de esa aula; si no tiene aula (valor nulo), se aplica de forma global en cualquier regla de bloqueo. \\
   \addlinespace
   \texttt{auth\_group} & Grupos de permisos de Django. Permite definir roles (por ejemplo, ``Profesor'') con un conjunto específico de permisos. \\
   \addlinespace

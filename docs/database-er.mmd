@@ -44,6 +44,7 @@ erDiagram
         bigint id PK
         string ip_address UK
         string name
+        bigint classroom_id FK
     }
 
     AUTH_GROUP {
@@ -83,6 +84,7 @@ erDiagram
     }
 
     DEVICES_CLASSROOM ||--o{ DEVICES_DEVICE : contains
+    DEVICES_CLASSROOM ||--o{ DEVICES_ALLOWEDHOST : restricts
     DEVICES_NETWORKDEVICE ||--o{ DEVICES_DEVICE : connects
 
     USERS_USER ||--o{ USERS_USER_CLASSROOMS : has
