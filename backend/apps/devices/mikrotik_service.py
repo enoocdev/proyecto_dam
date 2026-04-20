@@ -17,13 +17,36 @@ class MikrotikError(Exception):
     pass
 
 
-def _get_allowed_hosts(classroom_id=None):
-    """Devuelve IPs de hosts permitidos: los globales (sin aula) mas los del aula indicada."""
-    from django.db.models import Q
-    qs = AllowedHost.objects.filter(
-        Q(classroom__isnull=True) | Q(classroom_id=classroom_id)
-    ) if classroom_id else AllowedHost.objects.filter(classroom__isnull=True)
-    return list(qs.values_list("ip_address", flat=True))
+def _get_allowed_hosts():
+    return list(AllowedHost.objects.values_list("ip_address", flat=True))
+
+
+def _resolve_allowed_ports(api, allowed_ips: list) -> set:
+    """Dado un listado de IPs permitidas, busca en que puerto del bridge esta
+    cada una consultando ARP (ip->mac) y bridge host (mac->puerto).
+    Devuelve un set de nombres de interfaz (puertos del switch)."""
+    if not allowed_ips:
+        return set()
+
+    # Cargar tablas una sola vez
+    arp_entries = {a.get("address"): a.get("mac-address", "").upper()
+                   for a in api.path("/ip/arp")}
+    bridge_hosts = {h.get("mac-address", "").upper(): h.get("on-interface", "")
+                    for h in api.path("/interface/bridge/host")}
+
+    ports = set()
+    for ip in allowed_ips:
+        mac = arp_entries.get(str(ip), "")
+        if mac:
+            port = bridge_hosts.get(mac, "")
+            if port:
+                ports.add(port)
+                logger.debug("Allowed host %s -> mac=%s -> puerto=%s", ip, mac, port)
+            else:
+                logger.debug("Allowed host %s mac=%s no encontrada en bridge hosts", ip, mac)
+        else:
+            logger.debug("Allowed host %s no encontrada en ARP", ip)
+    return ports
 
 
 def _to_cidr(ip: str) -> str:
@@ -144,18 +167,18 @@ def _add_rules_with_placement(path, rules: list, chain: str):
 
 #  Bloqueo / desbloqueo de un dispositivo individual
 
-def block_device_internet(network_device, switch_port, device_id, device_ip, classroom_id=None):
+def block_device_internet(network_device, switch_port, device_id, device_ip):
     """Bloquea internet a un dispositivo usando reglas de IP firewall (por IP)
     y bridge filter (por puerto fisico del switch) para evitar que VMs en
     adaptador puente puedan saltarse el bloqueo."""
 
     comment = _build_device_comment(device_id)
-    allowed_hosts = _get_allowed_hosts(classroom_id=classroom_id)
+    allowed_hosts = _get_allowed_hosts()
 
     with _mikrotik_connection(network_device) as api:
         _remove_rules_by_comment(api, comment)
 
-        # --- L3: IP Firewall Filter (bloqueo por IP) ---
+        # L3: IP Firewall Filter
         ip_filt = _get_ip_filter(api)
         ip_rules = []
         dev_cidr = _to_cidr(device_ip)
@@ -184,24 +207,36 @@ def block_device_internet(network_device, switch_port, device_id, device_ip, cla
 
         _add_rules_with_placement(ip_filt, ip_rules, "forward")
 
-        # --- L2: Bridge Filter (bloqueo por puerto fisico) ---
+        # L2: Bridge Filter 
         _set_hw_offload(api, switch_port, False)
 
         br_filt = _get_bridge_filter(api)
         br_rules = []
 
-        for allowed_ip in allowed_hosts:
-            ah_cidr = _to_cidr(allowed_ip)
+        allowed_ports = _resolve_allowed_ports(api, allowed_hosts)
+
+        for ah_port in allowed_ports:
+            _set_hw_offload(api, ah_port, False)
             br_rules.append({
                 "chain": "forward", "action": "accept",
-                "in-interface": switch_port, "mac-protocol": "ip",
-                "dst-address": ah_cidr,
+                "in-interface": switch_port, "out-interface": ah_port,
+                "comment": comment,
+            })
+            br_rules.append({
+                "chain": "forward", "action": "accept",
+                "in-interface": ah_port, "out-interface": switch_port,
                 "comment": comment,
             })
 
+        # Siempre bloquear todo desde/hacia el puerto
         br_rules.append({
             "chain": "forward", "action": "drop",
             "in-interface": switch_port,
+            "comment": comment,
+        })
+        br_rules.append({
+            "chain": "forward", "action": "drop",
+            "out-interface": switch_port,
             "comment": comment,
         })
 
@@ -231,6 +266,11 @@ def unblock_device_internet(network_device, device_id):
         if switch_port:
             _set_hw_offload(api, switch_port, True)
 
+        # Restaurar hw-offload en puertos de allowed hosts
+        allowed_hosts = _get_allowed_hosts()
+        for ah_port in _resolve_allowed_ports(api, allowed_hosts):
+            _set_hw_offload(api, ah_port, True)
+
     logger.info("Internet desbloqueado para device_id=%s", device_id)
 
 
@@ -243,7 +283,7 @@ def global_block_internet(network_device):
     with _mikrotik_connection(network_device) as api:
         _remove_rules_by_comment(api, COMMENT_GLOBAL_BLOCK)
 
-        # --- L3: IP Firewall Filter ---
+        # L3: IP Firewall Filter
         ip_filt = _get_ip_filter(api)
         ip_rules = []
 
@@ -265,20 +305,29 @@ def global_block_internet(network_device):
 
         _add_rules_with_placement(ip_filt, ip_rules, "forward")
 
-        # --- L2: Bridge Filter (bloqueo global por bridge) ---
+        # L2: Bridge Filter
         _set_all_hw_offload(api, False)
 
         br_filt = _get_bridge_filter(api)
         br_rules = []
 
-        for allowed_ip in allowed_hosts:
-            cidr = _to_cidr(allowed_ip)
+        # Averiguar puertos de allowed hosts
+        allowed_ports = _resolve_allowed_ports(api, allowed_hosts)
+
+        # Permitir trafico desde/hacia los puertos de allowed hosts
+        for ah_port in allowed_ports:
             br_rules.append({
                 "chain": "forward", "action": "accept",
-                "mac-protocol": "ip", "dst-address": cidr,
+                "out-interface": ah_port,
+                "comment": COMMENT_GLOBAL_BLOCK,
+            })
+            br_rules.append({
+                "chain": "forward", "action": "accept",
+                "in-interface": ah_port,
                 "comment": COMMENT_GLOBAL_BLOCK,
             })
 
+        # Bloquear todo lo demas
         br_rules.append({
             "chain": "forward", "action": "drop",
             "comment": COMMENT_GLOBAL_BLOCK,
@@ -333,7 +382,6 @@ def classroom_block_internet(classroom_id):
                 switch_port=device.switch_port,
                 device_id=device.id,
                 device_ip=str(device.ip),
-                classroom_id=classroom_id,
             )
         except MikrotikError as e:
             logger.warning(
@@ -370,9 +418,7 @@ def classroom_unblock_internet(classroom_id):
     logger.info("Bloqueo por aula desactivado classroom_id=%s", classroom_id)
 
 
-# ======================================================================
 #  Busqueda de dispositivo en la red
-# ======================================================================
 
 def find_device_network_info(mac):
     mac_upper = mac.strip().upper()
