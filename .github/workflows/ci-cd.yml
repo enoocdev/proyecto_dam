@@ -152,7 +152,7 @@ jobs:
     name: CD Deploy (SSH)
     runs-on: ubuntu-latest
     needs: [docker-validate]
-    if: (github.event_name == 'push' && github.ref == 'refs/heads/main') || (github.event_name == 'workflow_dispatch' && inputs.deploy == true)
+    if: (((github.event_name == 'push' && github.ref == 'refs/heads/main') || (github.event_name == 'workflow_dispatch' && inputs.deploy == true)) && secrets.DEPLOY_HOST != '' && secrets.DEPLOY_USER != '' && secrets.DEPLOY_SSH_KEY != '' && secrets.DEPLOY_PATH != '')
     environment: ${{ github.event_name == 'workflow_dispatch' && inputs.target_environment || 'staging' }}
 
     steps:
