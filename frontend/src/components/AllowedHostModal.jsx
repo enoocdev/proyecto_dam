@@ -1,6 +1,6 @@
 // Modal para crear o editar un host permitido
 // Incluye validacion de campos antes de guardar
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import {
     Dialog, DialogTitle, DialogContent, DialogActions,
     TextField, Button, IconButton, Box, Grid,
@@ -11,11 +11,11 @@ import '../styles/UserModal.css';
 
 const AllowedHostModal = ({ open, onClose, onSave, host, classrooms = [] }) => {
 
-    const initialFormState = {
+    const initialFormState = useMemo(() => ({
         name: '',
         ip_address: '',
         classroom: null
-    };
+    }), []);
 
     const [formData, setFormData] = useState(initialFormState);
     const [errors, setErrors] = useState({});
@@ -25,17 +25,19 @@ const AllowedHostModal = ({ open, onClose, onSave, host, classrooms = [] }) => {
     useEffect(() => {
         if (open) {
             if (isEditMode && host) {
+                // eslint-disable-next-line react-hooks/set-state-in-effect
                 setFormData({
                     name: host.name || '',
                     ip_address: host.ip_address || '',
                     classroom: host.classroom || null
                 });
             } else {
+                // eslint-disable-next-line react-hooks/set-state-in-effect
                 setFormData(initialFormState);
             }
             setErrors({});
         }
-    }, [host, open, isEditMode]);
+    }, [host, open, isEditMode, initialFormState]);
 
     const handleChange = (e) => {
         const { name, value } = e.target;

@@ -1,6 +1,6 @@
 // Modal para crear o editar un aula
 // Permite asignar nombre y seleccionar dispositivos del listado disponible
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import {
     Dialog, DialogTitle, DialogContent, DialogActions,
     TextField, Button, IconButton, Typography, Box,
@@ -11,10 +11,10 @@ import '../styles/UserModal.css';
 
 const ClassroomModal = ({ open, onClose, onSave, classroom, availableDevices = [] }) => {
 
-    const initialFormState = {
+    const initialFormState = useMemo(() => ({
         name: '',
         devices: []
-    };
+    }), []);
 
     const [formData, setFormData] = useState(initialFormState);
     const [deviceMenuAnchor, setDeviceMenuAnchor] = useState(null);
@@ -31,16 +31,18 @@ const ClassroomModal = ({ open, onClose, onSave, classroom, availableDevices = [
                     typeof dev === 'object' ? dev : devicesMap[dev]
                 ).filter(Boolean);
 
+                // eslint-disable-next-line react-hooks/set-state-in-effect
                 setFormData({
                     name: classroom.name || '',
                     devices: resolvedDevices
                 });
             } else {
+                // eslint-disable-next-line react-hooks/set-state-in-effect
                 setFormData(initialFormState);
             }
             setDeviceSearch('');
         }
-    }, [classroom, open, isEditMode, availableDevices]);
+    }, [classroom, open, isEditMode, availableDevices, initialFormState]);
 
     const handleChange = (e) => {
         const { name, value } = e.target;

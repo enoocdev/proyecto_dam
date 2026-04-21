@@ -74,7 +74,7 @@ const UserGroups = () => {
                     setAllPermissions([...data]);
                     setAvaliablePermissions([...data]);
                 }
-            } catch (err) {
+            } catch {
                 setNotification({ open: true, message: 'Error al cargar los permisos', severity: 'warning' });
             }
         };
@@ -84,7 +84,7 @@ const UserGroups = () => {
 
     useEffect(() => {
         fetchUserGroups(page);
-    }, [page]); 
+    }, [page, fetchUserGroups]); 
 
     const handlePageChange = (event, value) => {
         setPage(value);
@@ -113,8 +113,7 @@ const UserGroups = () => {
         setGroups(newList);
     };
 
-    const handleGroupDeleted = (idDeleted) => {
-        //setGroups(prevGroups => prevGroups.filter(g => g.id !== idDeleted));
+    const handleGroupDeleted = () => {
         fetchUserGroups(page); 
     };
 
@@ -141,7 +140,7 @@ const UserGroups = () => {
             } else {
                 throw new Error();
             }
-        } catch (err) {
+        } catch {
             setNotification({ open: true, message: 'No se ha podido crear el grupo', severity: 'error' });
         }
     };

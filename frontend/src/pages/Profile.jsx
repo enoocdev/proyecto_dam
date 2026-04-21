@@ -1,6 +1,6 @@
 // Pagina de perfil del usuario autenticado
 // Permite modificar datos personales y contrasena
-import React, { use, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
     Paper,
     Typography,
@@ -83,7 +83,7 @@ const Profile = () => {
                 }else{
                     setNotification({ open: true, message: 'No se ha podido cargar el perfil de usuario', severity: 'error' });
                 }
-            }catch(err){
+            }catch{
                 setNotification({ open: true, message: 'No se ha podido cargar el perfil de usuario', severity: 'error' });
                 setError(true)
             }
@@ -95,7 +95,7 @@ const Profile = () => {
     useEffect(()=>{
         reloadProfile()
         
-    },[])
+    },[reloadProfile])
 
     const handleInputChange = (e) => {
         setUser({ ...User, [e.target.name]: e.target.value });
@@ -142,7 +142,7 @@ const Profile = () => {
                 }else{
                     throw new Error('Status no exitoso');
                 }
-            }catch(err){
+            }catch{
                 setNotification({ open: true, message: 'Error al guardar el usuario', severity: 'error' })
             }
         }

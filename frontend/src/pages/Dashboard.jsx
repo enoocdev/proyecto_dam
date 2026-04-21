@@ -28,10 +28,7 @@ function DashboardPage() {
 
     const [devices, setDevices] = useState([])
     const [loading, setLoading] = useState(true)
-
-    const [page, setPage] = useState(1)
-    const [totalPages, setTotalPages] = useState(1);
-    const pageSize = 10;
+    const [page] = useState(1);
 
     const [classrooms, setClassrooms] = useState([]);
     const [selectedClassroom, setSelectedClassroom] = useState(null);
@@ -59,10 +56,12 @@ function DashboardPage() {
 
     useEffect(() => {
         fetchClassrooms();
-    }, []);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [isSuperuser, isStaff]);
 
     useEffect(() => {
         fetchDevices();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [selectedClassroom]);
 
     const fetchClassrooms = async () => {
@@ -75,7 +74,7 @@ function DashboardPage() {
             if (!isSuperuser && !isStaff && allData.length > 0 && selectedClassroomRef.current === null) {
                 handleClassroomChange(allData[0].id);
             }
-        } catch (err) {
+        } catch {
             setNotification({ open: true, message: 'Error al cargar las Aulas', severity: 'error' });
         }
     };
@@ -191,14 +190,12 @@ function DashboardPage() {
             const response = await api.get(API_PATH_DEVICES, { params });
             
             const data = response.data.results ? response.data.results : response.data;
-            const count = response.data.count || (Array.isArray(data) ? data.length : 0);
 
             const deviceList = Array.isArray(data) ? data : [];
             setDevices(deviceList);
-            setTotalPages(Math.ceil(count / pageSize));
             resolveNetworkDeviceNames(deviceList);
 
-        } catch (err) {
+        } catch {
             setNotification({ open: true, message: 'Error al cargar los Equipos', severity: 'error' });
         }
         setLoading(false);

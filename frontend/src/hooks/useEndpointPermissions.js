@@ -17,7 +17,7 @@ const useEndpointPermission = (endpoint) => {
 
     useEffect(() => {
 
-        const fetchPermissions = async () =>{
+        const fetchPermissionsData = async () =>{
             try {
                 const response = await api.options(endpoint);
                 
@@ -42,7 +42,7 @@ const useEndpointPermission = (endpoint) => {
                 }
                 
                 
-            } catch (err) {
+            } catch {
                 setPermissions({
                     canRead: false,
                     canCreate: false,
@@ -50,10 +50,11 @@ const useEndpointPermission = (endpoint) => {
                     canDelete: false,
                 });
             }
+        }
 
-        fetchPermissions()
+        fetchPermissionsData()
         
-    }}, [endpoint])
+    }, [endpoint])
 
     return permissions
 }

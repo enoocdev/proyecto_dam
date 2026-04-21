@@ -46,7 +46,7 @@ const NetworkDevices = () => {
             setNetworkDevices(Array.isArray(data) ? data : []);
             setTotalPages(Math.ceil(count / pageSize));
 
-        } catch (err) {
+        } catch {
             setNotification({ open: true, message: 'Error al cargar los dispositivos de red', severity: 'error' });
         }
         setLoading(false);
@@ -54,6 +54,7 @@ const NetworkDevices = () => {
 
     useEffect(() => {
         fetchNetworkDevices();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [page]);
 
     // Funciones para abrir y cerrar el modal de crear o editar

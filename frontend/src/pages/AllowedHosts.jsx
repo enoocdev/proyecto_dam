@@ -47,25 +47,26 @@ const AllowedHosts = () => {
             setHosts(Array.isArray(data) ? data : []);
             setTotalPages(Math.ceil(count / pageSize));
 
-        } catch (err) {
+        } catch {
             setNotification({ open: true, message: 'Error al cargar los hosts permitidos', severity: 'error' });
         }
         setLoading(false);
     };
 
-    useEffect(() => {
-        fetchHosts();
-        fetchClassrooms();
-    }, [page]);
-
     const fetchClassrooms = async () => {
         try {
             const response = await api.get(API_PATH_CLASSROOMS_WITHOUT_PAGINATION);
             setClassrooms(Array.isArray(response.data) ? response.data : []);
-        } catch (err) {
-            console.error('Error al cargar aulas', err);
+        } catch {
+            console.error('Error al cargar aulas');
         }
     };
+
+    useEffect(() => {
+        fetchHosts();
+        fetchClassrooms();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [page]);
 
     const handleOpenModal = (host = null) => {
         setSelectedHost(host);

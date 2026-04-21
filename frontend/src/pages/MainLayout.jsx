@@ -31,7 +31,7 @@ const drawerWidth = 260;
 function MainLayout() {
 
     const location = useLocation(); 
-    const { theme, toggleTheme, isDark } = useTheme();
+    const { toggleTheme, isDark } = useTheme();
 
     const menuOptions = [
         { text: "Dashboard", icon: <DashboardIcon />, path: "/", requiredPermission: "view_device" },

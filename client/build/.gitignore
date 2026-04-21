@@ -1,0 +1,5 @@
+# Artefactos generados por PyInstaller — no versionar
+dist/
+work/
+__pycache__/
+*.pyc

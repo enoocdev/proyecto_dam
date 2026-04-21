@@ -63,7 +63,7 @@ const Users = () => {
             setUsers(Array.isArray(data) ? data : []);
             setTotalPages(Math.ceil(count / pageSize));
 
-        } catch (err) {
+        } catch {
             setNotification({ open: true, message: 'Error al cargar los usuarios', severity: 'error' });
         }
         setLoading(false);
@@ -75,7 +75,7 @@ const Users = () => {
             if (status === 200) {
                 setAllUserGroups(data);
             }
-        } catch (err) {
+        } catch {
             setNotification({ open: true, message: 'Error al cargar los grupos', severity: 'warning' });
         }
     };
@@ -86,21 +86,16 @@ const Users = () => {
             if (status === 200) {
                 setAllClassrooms(Array.isArray(data) ? data : []);
             }
-        } catch (err) {
+        } catch {
             setNotification({ open: true, message: 'Error al cargar las aulas', severity: 'warning' });
         }
     };
 
     useEffect(() => {
-        
-    }, []);
-
-
-    useEffect(() => {
         fetchUserGroups();
         fetchClassrooms();
         fetchUsers();
-
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [page]);
 
     const handleOpenModal = (user = null) => {
@@ -122,7 +117,7 @@ const Users = () => {
             }
             fetchUsers(page); 
             handleCloseModal();
-        } catch (err) {
+        } catch {
             setNotification({ open: true, message: 'No se ha podido actualizar o gruadar el usuario', severity: 'warning' });
 
         }
@@ -143,7 +138,7 @@ const Users = () => {
             await api.delete(`/users/${userToDelete.id}/`);
             fetchUsers(page); 
             handleCloseDeleteDialog();
-        } catch (error) {
+        } catch {
             setNotification({ open: true, message: 'No se ha podido eliminar el usuario', severity: 'warning' });
         }
     };

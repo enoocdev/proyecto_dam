@@ -1,5 +1,5 @@
 // Modal para crear o editar un usuario con campos de datos y gestion de grupos
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import {
     Dialog,
     DialogTitle,
@@ -29,7 +29,7 @@ import '../styles/UserModal.css';
 
 const UserModal = ({ open, onClose, onSave, user, availableGroups = [], availableClassrooms = [] }) => {
 
-    const initialFormState = {
+    const initialFormState = useMemo(() => ({
         username: '',
         email: '',
         first_name: '',
@@ -40,7 +40,7 @@ const UserModal = ({ open, onClose, onSave, user, availableGroups = [], availabl
         is_staff: false,
         groups: [],
         classrooms: []
-    };
+    }), []);
 
     const [formData, setFormData] = useState(initialFormState);
     const [showPassword, setShowPassword] = useState(false);
@@ -57,6 +57,7 @@ const UserModal = ({ open, onClose, onSave, user, availableGroups = [], availabl
     useEffect(() => {
         if (open) {
             if (isEditMode && user) {
+                // eslint-disable-next-line react-hooks/set-state-in-effect
                 setFormData({
                     username: user.username || '',
                     email: user.email || '',
@@ -70,6 +71,7 @@ const UserModal = ({ open, onClose, onSave, user, availableGroups = [], availabl
                     classrooms: user.classrooms || []
                 });
             } else {
+                // eslint-disable-next-line react-hooks/set-state-in-effect
                 setFormData(initialFormState);
             }
             setShowPassword(false);
@@ -77,7 +79,7 @@ const UserModal = ({ open, onClose, onSave, user, availableGroups = [], availabl
             setGroupSearch('');
             setClassroomSearch('');
         }
-    }, [user, open, isEditMode]);
+    }, [user, open, isEditMode, initialFormState]);
 
     const handleChange = (e) => {
         const { name, value, type, checked } = e.target;

@@ -47,7 +47,7 @@ const Classroom = () => {
             setClassrooms(Array.isArray(data) ? data : []);
             setTotalPages(Math.ceil(count / pageSize));
 
-        } catch (err) {
+        } catch {
             setNotification({ open: true, message: 'Error al cargar las aulas', severity: 'error' });
         }
         setLoading(false);
@@ -59,7 +59,7 @@ const Classroom = () => {
             if (status === 200) {
                 setAllDevices(Array.isArray(data) ? data : []);
             }
-        } catch (err) {
+        } catch {
             setNotification({ open: true, message: 'Error al cargar los dispositivos', severity: 'warning' });
         }
     };
@@ -70,6 +70,7 @@ const Classroom = () => {
 
     useEffect(() => {
         fetchClassrooms();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [page]);
 
     // Funciones para abrir y cerrar el modal de crear o editar aula
@@ -95,7 +96,7 @@ const Classroom = () => {
             fetchClassrooms();
             fetchDevices();
             handleCloseModal();
-        } catch (err) {
+        } catch {
             setNotification({ open: true, message: 'No se ha podido guardar el aula', severity: 'warning' });
         }
     };
@@ -118,7 +119,7 @@ const Classroom = () => {
             fetchClassrooms();
             fetchDevices();
             handleCloseDeleteDialog();
-        } catch (err) {
+        } catch {
             setNotification({ open: true, message: 'No se ha podido eliminar el aula', severity: 'warning' });
         }
     };

@@ -1,6 +1,6 @@
 // Modal para crear o editar un dispositivo de red (switch/router)
 // Incluye validacion de campos antes de guardar
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import {
     Dialog, DialogTitle, DialogContent, DialogActions,
     TextField, Button, IconButton, Box, Typography
@@ -10,14 +10,14 @@ import '../styles/UserModal.css';
 
 const NetworkDeviceModal = ({ open, onClose, onSave, networkDevice }) => {
 
-    const initialFormState = {
+    const initialFormState = useMemo(() => ({
         name: '',
         ip_address: '',
         username: '',
         password: '',
         password_confirm: '',
         api_port: 8728
-    };
+    }), []);
 
     const [formData, setFormData] = useState(initialFormState);
     const [errors, setErrors] = useState({});
@@ -27,6 +27,7 @@ const NetworkDeviceModal = ({ open, onClose, onSave, networkDevice }) => {
     useEffect(() => {
         if (open) {
             if (isEditMode && networkDevice) {
+                // eslint-disable-next-line react-hooks/set-state-in-effect
                 setFormData({
                     name: networkDevice.name || '',
                     ip_address: networkDevice.ip_address || '',
@@ -36,11 +37,12 @@ const NetworkDeviceModal = ({ open, onClose, onSave, networkDevice }) => {
                     api_port: networkDevice.api_port ?? 8728
                 });
             } else {
+                // eslint-disable-next-line react-hooks/set-state-in-effect
                 setFormData(initialFormState);
             }
             setErrors({});
         }
-    }, [networkDevice, open, isEditMode]);
+    }, [networkDevice, open, isEditMode, initialFormState]);
 
     const handleChange = (e) => {
         const { name, value } = e.target;
