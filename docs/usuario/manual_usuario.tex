@@ -1,0 +1,566 @@
+% Manual de Usuario — NetManagement
+% Documento autocontenido para compilar de forma independiente
+\documentclass[12pt,a4paper]{article}
+
+% ── Paquetes ──────────────────────────────────────────────────
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[spanish]{babel}
+\usepackage{geometry}
+\geometry{margin=2.5cm}
+\setlength{\headheight}{14pt}
+\usepackage{graphicx}
+\usepackage{hyperref}
+\hypersetup{
+    colorlinks=true,
+    linkcolor=blue!70!black,
+    urlcolor=blue!60!black,
+    citecolor=green!50!black,
+}
+\usepackage{xcolor}
+\usepackage{tikz}
+\usepackage{booktabs}
+\usepackage{tabularx}
+\usepackage{enumitem}
+\usepackage{float}
+\usepackage{fancyhdr}
+\usepackage{titlesec}
+\usepackage{mdframed}
+
+% ── Colores ───────────────────────────────────────────────────
+\definecolor{primary}{HTML}{1565C0}
+\definecolor{secondary}{HTML}{0D47A1}
+\definecolor{accent}{HTML}{FF6F00}
+\definecolor{notebg}{HTML}{E3F2FD}
+\definecolor{noteframe}{HTML}{1565C0}
+\definecolor{warnbg}{HTML}{FFF8E1}
+\definecolor{warnframe}{HTML}{FF6F00}
+\definecolor{tipbg}{HTML}{E8F5E9}
+\definecolor{tipframe}{HTML}{2E7D32}
+
+% ── Cajas informativas ───────────────────────────────────────
+\newmdenv[
+    backgroundcolor=notebg,
+    linecolor=noteframe,
+    linewidth=3pt,
+    topline=false, bottomline=false, rightline=false,
+    innerleftmargin=12pt, innerrightmargin=8pt,
+    innertopmargin=6pt, innerbottommargin=6pt,
+]{infonote}
+
+\newmdenv[
+    backgroundcolor=warnbg,
+    linecolor=warnframe,
+    linewidth=3pt,
+    topline=false, bottomline=false, rightline=false,
+    innerleftmargin=12pt, innerrightmargin=8pt,
+    innertopmargin=6pt, innerbottommargin=6pt,
+]{warnnote}
+
+\newmdenv[
+    backgroundcolor=tipbg,
+    linecolor=tipframe,
+    linewidth=3pt,
+    topline=false, bottomline=false, rightline=false,
+    innerleftmargin=12pt, innerrightmargin=8pt,
+    innertopmargin=6pt, innerbottommargin=6pt,
+]{tipnote}
+
+% ── Encabezados y pies ───────────────────────────────────────
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\small\textit{Manual de Usuario --- NetManagement}}
+\fancyhead[R]{\small\thepage}
+\renewcommand{\headrulewidth}{0.4pt}
+
+% ── Secciones ─────────────────────────────────────────────────
+\titleformat{\section}{\Large\bfseries\color{primary}}{}{0em}{\thesection\quad}
+\titleformat{\subsection}{\large\bfseries\color{secondary}}{}{0em}{\thesubsection\quad}
+
+% ==============================================================
+\begin{document}
+
+% ── Portada ───────────────────────────────────────────────────
+\begin{titlepage}
+  \thispagestyle{empty}
+  \centering
+
+  \vspace*{1cm}
+
+  {\large\bfseries\color{secondary} IES San Mamede\par}
+  \vspace{0.3cm}
+  {\normalsize Ciclo Formativo de Grado Superior\\[0.15cm]
+  \textbf{Desarrollo de Aplicaciones Multiplataforma (DAM)}\par}
+
+  \vspace{1.5cm}
+
+  {\Huge\bfseries\color{primary} NetManagement\par}
+  \vspace{0.6cm}
+  {\LARGE Sistema de Monitorización y Control\\de Equipos en Aulas Informáticas\par}
+
+  \vspace{1.5cm}
+
+  \begin{tikzpicture}
+    \draw[primary, line width=2pt] (0,0) -- (12,0);
+  \end{tikzpicture}
+
+  \vspace{1.5cm}
+
+  {\Large\bfseries Manual de Usuario\par}
+
+  \vspace{2cm}
+
+  \begin{tabular}{rl}
+    \textbf{Autor:}  & Enooc Domínguez Quiroga \\[0.3cm]
+    \textbf{Centro:} & IES San Mamede \\[0.3cm]
+    \textbf{Curso:}  & 2025 / 2026 \\[0.3cm]
+    \textbf{Fecha:}  & Junio de 2026 \\
+  \end{tabular}
+
+  \vfill
+
+  {\small Versión 1.0 --- Junio 2026\par}
+\end{titlepage}
+
+\newpage
+\thispagestyle{empty}
+\tableofcontents
+\newpage
+
+% ==============================================================
+\section{Introducción}
+% ==============================================================
+
+\textbf{NetManagement} es una aplicación web para la monitorización y control de equipos informáticos en aulas. Permite al profesorado y al personal de administración visualizar el estado de los equipos en tiempo real, controlar el acceso a internet de forma individual o por aula completa, y gestionar los recursos de red del centro.
+
+Este manual describe el uso de la interfaz web desde el punto de vista del usuario. No cubre la instalación ni la configuración del servidor (véase el \textit{Manual de Instalación}).
+
+\subsection{Tipos de usuario}
+
+La aplicación distingue tres niveles de acceso:
+
+\begin{table}[H]
+\centering
+\begin{tabularx}{\textwidth}{lX}
+    \toprule
+    \textbf{Tipo} & \textbf{Capacidades} \\
+    \midrule
+    \textbf{Usuario estándar} & Accede únicamente al Dashboard. Visualiza los dispositivos de las aulas que tiene asignadas. No puede acceder a secciones de administración. \\[0.3cm]
+    \textbf{Staff (profesor / técnico)} & Acceso completo al Dashboard y a todas las secciones de gestión: aulas, equipos de red, hosts permitidos, usuarios y grupos. \\[0.3cm]
+    \textbf{Superusuario} & Acceso total sin restricciones. Puede ver dispositivos de cualquier aula. Tiene todos los permisos de staff más la capacidad de gestionar otros superusuarios. \\
+    \bottomrule
+\end{tabularx}
+\end{table}
+
+\begin{infonote}
+\textbf{Nota:} Los permisos también pueden refinarse mediante grupos de permisos. Un usuario de staff puede tener acceso solo a determinadas secciones según el grupo al que pertenezca.
+\end{infonote}
+
+% ==============================================================
+\section{Acceso a la aplicación}
+% ==============================================================
+
+Abra su navegador web y acceda a la URL proporcionada por el administrador del sistema (p. ej., \texttt{https://netmanagement.ejemplo.es}).
+
+\subsection{Inicio de sesión}
+
+En la pantalla de inicio de sesión:
+
+\begin{enumerate}
+    \item Introduzca su \textbf{nombre de usuario} en el campo «Usuario».
+    \item Introduzca su \textbf{contraseña} en el campo «Contraseña».
+    \item Pulse el botón \textbf{Iniciar sesión}.
+\end{enumerate}
+
+Si las credenciales son correctas, será redirigido al \textbf{Dashboard} (página de inicio).
+
+\begin{warnnote}
+\textbf{Atención:} Si aparece el mensaje «Credenciales inválidas», compruebe que el usuario existe y que la contraseña es correcta. Contacte con el administrador si no recuerda sus credenciales.
+\end{warnnote}
+
+\subsection{Cierre de sesión}
+
+Para cerrar sesión de forma segura, haga clic en \textbf{Cerrar sesión} en la barra lateral izquierda (icono de salida, en la parte inferior). La sesión se invalida y se le redirige a la página de inicio de sesión.
+
+% ==============================================================
+\section{Navegación general}
+% ==============================================================
+
+Tras iniciar sesión, la interfaz se divide en dos zonas principales:
+
+\begin{itemize}
+    \item \textbf{Barra lateral izquierda:} Menú de navegación con acceso a todas las secciones disponibles según su nivel de acceso.
+    \item \textbf{Área de contenido:} Muestra la sección actualmente seleccionada.
+\end{itemize}
+
+\subsection{Opciones del menú lateral}
+
+\begin{table}[H]
+\centering
+\begin{tabularx}{\textwidth}{llX}
+    \toprule
+    \textbf{Icono} & \textbf{Sección} & \textbf{Descripción} \\
+    \midrule
+    Dashboard      & Dashboard            & Vista principal con los dispositivos del aula seleccionada. \\
+    Classroom      & Aulas                & Gestión de aulas y asignación de dispositivos. \textit{(solo staff)} \\
+    Switches       & Switches / Routers   & Gestión de equipos de red MikroTik. \textit{(solo staff)} \\
+    Hosts          & Hosts Permitidos     & Dominios o IPs con acceso permitido durante el bloqueo. \textit{(solo staff)} \\
+    Personas       & Usuarios             & Gestión de cuentas de usuario. \textit{(solo staff)} \\
+    Grupos         & Grupos               & Gestión de grupos y permisos. \textit{(solo staff)} \\
+    Perfil         & Perfil               & Edición de los datos del usuario autenticado. \\
+    \bottomrule
+\end{tabularx}
+\end{table}
+
+Las secciones marcadas como \textit{solo staff} no aparecen en el menú para usuarios sin privilegios de staff.
+
+\subsection{Tema claro / oscuro}
+
+En la parte inferior de la barra lateral hay un botón de alternancia de tema. Haga clic en él para cambiar entre el \textbf{tema claro} y el \textbf{tema oscuro}. La preferencia se aplica de inmediato.
+
+% ==============================================================
+\section{Dashboard}
+% ==============================================================
+
+El Dashboard es la pantalla principal de la aplicación. Muestra el estado de los dispositivos registrados en el aula seleccionada y permite realizar acciones sobre ellos en tiempo real.
+
+\subsection{Selección de aula}
+
+En la parte superior del Dashboard encontrará un desplegable para seleccionar el \textbf{aula activa}. Al cambiar de aula, la lista de dispositivos se actualiza automáticamente.
+
+\begin{infonote}
+\textbf{Nota:} Los usuarios estándar solo pueden ver las aulas que tienen asignadas. Los superusuarios y el staff pueden acceder a cualquier aula.
+\end{infonote}
+
+\subsection{Control de internet del aula}
+
+Junto al selector de aula aparece el botón \textbf{Bloquear internet del aula} / \textbf{Desbloquear internet del aula}. Este botón actúa sobre todos los dispositivos del aula simultáneamente:
+
+\begin{itemize}
+    \item \textbf{Bloquear (rojo):} Aplica las reglas de filtrado en el switch/router MikroTik para cortar el acceso a internet de todos los equipos del aula, excepto los dominios o IPs incluidos en la lista de Hosts Permitidos.
+    \item \textbf{Desbloquear (verde):} Elimina las reglas de bloqueo y restaura el acceso total.
+\end{itemize}
+
+El estado del botón se actualiza automáticamente vía WebSocket: si otro usuario realiza cambios, el dashboard refleja el nuevo estado sin necesidad de recargar la página.
+
+\begin{tipnote}
+\textbf{Consejo:} El botón aparece en rojo si \textit{todos} los dispositivos del aula están bloqueados, y en verde si alguno tiene acceso libre. Puede usar el botón global para garantizar un estado uniforme en toda el aula.
+\end{tipnote}
+
+\subsection{Tarjetas de dispositivo}
+
+Cada dispositivo del aula se representa con una \textbf{tarjeta} que muestra:
+
+\begin{itemize}
+    \item \textbf{Nombre del equipo} (hostname).
+    \item \textbf{Dirección IP} asignada.
+    \item \textbf{Sistema operativo} detectado.
+    \item \textbf{Indicador de estado en línea} (punto verde = conectado, gris = desconectado).
+    \item \textbf{Indicador de internet} (icono de globo = con acceso; icono tachado = bloqueado).
+    \item \textbf{Switch/puerto} al que está conectado físicamente (si está configurado).
+\end{itemize}
+
+\subsubsection{Panel de acciones del dispositivo}
+
+Al hacer clic sobre una tarjeta de dispositivo se abre un \textbf{panel inferior} con las siguientes acciones:
+
+\begin{table}[H]
+\centering
+\begin{tabularx}{\textwidth}{lX}
+    \toprule
+    \textbf{Acción} & \textbf{Descripción} \\
+    \midrule
+    \textbf{Bloquear / Desbloquear internet} & Activa o desactiva el acceso a internet solo para ese equipo. \\
+    \textbf{Apagar equipo} & Envía una orden de apagado al agente cliente instalado en el equipo. Solicita confirmación antes de ejecutarse. \\
+    \textbf{Ver captura de pantalla} & Muestra la última captura de pantalla recibida del equipo (si el agente la ha enviado). Las capturas se conservan durante la sesión del navegador. \\
+    \textbf{Eliminar dispositivo} & Elimina el registro del dispositivo del sistema. Solicita confirmación. Solo disponible para staff. \\
+    \bottomrule
+\end{tabularx}
+\end{table}
+
+\begin{warnnote}
+\textbf{Atención:} La acción de apagado es inmediata una vez confirmada. Asegúrese de que los alumnos han guardado su trabajo antes de ejecutarla.
+\end{warnnote}
+
+\subsection{Paginación}
+
+Si el aula tiene más de 10 dispositivos, la lista se divide en páginas. Use los controles de paginación en la parte inferior para navegar entre ellas.
+
+% ==============================================================
+\section{Gestión de aulas}
+% ==============================================================
+
+\textit{Esta sección requiere permiso de staff y el permiso \texttt{view\_classroom}.}
+
+Acceda a \textbf{Classroom} desde el menú lateral para gestionar las aulas del centro.
+
+\subsection{Listado de aulas}
+
+Se muestra una lista paginada (10 elementos por página) con las aulas registradas. Cada tarjeta de aula indica:
+
+\begin{itemize}
+    \item Nombre del aula.
+    \item Número de dispositivos asignados.
+\end{itemize}
+
+Use el campo de \textbf{búsqueda} en la parte superior para filtrar aulas por nombre.
+
+\subsection{Crear una nueva aula}
+
+\begin{enumerate}
+    \item Haga clic en el botón \textbf{+ Nueva aula}.
+    \item En el modal que se abre, introduzca el \textbf{nombre} del aula.
+    \item Seleccione los \textbf{dispositivos} que desea asignar al aula (campo de selección múltiple).
+    \item Pulse \textbf{Guardar}.
+\end{enumerate}
+
+\subsection{Editar un aula}
+
+Haga clic en el icono de \textbf{edición} (lápiz) de la tarjeta correspondiente. Se abrirá el mismo modal con los datos actuales del aula. Modifique los campos necesarios y pulse \textbf{Guardar}.
+
+\subsection{Eliminar un aula}
+
+Haga clic en el icono de \textbf{papelera} de la tarjeta. Se solicitará confirmación. Una vez confirmado, el aula se elimina y los dispositivos asignados quedan sin aula.
+
+\begin{warnnote}
+\textbf{Atención:} Eliminar un aula no elimina los dispositivos que tenía asignados. Estos quedarán disponibles para ser reasignados.
+\end{warnnote}
+
+% ==============================================================
+\section{Gestión de switches y routers}
+% ==============================================================
+
+\textit{Esta sección requiere permiso de staff y el permiso \texttt{view\_networkdevice}.}
+
+Acceda a \textbf{Switches / Routers} desde el menú lateral para registrar y gestionar los equipos de red MikroTik que controlan el acceso a internet de las aulas.
+
+\subsection{Listado de equipos de red}
+
+Cada tarjeta muestra:
+
+\begin{itemize}
+    \item Nombre descriptivo del equipo.
+    \item Dirección IP de gestión.
+    \item Usuario de conexión a la API MikroTik.
+\end{itemize}
+
+\subsection{Añadir un equipo de red}
+
+\begin{enumerate}
+    \item Pulse \textbf{+ Nuevo equipo}.
+    \item Rellene los campos del formulario:
+    \begin{itemize}
+        \item \textbf{Nombre:} Identificador descriptivo (p. ej., «Switch Aula 1»).
+        \item \textbf{IP de gestión:} Dirección IP del equipo MikroTik.
+        \item \textbf{Usuario API:} Nombre de usuario con acceso a la API RouterOS.
+        \item \textbf{Contraseña API:} Contraseña del usuario API.
+    \end{itemize}
+    \item Pulse \textbf{Guardar}.
+\end{enumerate}
+
+\subsection{Editar o eliminar un equipo de red}
+
+Use los iconos de \textbf{edición} o \textbf{papelera} en cada tarjeta para modificar los datos o eliminar el equipo del sistema.
+
+\begin{warnnote}
+\textbf{Atención:} Si elimina un equipo de red asociado a dispositivos activos, las acciones de bloqueo de internet sobre esos dispositivos dejarán de funcionar.
+\end{warnnote}
+
+% ==============================================================
+\section{Hosts permitidos}
+% ==============================================================
+
+\textit{Esta sección requiere permiso de staff y el permiso \texttt{view\_allowedhost}.}
+
+Los \textbf{hosts permitidos} son direcciones IP o dominios que permanecen accesibles para los alumnos \textit{incluso cuando el internet del aula está bloqueado}. Esto permite, por ejemplo, mantener el acceso a un servidor local de recursos educativos.
+
+\subsection{Listado de hosts permitidos}
+
+Cada tarjeta muestra la dirección IP o dominio, y si el host está restringido a un aula concreta o es \textbf{global} (accesible desde cualquier aula).
+
+\subsection{Añadir un host permitido}
+
+\begin{enumerate}
+    \item Pulse \textbf{+ Nuevo host}.
+    \item Complete el formulario:
+    \begin{itemize}
+        \item \textbf{Dirección:} IP o dominio a permitir (p. ej., \texttt{192.168.1.50} o \texttt{moodle.centro.es}).
+        \item \textbf{Aula} (opcional): Si se selecciona un aula, el host solo estará permitido para los dispositivos de esa aula. Si se deja vacío, el host es \textbf{global}.
+    \end{itemize}
+    \item Pulse \textbf{Guardar}.
+\end{enumerate}
+
+\begin{tipnote}
+\textbf{Consejo:} Use hosts globales para recursos comunes (servidor de ficheros, impresoras) y hosts de aula para recursos específicos de un grupo (servidor de prácticas de una asignatura concreta).
+\end{tipnote}
+
+\subsection{Editar o eliminar un host}
+
+Use los iconos de \textbf{edición} o \textbf{papelera} en cada tarjeta.
+
+% ==============================================================
+\section{Gestión de usuarios}
+% ==============================================================
+
+\textit{Esta sección requiere permiso de staff y el permiso \texttt{view\_user}.}
+
+\subsection{Listado de usuarios}
+
+Se muestra una lista paginada con todos los usuarios del sistema. Use el buscador en la parte superior para filtrar por nombre de usuario.
+
+Cada tarjeta de usuario muestra:
+\begin{itemize}
+    \item Avatar con la inicial del usuario (dorado para superusuarios).
+    \item Nombre completo y nombre de usuario.
+    \item Grupos y roles asignados.
+    \item Aulas asignadas al usuario.
+    \item Botones de \textbf{edición} y \textbf{eliminación}.
+\end{itemize}
+
+\subsection{Crear un usuario}
+
+\begin{enumerate}
+    \item Pulse \textbf{+ Nuevo usuario}.
+    \item Rellene el formulario con los datos del usuario:
+    \begin{itemize}
+        \item \textbf{Nombre de usuario} (obligatorio, único en el sistema).
+        \item \textbf{Nombre} y \textbf{apellidos}.
+        \item \textbf{Correo electrónico}.
+        \item \textbf{Contraseña} y confirmación.
+        \item \textbf{Grupos:} Asigne uno o varios grupos de permisos.
+        \item \textbf{Aulas:} Aulas a las que tendrá acceso el usuario.
+        \item \textbf{Staff / Superusuario:} Marque si corresponde.
+    \end{itemize}
+    \item Pulse \textbf{Guardar}.
+\end{enumerate}
+
+\subsection{Editar un usuario}
+
+Haga clic en el icono de \textbf{edición} de la tarjeta. Se abrirá el modal con los datos actuales. El campo de contraseña solo es necesario si desea cambiarla; si se deja vacío, se conserva la contraseña anterior.
+
+\subsection{Eliminar un usuario}
+
+Haga clic en el icono de \textbf{papelera}. Se solicitará confirmación. La eliminación es permanente.
+
+% ==============================================================
+\section{Gestión de grupos y permisos}
+% ==============================================================
+
+\textit{Esta sección requiere permiso de staff y el permiso \texttt{view\_group}.}
+
+Los grupos permiten agrupar permisos y asignarlos a varios usuarios a la vez. Cada permiso controla el acceso a una operación concreta (ver, crear, modificar, eliminar) sobre una entidad del sistema.
+
+\subsection{Listado de grupos}
+
+Se muestra una lista paginada. Cada tarjeta de grupo indica su nombre y los permisos que tiene asignados como \textit{chips} (etiquetas).
+
+\subsection{Crear un grupo}
+
+\begin{enumerate}
+    \item Pulse \textbf{+ Nuevo grupo}.
+    \item Introduzca el \textbf{nombre} del grupo.
+    \item Use el menú desplegable \textbf{Añadir permisos} para seleccionar los permisos que tendrá el grupo.
+    \item Pulse \textbf{Guardar}.
+\end{enumerate}
+
+\subsection{Editar un grupo}
+
+Haga clic en el icono de \textbf{edición} de la tarjeta. Puede:
+\begin{itemize}
+    \item Cambiar el nombre del grupo.
+    \item Añadir nuevos permisos desde el menú desplegable.
+    \item Eliminar permisos existentes haciendo clic en la \textbf{X} de cada chip de permiso.
+\end{itemize}
+
+\subsection{Eliminar un grupo}
+
+Haga clic en el icono de \textbf{papelera} dentro del modal de edición. Se solicitará confirmación. Los usuarios que pertenecían a ese grupo conservan su cuenta, pero pierden los permisos del grupo eliminado.
+
+\subsection{Referencia de permisos}
+
+\begin{table}[H]
+\centering
+\begin{tabularx}{\textwidth}{lX}
+    \toprule
+    \textbf{Permiso} & \textbf{Acción que permite} \\
+    \midrule
+    \texttt{view\_device}        & Ver dispositivos en el Dashboard. \\
+    \texttt{view\_classroom}     & Acceder a la sección de aulas. \\
+    \texttt{add/change/delete\_classroom} & Crear, editar o eliminar aulas. \\
+    \texttt{view\_networkdevice} & Ver equipos de red. \\
+    \texttt{add/change/delete\_networkdevice} & Gestionar equipos de red. \\
+    \texttt{view\_allowedhost}   & Ver hosts permitidos. \\
+    \texttt{add/change/delete\_allowedhost} & Gestionar hosts permitidos. \\
+    \texttt{view\_user}          & Ver la lista de usuarios. \\
+    \texttt{add/change/delete\_user} & Gestionar usuarios. \\
+    \texttt{view\_group}         & Ver grupos de permisos. \\
+    \texttt{add/change/delete\_group} & Gestionar grupos. \\
+    \bottomrule
+\end{tabularx}
+\end{table}
+
+% ==============================================================
+\section{Perfil de usuario}
+% ==============================================================
+
+Acceda a \textbf{Perfil} desde el menú lateral para consultar y modificar los datos de su propia cuenta.
+
+\subsection{Información mostrada}
+
+\begin{itemize}
+    \item Avatar con la inicial del nombre.
+    \item Nombre de usuario, nombre completo y correo electrónico.
+    \item Roles activos: se muestran \textit{chips} indicando si el usuario es \textbf{Superusuario}, \textbf{Staff} o \textbf{Usuario activo}.
+    \item Grupos a los que pertenece.
+\end{itemize}
+
+\subsection{Editar datos personales}
+
+\begin{enumerate}
+    \item Modifique los campos de \textbf{nombre}, \textbf{apellidos} o \textbf{correo electrónico}.
+    \item Pulse el botón \textbf{Guardar cambios} (icono de disco).
+\end{enumerate}
+
+\subsection{Cambiar la contraseña}
+
+\begin{enumerate}
+    \item Introduzca la \textbf{nueva contraseña} en el campo correspondiente.
+    \item Repita la contraseña en el campo de \textbf{confirmación}.
+    \item Pulse \textbf{Guardar cambios}.
+\end{enumerate}
+
+\begin{warnnote}
+\textbf{Atención:} Si introduce una contraseña nueva y los dos campos no coinciden, el sistema mostrará un error y los cambios no se guardarán.
+\end{warnnote}
+
+\begin{infonote}
+\textbf{Nota:} Si no desea cambiar la contraseña, deje ambos campos en blanco. Se conservará la contraseña actual.
+\end{infonote}
+
+% ==============================================================
+\section{Preguntas frecuentes}
+% ==============================================================
+
+\begin{description}[style=nextline]
+
+\item[\textbf{El Dashboard no muestra ningún dispositivo.}]
+Compruebe que hay un aula seleccionada en el desplegable. Si el problema persiste, verifique que los agentes cliente están en funcionamiento en los equipos del aula.
+
+\item[\textbf{Un dispositivo aparece como desconectado aunque el equipo está encendido.}]
+El agente cliente puede haberse detenido o el equipo puede haber perdido conectividad de red. Compruebe que el servicio \texttt{netmanagement-client} está activo en el equipo afectado.
+
+\item[\textbf{El botón de bloquear internet no funciona.}]
+Verifique que hay al menos un equipo de red (switch/router MikroTik) configurado en la sección \textit{Switches / Routers} y que la IP de gestión es accesible desde el servidor.
+
+\item[\textbf{No veo la sección «Aulas» ni «Usuarios» en el menú.}]
+Estas secciones requieren privilegios de \textbf{staff}. Contacte con el administrador del sistema para que le asigne el rol o los permisos necesarios.
+
+\item[\textbf{He olvidado mi contraseña.}]
+Contacte con un administrador del sistema para que le restablezca la contraseña desde la sección de \textit{Gestión de usuarios}.
+
+\item[\textbf{La captura de pantalla de un dispositivo es antigua.}]
+Las capturas se actualizan periódicamente según la configuración del agente cliente. Si la imagen es muy antigua, es posible que el agente esté detenido.
+
+\end{description}
+
+\end{document}

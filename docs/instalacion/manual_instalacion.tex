@@ -1,0 +1,627 @@
+% Manual de Instalación — NetManagement
+% Documento autocontenido para compilar de forma independiente
+\documentclass[12pt,a4paper]{article}
+
+% ── Paquetes ──────────────────────────────────────────────────
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[spanish]{babel}
+\usepackage{geometry}
+\geometry{margin=2.5cm}
+\setlength{\headheight}{14pt}
+\usepackage{graphicx}
+\usepackage{hyperref}
+\hypersetup{
+    colorlinks=true,
+    linkcolor=blue!70!black,
+    urlcolor=blue!60!black,
+    citecolor=green!50!black,
+}
+\usepackage{xcolor}
+\usepackage{listings}
+\usepackage{booktabs}
+\usepackage{tabularx}
+\usepackage{enumitem}
+\usepackage{float}
+\usepackage{fancyhdr}
+\usepackage{titlesec}
+
+\usepackage{tikz}
+
+% ── Colores ───────────────────────────────────────────────────
+\definecolor{primary}{HTML}{1565C0}
+\definecolor{secondary}{HTML}{0D47A1}
+\definecolor{codebg}{HTML}{F5F5F5}
+\definecolor{codeframe}{HTML}{CCCCCC}
+\definecolor{keyword}{HTML}{0077AA}
+\definecolor{comment}{HTML}{999999}
+\definecolor{string}{HTML}{669900}
+
+% ── Listados de código ───────────────────────────────────────
+\lstset{
+    backgroundcolor=\color{codebg},
+    frame=single,
+    rulecolor=\color{codeframe},
+    basicstyle=\ttfamily\small,
+    keywordstyle=\color{keyword}\bfseries,
+    commentstyle=\color{comment}\itshape,
+    stringstyle=\color{string},
+    breaklines=true,
+    breakatwhitespace=false,
+    showstringspaces=false,
+    tabsize=2,
+    xleftmargin=1em,
+    framexleftmargin=0.5em,
+    aboveskip=1em,
+    belowskip=0.8em,
+}
+
+\lstdefinelanguage{dotenv}{
+    morecomment=[l]{\#},
+    morestring=[b]{"},
+    morekeywords={},
+}
+
+% ── Encabezados y pies ───────────────────────────────────────
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\small\textit{Manual de Instalación --- NetManagement}}
+\fancyhead[R]{\small\thepage}
+\renewcommand{\headrulewidth}{0.4pt}
+
+% ==============================================================
+\begin{document}
+
+% ── Portada ───────────────────────────────────────────────────
+\begin{titlepage}
+  \thispagestyle{empty}
+  \centering
+
+  \vspace*{1cm}
+
+  {\large\bfseries\color{secondary} IES San Mamede\par}
+  \vspace{0.3cm}
+  {\normalsize Ciclo Formativo de Grado Superior\\[0.15cm]
+  \textbf{Desarrollo de Aplicaciones Multiplataforma (DAM)}\par}
+
+  \vspace{1.5cm}
+
+  {\Huge\bfseries\color{primary} NetManagement\par}
+  \vspace{0.6cm}
+  {\LARGE Sistema de Monitorización y Control\\de Equipos en Aulas Informáticas\par}
+
+  \vspace{1.5cm}
+
+  \begin{tikzpicture}
+    \draw[primary, line width=2pt] (0,0) -- (12,0);
+  \end{tikzpicture}
+
+  \vspace{1.5cm}
+
+  {\Large\bfseries Manual de Instalación\par}
+
+  \vspace{2cm}
+
+  \begin{tabular}{rl}
+    \textbf{Autor:}  & Enooc Domínguez Quiroga \\[0.3cm]
+    \textbf{Centro:} & IES San Mamede \\[0.3cm]
+    \textbf{Curso:}  & 2025 / 2026 \\[0.3cm]
+    \textbf{Fecha:}  & Junio de 2026 \\
+  \end{tabular}
+
+  \vfill
+
+  {\small Versión 1.0 --- Junio 2026\par}
+\end{titlepage}
+
+\newpage
+\thispagestyle{empty}
+\tableofcontents
+\newpage
+
+% ==============================================================
+\section{Introducción}
+% ==============================================================
+
+Este documento describe los pasos necesarios para desplegar el sistema \textbf{NetManagement} en un entorno de producción. El sistema se compone de tres elementos principales:
+
+\begin{enumerate}
+    \item \textbf{Servidor (backend + frontend):} Aplicación web desplegada con Docker Compose que incluye el backend Django, la base de datos PostgreSQL, Redis, el frontend React y el proxy inverso Caddy.
+    \item \textbf{Agente cliente:} Programa Python que se instala en cada equipo del aula y se comunica con el servidor vía WebSocket.
+    \item \textbf{Equipos de red MikroTik:} Switches/routers gestionados por el backend mediante su API para aplicar reglas de aislamiento de red.
+\end{enumerate}
+
+% ==============================================================
+\section{Requisitos previos}
+% ==============================================================
+
+\subsection{Requisitos del servidor}
+
+\begin{table}[H]
+\centering
+\begin{tabularx}{\textwidth}{lll}
+    \toprule
+    \textbf{Herramienta} & \textbf{Versión mínima} & \textbf{Enlace} \\
+    \midrule
+    Docker         & 24+   & \url{https://docs.docker.com/engine/install/} \\
+    Docker Compose & v2+   & Incluido con Docker Desktop / plugin CLI \\
+    Bun            & 1.0+  & \url{https://bun.sh} \\
+    Git            & 2.x   & \url{https://git-scm.com} \\
+    \bottomrule
+\end{tabularx}
+\caption{Requisitos de software del servidor.}
+\end{table}
+
+\begin{itemize}
+    \item \textbf{Sistema operativo:} Cualquier sistema compatible con Docker (Linux recomendado, Windows con WSL2, macOS).
+    \item \textbf{Puertos:} El servidor debe tener los puertos \texttt{80} y \texttt{443} accesibles desde la red local (y desde Internet si se desea TLS automático con Let's Encrypt).
+    \item \textbf{Conectividad de red:} El servidor debe poder alcanzar las direcciones IP de los equipos de red MikroTik del centro.
+\end{itemize}
+
+\textbf{Nota:} Si se prefiere \texttt{npm} o \texttt{yarn} en lugar de Bun, basta con sustituir \texttt{bun install} y \texttt{bun run build} por los comandos equivalentes.
+
+\subsection{Requisitos del agente cliente}
+
+\begin{table}[H]
+\centering
+\begin{tabularx}{\textwidth}{lll}
+    \toprule
+    \textbf{Herramienta} & \textbf{Versión mínima} & \textbf{Observaciones} \\
+    \midrule
+    Python   & 3.10+  & Incluido en la mayoría de distribuciones Linux \\
+    pip      & 21+    & Se instala automáticamente con el instalador \\
+    \bottomrule
+\end{tabularx}
+\caption{Requisitos del agente cliente.}
+\end{table}
+
+\begin{itemize}
+    \item \textbf{Sistemas operativos soportados:} Windows 10/11, Linux (X11/Xorg).
+    \item \textbf{Limitación en Linux:} La captura de pantalla requiere el servidor gráfico \textbf{X11/Xorg}. Wayland no está soportado por la librería \texttt{mss}.
+\end{itemize}
+
+\subsection{Requisitos de los equipos de red}
+
+\begin{itemize}
+    \item Router/switch \textbf{MikroTik} con RouterOS 6.x o 7.x.
+    \item \textbf{API habilitada} en \texttt{/ip/service} (puerto 8728 sin TLS o 8729 con TLS).
+    \item Usuario con permisos de lectura y escritura sobre \texttt{/ip/firewall/filter}, \texttt{/interface/bridge/filter}, \texttt{/interface/bridge/port} y \texttt{/ip/arp}.
+\end{itemize}
+
+% ==============================================================
+\section{Arquitectura del despliegue}
+% ==============================================================
+
+El despliegue en producción utiliza Docker Compose con la siguiente arquitectura:
+
+\begin{lstlisting}[language={},title={Arquitectura de servicios}]
+Internet --80/443--> Caddy (proxy inverso + TLS automatico)
+                       |-- /api/*    --> backend:8000  (Django REST)
+                       |-- /ws/*     --> backend:8000  (Daphne WebSocket)
+                       |-- /admin/*  --> backend:8000  (Django Admin)
+                       |-- /static/* --> ficheros estaticos Django
+                       '-- /*        --> React SPA (Vite build)
+
+                    Backend --> PostgreSQL 16
+                            --> Redis 7 (Channel Layers + Heartbeat)
+                            --> Routers MikroTik (API TLS puerto 8729)
+\end{lstlisting}
+
+\subsection{Redes Docker}
+
+\begin{table}[H]
+\centering
+\begin{tabularx}{\textwidth}{llX}
+    \toprule
+    \textbf{Red} & \textbf{Tipo} & \textbf{Propósito} \\
+    \midrule
+    \texttt{backend\_net}  & bridge (no interna) & Comunicación entre servicios base (DB, Redis, Backend). No debe ser \texttt{internal: true} porque el backend necesita alcanzar los MikroTik de la red local. \\
+    \texttt{frontend\_net} & bridge & Conecta Caddy con el backend y permite la exposición de puertos al exterior. \\
+    \bottomrule
+\end{tabularx}
+\caption{Redes Docker del despliegue.}
+\end{table}
+
+Solo \textbf{Caddy} expone puertos al exterior (80 y 443). Los demás servicios no son accesibles directamente desde fuera de Docker.
+
+% ==============================================================
+\section{Instalación del servidor}
+% ==============================================================
+
+\subsection{Paso 1: Clonar el repositorio}
+
+\begin{lstlisting}[language=bash]
+git clone https://github.com/enoocdev/proyecto_dam.git
+cd proyecto_dam
+\end{lstlisting}
+
+\subsection{Paso 2: Configurar las variables de entorno}
+
+\begin{lstlisting}[language=bash]
+cd produccion
+cp .env.example .env
+\end{lstlisting}
+
+Editar el fichero \texttt{.env} con los valores adecuados para el entorno:
+
+\begin{lstlisting}[language=dotenv,title={Ejemplo de .env}]
+# --- PostgreSQL ---
+POSTGRES_DB=monitor_db
+POSTGRES_USER=postgres
+POSTGRES_PASSWORD=tu_password_segura
+
+# --- Django ---
+SECRET_KEY=clave-secreta-generada
+DEBUG=False
+ALLOWED_HOSTS=tu-dominio.com,www.tu-dominio.com,localhost
+CORS_ALLOWED_ORIGINS=https://tu-dominio.com
+
+# --- Superusuario inicial ---
+DJANGO_SUPERUSER_USERNAME=admin
+DJANGO_SUPERUSER_PASSWORD=password_segura
+DJANGO_SUPERUSER_EMAIL=admin@tu-dominio.com
+
+# --- Caddy (dominio para TLS automatico) ---
+# Usar dominio real para Let's Encrypt, o :80 para pruebas
+DOMAIN=tu-dominio.com
+\end{lstlisting}
+
+\textbf{Generar la clave secreta de Django:}
+
+\begin{lstlisting}[language=bash]
+cd ../backend
+python generar_clave.py
+\end{lstlisting}
+
+Copiar el resultado en la variable \texttt{SECRET\_KEY} del fichero \texttt{.env}.
+
+\subsection{Paso 3: Despliegue automático}
+
+El repositorio incluye un script que automatiza todo el proceso:
+
+\textbf{Linux / macOS:}
+\begin{lstlisting}[language=bash]
+cd produccion
+chmod +x deploy.sh
+./deploy.sh
+\end{lstlisting}
+
+\textbf{Windows:}
+\begin{lstlisting}[language=bash]
+cd produccion
+deploy.bat
+\end{lstlisting}
+
+El script realiza automáticamente las siguientes operaciones:
+
+\begin{enumerate}
+    \item Instala las dependencias del frontend (\texttt{bun install}).
+    \item Compila el frontend para producción (\texttt{bun run build}).
+    \item Construye la imagen Docker del backend.
+    \item Levanta todos los contenedores con Docker Compose.
+    \item Ejecuta las migraciones de base de datos.
+    \item Recopila los ficheros estáticos de Django.
+    \item Crea el superusuario con las credenciales del \texttt{.env}.
+    \item Extrae los certificados TLS de Caddy para la configuración de MikroTik.
+\end{enumerate}
+
+\subsection{Paso 4: Despliegue manual (alternativa)}
+
+Si se prefiere ejecutar cada paso por separado:
+
+\begin{lstlisting}[language=bash]
+# 1. Compilar el frontend
+cd frontend
+bun install
+bun run build
+cd ..
+
+# 2. Construir y levantar contenedores
+cd produccion
+docker compose -f docker-compose.prod.yml build
+docker compose -f docker-compose.prod.yml up -d --wait
+
+# 3. Ejecutar migraciones
+docker compose -f docker-compose.prod.yml exec backend \
+    python manage.py migrate --noinput
+
+# 4. Recopilar archivos estaticos
+docker compose -f docker-compose.prod.yml exec backend \
+    python manage.py collectstatic --noinput
+
+# 5. Crear superusuario
+docker compose -f docker-compose.prod.yml exec backend \
+    python manage.py createsuperuser --noinput
+\end{lstlisting}
+
+\subsection{Paso 5: Verificar el despliegue}
+
+\begin{lstlisting}[language=bash]
+# Ver estado de los servicios
+docker compose -f docker-compose.prod.yml ps
+
+# Ver logs en tiempo real
+docker compose -f docker-compose.prod.yml logs -f
+\end{lstlisting}
+
+Acceder a la aplicación web desde el navegador en \texttt{https://tu-dominio.com} (o \texttt{http://localhost} si se configuró \texttt{DOMAIN=:80}).
+
+% ==============================================================
+\section{Configuración de los equipos de red MikroTik}
+% ==============================================================
+
+Para que el backend pueda aplicar reglas de aislamiento de red, es necesario configurar cada equipo MikroTik del centro.
+
+\subsection{Habilitar la API}
+
+Acceder a la consola del router (por WinBox, SSH o terminal) y ejecutar:
+
+\begin{lstlisting}[language=bash,title={RouterOS CLI}]
+# Habilitar API sin TLS (puerto 8728, solo para pruebas)
+/ip service enable api
+
+# Habilitar API con TLS (puerto 8729, recomendado en produccion)
+/ip service enable api-ssl
+\end{lstlisting}
+
+\subsection{Crear usuario de API}
+
+Se recomienda crear un usuario específico para el backend con los permisos necesarios:
+
+\begin{lstlisting}[language=bash,title={RouterOS CLI}]
+/user group add name=api-monitor \
+    policy=read,write,api,test
+
+/user add name=netmanagement group=api-monitor \
+    password=password_segura
+\end{lstlisting}
+
+\subsection{Certificados TLS para la API}
+
+Si se utiliza el puerto con TLS (8729), el script de despliegue extrae automáticamente los certificados de Caddy en la carpeta \texttt{produccion/mikrotik\_certs/}:
+
+\begin{itemize}
+    \item \texttt{caddy\_root.crt} --- Certificado raíz de la CA.
+    \item \texttt{server.crt} --- Certificado del servidor.
+    \item \texttt{server.key} --- Clave privada del servidor.
+\end{itemize}
+
+Subir estos ficheros al MikroTik e importarlos:
+
+\begin{lstlisting}[language=bash,title={RouterOS CLI}]
+/certificate import file-name=caddy_root.crt passphrase=""
+/certificate import file-name=server.crt passphrase=""
+/certificate import file-name=server.key passphrase=""
+\end{lstlisting}
+
+Asignar el certificado al servicio API-SSL:
+
+\begin{lstlisting}[language=bash,title={RouterOS CLI}]
+/ip service set api-ssl certificate=server.crt_0
+\end{lstlisting}
+
+\subsection{Registrar el equipo de red en la aplicación}
+
+Una vez configurado el MikroTik, acceder al panel de administración web (\texttt{/admin} o desde la interfaz) y crear un nuevo \textbf{Equipo de Red} con:
+
+\begin{itemize}
+    \item \textbf{Nombre:} Identificador descriptivo (ej.: \textit{Switch Aula 1}).
+    \item \textbf{Dirección IP:} IP del MikroTik accesible desde el servidor Docker.
+    \item \textbf{Usuario:} El usuario de API creado anteriormente.
+    \item \textbf{Contraseña:} La contraseña del usuario de API.
+    \item \textbf{Puerto API:} \texttt{8728} (sin TLS) o \texttt{8729} (con TLS).
+\end{itemize}
+
+% ==============================================================
+\section{Instalación del agente cliente}
+% ==============================================================
+
+El agente debe instalarse en cada equipo del aula que se desee monitorizar.
+
+\subsection{Configuración previa}
+
+Antes de instalar, editar el fichero \texttt{client/client\_config.json} (o usar variables de entorno) para establecer la URL del servidor:
+
+\begin{lstlisting}[language=bash,title={client\_config.json}]
+{
+    "WS_URL": "wss://tu-dominio.com/ws/client/",
+    "HEARTBEAT_INTERVAL": 30,
+    "SCREENSHOT_INTERVAL": 15
+}
+\end{lstlisting}
+
+Alternativamente, se pueden usar variables de entorno:
+
+\begin{table}[H]
+\centering
+\begin{tabularx}{\textwidth}{llX}
+    \toprule
+    \textbf{Variable} & \textbf{Valor por defecto} & \textbf{Descripción} \\
+    \midrule
+    \texttt{CLIENT\_WS\_URL}              & \texttt{wss://localhost/ws/client/} & URL del WebSocket del servidor \\
+    \texttt{CLIENT\_HEARTBEAT\_INTERVAL}  & 30         & Segundos entre heartbeats \\
+    \texttt{CLIENT\_RECONNECT\_DELAY}     & 5          & Segundos antes de reintentar conexión \\
+    \texttt{CLIENT\_SCREENSHOT\_INTERVAL} & 15         & Segundos entre capturas de pantalla \\
+    \texttt{CLIENT\_LOG\_LEVEL}           & INFO       & Nivel de log \\
+    \bottomrule
+\end{tabularx}
+\caption{Variables de configuración del agente.}
+\end{table}
+
+\subsection{Instalación en Windows}
+
+\begin{enumerate}
+    \item Abrir una terminal (PowerShell o CMD) en la carpeta \texttt{client/}.
+    \item Ejecutar el instalador:
+
+\begin{lstlisting}[language=bash]
+python install_service.py install
+\end{lstlisting}
+
+    \item El instalador realizará automáticamente:
+    \begin{itemize}
+        \item Creación de un entorno virtual (\texttt{.venv}).
+        \item Instalación de las dependencias (\texttt{requirements.txt}).
+        \item Creación de un script VBS que oculta la ventana de consola.
+        \item Registro de una \textbf{Tarea Programada} en el Task Scheduler que arranca el agente al iniciar sesión.
+        \item Inicio inmediato del agente en segundo plano.
+    \end{itemize}
+\end{enumerate}
+
+\textbf{Comandos útiles en Windows:}
+
+\begin{lstlisting}[language=bash]
+# Ver estado
+python install_service.py status
+
+# Desinstalar
+python install_service.py remove
+
+# Consultar tarea programada
+schtasks /query /tn ProyectoDAMClient
+\end{lstlisting}
+
+\subsection{Instalación en Linux}
+
+\begin{enumerate}
+    \item Abrir una terminal en la carpeta \texttt{client/}.
+    \item Ejecutar el instalador con privilegios de superusuario:
+
+\begin{lstlisting}[language=bash]
+sudo python install_service.py install
+\end{lstlisting}
+
+    \item El instalador realizará automáticamente:
+    \begin{itemize}
+        \item Creación de un entorno virtual (\texttt{.venv}) e instalación de dependencias.
+        \item Generación de un fichero de unidad \textbf{systemd}.
+        \item Configuración de \textbf{polkit} para permitir el apagado remoto sin contraseña.
+        \item Habilitación e inicio del servicio.
+    \end{itemize}
+\end{enumerate}
+
+\textbf{Comandos útiles en Linux:}
+
+\begin{lstlisting}[language=bash]
+# Ver estado del servicio
+sudo systemctl status proyectodamclient
+
+# Ver logs en tiempo real
+sudo journalctl -u proyectodamclient -f
+
+# Reiniciar
+sudo systemctl restart proyectodamclient
+
+# Desinstalar
+sudo python install_service.py remove
+\end{lstlisting}
+
+\textbf{Importante:} En Linux, el servidor gráfico debe ser \textbf{X11/Xorg} para que la captura de pantalla funcione. Se puede seleccionar en la pantalla de inicio de sesión (GDM, SDDM, LightDM).
+
+\subsection{Verificación}
+
+Una vez instalado, el equipo debería aparecer automáticamente en el \textbf{Dashboard} de la aplicación web como \textit{en línea}. Si no aparece:
+
+\begin{enumerate}
+    \item Verificar que la URL del WebSocket es correcta en la configuración del agente.
+    \item Comprobar que el servidor es accesible desde el equipo cliente (\texttt{ping tu-dominio.com}).
+    \item Revisar los logs del agente (\texttt{client\_errors.log}).
+    \item Ejecutar una prueba rápida: \texttt{python install\_service.py test}.
+\end{enumerate}
+
+% ==============================================================
+\section{Configuración inicial de la aplicación}
+% ==============================================================
+
+Tras el despliegue, acceder a la aplicación web y realizar la configuración inicial:
+
+\begin{enumerate}
+    \item \textbf{Iniciar sesión} con las credenciales de superusuario definidas en el \texttt{.env}.
+    \item \textbf{Crear aulas:} Ir a la sección de Aulas y crear las aulas del centro con sus nombres.
+    \item \textbf{Registrar equipos de red:} Añadir los equipos MikroTik del centro con sus datos de conexión API.
+    \item \textbf{Crear grupos de usuarios:} Definir roles (ej.: \textit{Profesor}) y asignar los permisos necesarios.
+    \item \textbf{Crear usuarios:} Registrar a los profesores, asignarles un grupo de permisos y las aulas que pueden gestionar.
+    \item \textbf{Configurar hosts permitidos:} Añadir las direcciones IP de los servidores que deben seguir siendo accesibles durante un bloqueo de internet (ej.: servidor de exámenes). Opcionalmente, asignar cada host a un aula específica.
+    \item \textbf{Instalar el agente} en los equipos de las aulas.
+\end{enumerate}
+
+Los equipos cliente se registran automáticamente al conectarse por primera vez. Una vez aparezcan en el Dashboard, se pueden asignar a su aula correspondiente.
+
+% ==============================================================
+\section{Comandos de administración}
+% ==============================================================
+
+\begin{table}[H]
+\centering
+\begin{tabularx}{\textwidth}{lX}
+    \toprule
+    \textbf{Comando} & \textbf{Descripción} \\
+    \midrule
+    \texttt{docker compose -f docker-compose.prod.yml ps} & Ver estado de los servicios \\
+    \texttt{docker compose -f docker-compose.prod.yml logs -f} & Ver logs en tiempo real \\
+    \texttt{docker compose -f docker-compose.prod.yml logs -f backend} & Logs solo del backend \\
+    \texttt{docker compose -f docker-compose.prod.yml exec backend sh} & Shell dentro del contenedor \\
+    \texttt{docker compose -f docker-compose.prod.yml down} & Detener todos los servicios \\
+    \texttt{docker compose -f docker-compose.prod.yml down -v} & Detener y borrar volúmenes (¡borra la BD!) \\
+    \texttt{docker compose -f docker-compose.prod.yml up -d -{}-build backend} & Reconstruir solo el backend \\
+    \bottomrule
+\end{tabularx}
+\caption{Comandos de administración frecuentes.}
+\end{table}
+
+% ==============================================================
+\section{Solución de problemas}
+% ==============================================================
+
+\begin{table}[H]
+\centering
+\begin{tabularx}{\textwidth}{lX}
+    \toprule
+    \textbf{Problema} & \textbf{Solución} \\
+    \midrule
+    No se encontró \texttt{.env} & Copiar \texttt{.env.example} como \texttt{.env} y rellenar los valores. \\
+    \addlinespace
+    El backend no conecta con PostgreSQL & Verificar que \texttt{POSTGRES\_HOST=db} y que el contenedor \texttt{db} esté \textit{healthy} con \texttt{docker compose ps}. \\
+    \addlinespace
+    El backend no alcanza el MikroTik & Comprobar que la red \texttt{backend\_net} \textbf{no} tiene \texttt{internal: true}. \\
+    \addlinespace
+    Frontend muestra página en blanco & Verificar que el build de Vite existe: \texttt{docker compose exec caddy ls /var/www/frontend/}. \\
+    \addlinespace
+    El agente no se conecta al servidor & Revisar la URL del WebSocket en la configuración del agente. Comprobar conectividad con \texttt{ping}. \\
+    \addlinespace
+    Captura de pantalla no funciona en Linux & Verificar que el servidor gráfico es X11/Xorg, no Wayland. \\
+    \addlinespace
+    API de MikroTik rechaza la conexión TLS & Verificar que el certificado esté importado y asignado al servicio \texttt{api-ssl}. Comprobar que \texttt{api\_port} sea 8729. \\
+    \bottomrule
+\end{tabularx}
+\caption{Problemas frecuentes y soluciones.}
+\end{table}
+
+% ==============================================================
+\section{Estructura de ficheros del despliegue}
+% ==============================================================
+
+\begin{lstlisting}[language={},title={Estructura del directorio produccion/}]
+produccion/
+  |-- .env.example              # Plantilla de variables de entorno
+  |-- .env                      # Variables reales (no versionado)
+  |-- docker-compose.prod.yml   # Orquestacion de servicios
+  |-- Caddyfile                 # Configuracion del proxy inverso
+  |-- deploy.sh                 # Script de despliegue (Linux/macOS)
+  |-- deploy.bat                # Script de despliegue (Windows)
+  |-- mikrotik_certs/           # Certificados extraidos de Caddy
+  '-- README.md                 # Documentacion del despliegue
+\end{lstlisting}
+
+\begin{lstlisting}[language={},title={Estructura del directorio client/}]
+client/
+  |-- client.py                 # Cliente principal (WebSocket)
+  |-- config.py                 # Configuracion (JSON + env vars)
+  |-- system_info.py            # Recopilacion de info del sistema
+  |-- install_service.py        # Instalador como servicio
+  |-- requirements.txt          # Dependencias Python
+  |-- client_config.json        # Configuracion local (opcional)
+  '-- README.md                 # Documentacion del cliente
+\end{lstlisting}
+
+\end{document}

@@ -1786,25 +1786,6 @@ La conexión con la API de MikroTik RouterOS mediante \texttt{librouteros} prese
   \item \textbf{Timeout y reconexión:} Las conexiones a la API pueden cerrarse por inactividad. Se implementó la apertura y cierre de conexión por cada operación en lugar de mantener una conexión persistente, evitando así problemas de timeout.
 \end{itemize}
 
-\subsection{Limitación del bloqueo entre equipos de la misma subred}
-
-La estrategia de \textit{Network Fencing} implementada combina dos mecanismos:
-
-\begin{enumerate}
-  \item \textbf{Split-Horizon (L2):} Se asigna un valor de \texttt{horizon} al puerto del bridge del equipo bloqueado, impidiendo que el tráfico L2 se reenvíe entre puertos con el mismo valor de horizon.
-  \item \textbf{IP Firewall Filter (L3):} Se crean reglas \texttt{drop} en el firewall IP del router para bloquear el tráfico L3 del equipo, exceptuando los hosts permitidos.
-\end{enumerate}
-
-Esta combinación es efectiva para bloquear el acceso a internet y la comunicación con equipos que se encuentran en \textbf{subredes diferentes} (el tráfico pasa por el router y es filtrado por las reglas de firewall).
-
-Sin embargo, se detectó una \textbf{limitación conocida}: si dos equipos están conectados al \textbf{mismo bridge y la misma subred} (lo cual es habitual en un aula), el tráfico entre ellos puede realizarse directamente a nivel L2 sin pasar por el motor de firewall IP del router. Aunque el split-horizon impide el reenvío entre puertos con el mismo valor de horizon, los equipos \textbf{no bloqueados} (con horizon 0, el valor por defecto) siguen pudiendo comunicarse con los equipos bloqueados a nivel de enlace.
-
-Esta limitación es \textbf{inherente a la arquitectura de bridging de MikroTik}: el firewall IP (\texttt{/ip/firewall/filter}) solo actúa sobre paquetes que pasan por la capa L3 del router, y el tráfico bridgeado dentro del mismo segmento no necesariamente pasa por esa capa a menos que se habilite \texttt{use-ip-firewall} en la configuración del bridge.
-
-Se habilitó la opción \texttt{use-ip-firewall} en \texttt{/interface/bridge/settings}, lo que fuerza a que el tráfico bridgeado también sea procesado por las reglas del firewall IP. Sin embargo, esta opción tiene un \textbf{impacto en el rendimiento} del router, ya que todo el tráfico L2 pasa a ser inspeccionado a nivel L3. En entornos con mucho tráfico de red, esto puede generar cuellos de botella.
-
-Esta limitación queda documentada como una \textbf{restricción conocida del sistema} y se recomienda evaluar el rendimiento en cada entorno particular.
-
 \section{Conclusiones}
 
 \subsection{Objetivos alcanzados}
@@ -1828,16 +1809,20 @@ Se han cumplido todos los objetivos definidos para el MVP:
   \item La instalación del agente como servicio del sistema en diferentes SO requiere un manejo cuidadoso de las particularidades de cada plataforma (Task Scheduler en Windows, systemd en Linux).
 \end{itemize}
 
-\subsection{Líneas futuras}
+\section{Líneas de trabajo futuro}
+
+A continuación se describen las principales líneas de mejora identificadas para evolucionar el sistema hacia un estándar de calidad corporativo, superando las limitaciones propias de un prototipo académico.
 
 \begin{itemize}
-  \item \textbf{Wake-on-LAN:} Permitir encender equipos remotamente enviando paquetes WoL a través del router MikroTik.
-  \item \textbf{Streaming de pantalla:} Implementar transmisión de vídeo en tiempo real (WebRTC o MJPEG) para una experiencia de monitorización más completa.
-  \item \textbf{Mensajería y chat:} Permitir al profesor enviar mensajes a los equipos del aula y comunicarse con los alumnos.
-  \item \textbf{Historial y auditoría:} Registro de todas las acciones realizadas en el sistema para trazabilidad.
-  \item \textbf{Integración LDAP/AD:} Sincronización de usuarios con el directorio del centro educativo.
-  \item \textbf{Aplicación móvil:} Panel de control para profesores en dispositivos móviles.
-  \item \textbf{Soporte multi-centro:} Arquitectura multi-tenant para gestionar varios centros desde una única instancia.
+  \item \textbf{Seguridad en WebSockets:} Actualmente, la conexión WebSocket del agente se establece sin un mecanismo de autenticación mutua previo al intercambio de datos. Una mejora prioritaria consiste en implementar un protocolo de autenticación inicial ---por ejemplo, mediante tokens JWT de corta duración o secretos compartidos (\textit{pre-shared keys})--- que obligue al agente a demostrar su identidad antes de que el servidor acepte la conexión. De este modo se mitigaría el riesgo de inyección de telemetría falsa por parte de clientes no autorizados.
+
+  \item \textbf{Validación estricta de certificados SSL/TLS:} Durante la fase de desarrollo, la verificación del certificado del servidor se deshabilitó para facilitar las pruebas en red local con certificados autofirmados. En un entorno de producción real, resulta imprescindible configurar certificados emitidos por una Autoridad Certificadora reconocida y habilitar la validación estricta tanto en el agente como en las conexiones a la API de MikroTik, eliminando así la superficie de ataque frente a ataques de tipo \textit{Man-in-the-Middle} (MitM).
+
+  \item \textbf{Automatización mediante CI/CD:} La incorporación de un \textit{pipeline} de integración y entrega continuas ---por ejemplo, mediante GitHub Actions--- permitiría ejecutar de forma automática las suites de pruebas unitarias, los \textit{linters} de código y los análisis estáticos con cada \textit{push} o \textit{pull request}. Esto garantizaría la detección temprana de regresiones y el mantenimiento de un nivel de calidad de código homogéneo a lo largo de todo el ciclo de vida del proyecto.
+
+  \item \textbf{Empaquetado y despliegue masivo del agente:} Actualmente, el agente se distribuye como un script Python que requiere un intérprete y dependencias instaladas en cada equipo. Una evolución natural consiste en compilar el agente como un ejecutable binario independiente mediante herramientas como PyInstaller y encapsularlo en un instalador silencioso (\texttt{.msi}). Esto posibilitaría el despliegue remoto y transparente en todas las aulas del centro educativo utilizando Directivas de Grupo (GPO) de Windows Server, sin intervención manual en cada equipo.
+
+  \item \textbf{Refinamiento en sistemas UNIX:} En equipos con macOS, la ejecución de determinadas órdenes remotas ---como el apagado del sistema--- requiere privilegios de superusuario. Actualmente, esta operación puede exigir interacción manual para la introducción de credenciales. Una línea de mejora consiste en configurar de forma automatizada el archivo \texttt{sudoers} (mediante \texttt{visudo}) para conceder al usuario del agente permisos específicos sobre los comandos necesarios, permitiendo así una gestión remota completamente desatendida.
 \end{itemize}
 
 \section{Bibliografía y referencias}
