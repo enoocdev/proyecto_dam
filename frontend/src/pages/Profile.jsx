@@ -94,8 +94,8 @@ const Profile = () => {
     
     useEffect(()=>{
         reloadProfile()
-        
-    },[reloadProfile])
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    },[])
 
     const handleInputChange = (e) => {
         setUser({ ...User, [e.target.name]: e.target.value });

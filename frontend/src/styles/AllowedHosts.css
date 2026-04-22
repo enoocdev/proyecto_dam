@@ -1,6 +1,4 @@
-/* =========================================
-   Estilos de la pagina de hosts permitidos
-   ========================================= */
+/* Estilos de la pagina de hosts permitidos */
 
 .allowed-hosts-container {
     padding: 2rem;
@@ -15,9 +13,7 @@
     transition: background-color 0.3s ease;
 }
 
-/* =========================================
-   Header
-   ========================================= */
+/* Header */
 
 .allowed-hosts-header {
     margin-bottom: 2rem;
@@ -54,9 +50,7 @@ button.new-allowed-host-button:hover {
     background-color: var(--accent-hover) !important;
 }
 
-/* =========================================
-   Lista de hosts (scroll)
-   ========================================= */
+/* Lista de hosts (scroll) */
 
 .allowed-hosts-list {
     flex-grow: 1;
@@ -81,9 +75,7 @@ button.new-allowed-host-button:hover {
     background: var(--scrollbar-thumb-hover);
 }
 
-/* =========================================
-   Tarjeta de host permitido
-   ========================================= */
+/* Tarjeta de host permitido */
 
 .allowed-host-card {
     background-color: var(--bg-card);
@@ -140,9 +132,7 @@ button.new-allowed-host-button:hover {
     gap: 5px;
 }
 
-/* =========================================
-   Paginacion
-   ========================================= */
+/* Paginacion */
 
 .allowed-hosts-pagination {
     padding: 1rem 0;
@@ -166,9 +156,7 @@ button.new-allowed-host-button:hover {
     background-color: var(--accent-bg);
 }
 
-/* =========================================
-   Mensajes vacios y spinner
-   ========================================= */
+/* Mensajes vacios y spinner */
 
 .no-allowed-hosts-message {
     text-align: center;
@@ -184,4 +172,17 @@ button.new-allowed-host-button:hover {
 
 .loading-spinner {
     color: var(--accent-color) !important;
+}
+
+/* Responsive */
+
+@media (max-width: 960px) {
+    .allowed-hosts-container { padding: 1.25rem; }
+}
+
+@media (max-width: 600px) {
+    .allowed-hosts-container { padding: 1rem; height: calc(100vh - 52px); }
+    .allowed-hosts-header { flex-direction: column; align-items: flex-start; gap: 10px; margin-bottom: 1rem; }
+    .allowed-hosts-header-actions { width: 100%; justify-content: flex-end; }
+    button.new-allowed-host-button { width: 100%; }
 }

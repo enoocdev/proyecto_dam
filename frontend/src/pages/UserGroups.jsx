@@ -84,7 +84,7 @@ const UserGroups = () => {
 
     useEffect(() => {
         fetchUserGroups(page);
-    }, [page, fetchUserGroups]); 
+    }, [page]); 
 
     const handlePageChange = (event, value) => {
         setPage(value);

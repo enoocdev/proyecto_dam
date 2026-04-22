@@ -1,6 +1,4 @@
-/* =========================================
-   Estilos de la pagina de dispositivos de red
-   ========================================= */
+/* Estilos de la pagina de dispositivos de red */
 
 .network-devices-container {
     padding: 2rem;
@@ -15,9 +13,7 @@
     transition: background-color 0.3s ease;
 }
 
-/* =========================================
-   Header
-   ========================================= */
+/* Header */
 
 .network-devices-header {
     margin-bottom: 2rem;
@@ -54,9 +50,7 @@ button.new-network-device-button:hover {
     background-color: var(--accent-hover) !important;
 }
 
-/* =========================================
-   Lista de dispositivos (scroll)
-   ========================================= */
+/* Lista de dispositivos (scroll) */
 
 .network-devices-list {
     flex-grow: 1;
@@ -81,9 +75,7 @@ button.new-network-device-button:hover {
     background: var(--scrollbar-thumb-hover);
 }
 
-/* =========================================
-   Tarjeta de dispositivo de red
-   ========================================= */
+/* Tarjeta de dispositivo de red */
 
 .network-device-card {
     background-color: var(--bg-card);
@@ -172,9 +164,7 @@ button.new-network-device-button:hover {
     gap: 5px;
 }
 
-/* =========================================
-   Paginacion
-   ========================================= */
+/* Paginacion */
 
 .network-devices-pagination {
     padding: 1rem 0;
@@ -198,9 +188,7 @@ button.new-network-device-button:hover {
     background-color: var(--accent-bg);
 }
 
-/* =========================================
-   Mensajes vacios y spinner
-   ========================================= */
+/* Mensajes vacios y spinner */
 
 .no-network-devices-message {
     text-align: center;
@@ -216,4 +204,17 @@ button.new-network-device-button:hover {
 
 .loading-spinner {
     color: var(--accent-color) !important;
+}
+
+/* Responsive */
+
+@media (max-width: 960px) {
+    .network-devices-container { padding: 1.25rem; }
+}
+
+@media (max-width: 600px) {
+    .network-devices-container { padding: 1rem; height: calc(100vh - 52px); }
+    .network-devices-header { flex-direction: column; align-items: flex-start; gap: 10px; margin-bottom: 1rem; }
+    .network-devices-header-actions { width: 100%; justify-content: flex-end; }
+    button.new-network-device-button { width: 100%; }
 }

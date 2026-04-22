@@ -227,3 +227,17 @@
     color: #00d9ff !important;
     filter: drop-shadow(0 0 5px rgba(0, 217, 255, 0.8));
 }
+/* Responsive */
+
+@media (max-width: 960px) {
+    .profile-container { padding: 1rem; align-items: flex-start; }
+    .main-card { height: auto; min-height: 85vh; }
+    .left-pane { width: 260px; }
+}
+
+@media (max-width: 700px) {
+    .profile-container { padding: 0.5rem; overflow-y: auto; align-items: flex-start; height: calc(100vh - 52px); }
+    .main-card { flex-direction: column; height: auto; border-radius: 16px !important; }
+    .left-pane { width: 100%; border-right: none; border-bottom: 1px solid var(--border-color); padding: 1.5rem 1.25rem; }
+    .profile-avatar { width: 80px !important; height: 80px !important; }
+}

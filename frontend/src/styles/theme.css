@@ -123,9 +123,7 @@
     --overlay-bg: rgba(0, 0, 0, 0.3);
 }
 
-/* =========================================
-   Transicion suave global al cambiar de tema
-   ========================================= */
+/* Transicion suave global al cambiar de tema */
 html {
     transition: background-color 0.3s ease, color 0.3s ease;
 }

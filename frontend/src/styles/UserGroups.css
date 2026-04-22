@@ -1,6 +1,4 @@
-/* =========================================
-   Layout principal de la pagina de grupos
-   ========================================= */
+/* Layout principal de la pagina de grupos */
 
 .groups-container {
     padding: 3rem;
@@ -27,9 +25,7 @@
     align-items: center; 
 }
 
-/* =========================================
-   Componente fila de cada grupo
-   ========================================= */
+/* Componente fila de cada grupo */
 
 .group-row {
     background-color: var(--bg-card) !important;
@@ -68,9 +64,7 @@
     padding-right: 10px; 
 }
 
-/* =========================================
-   Seccion de permisos con scroll horizontal
-   ========================================= */
+/* Seccion de permisos con scroll horizontal */
 
 .permissions-container {
     display: flex;
@@ -101,9 +95,7 @@
     display: none;
 }
 
-/* =========================================
-   Chips de permisos estilo moderno
-   ========================================= */
+/* Chips de permisos estilo moderno */
 
 .permission-chip {
     background-color: var(--accent-bg-soft) !important;
@@ -125,9 +117,7 @@
     border-color: var(--accent-border-strong) !important;
 }
 
-/* =========================================
-   Modal del grupo
-   ========================================= */
+/* Modal del grupo */
 
 .group-dialog-paper {
     background-color: var(--bg-card) !important;
@@ -176,4 +166,15 @@
 
 .permission-search-input:focus-within .MuiSvgIcon-root {
     color: var(--accent-color) !important;
+}
+/* Responsive */
+
+@media (max-width: 960px) {
+    .groups-container { padding: 1.25rem; }
+}
+
+@media (max-width: 600px) {
+    .groups-container { padding: 1rem; height: calc(100vh - 52px); }
+    .groups-header { flex-direction: column; align-items: flex-start; gap: 10px; margin-bottom: 1rem; }
+    .group-row { flex-direction: column; align-items: flex-start; padding: 0.75rem 1rem; }
 }
