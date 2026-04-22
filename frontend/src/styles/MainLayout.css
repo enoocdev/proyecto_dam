@@ -1,11 +1,12 @@
 /* Estilos del layout principal con barra lateral */
 
 /* Estructura general */
-.MainContainer{
+.MainContainer {
     margin: 0;
     padding: 20px;
     height: 100%;
 }
+
 .layout-root {
     display: flex;
     min-height: 100vh;
@@ -23,28 +24,35 @@
     transition: background-color 0.3s ease, color 0.3s ease;
 }
 
-/* Barra lateral del menu */
+/* Barra lateral */
 
-/* Sobreescribe los estilos por defecto de MUI */
 .layout-drawer .MuiDrawer-paper {
     background-color: var(--bg-sidebar) !important;
     color: var(--text-primary) !important;
     border-right: 1px solid var(--border-color) !important;
     display: flex;
     flex-direction: column;
-    justify-content: space-between;
-    /* Empuja el footer abajo */
 }
 
+/* Cabecera del sidebar – modo completo */
 .sidebar-header {
     padding: 24px;
     border-bottom: 1px solid var(--border-color);
-    margin-bottom: 16px;
+    margin-bottom: 8px;
+    flex-shrink: 0;
+}
+
+/* Cabecera del sidebar – modo colapsado (solo icono) */
+.sidebar-header--collapsed {
+    padding: 18px 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 8px;
 }
 
 /* Botones del menu */
 
-/* Estilo base del boton */
 .menu-item-btn {
     border-radius: 12px !important;
     margin: 4px 12px !important;
@@ -57,7 +65,6 @@
     min-width: 40px !important;
 }
 
-/* Efecto hover del boton del menu */
 .menu-item-btn:hover {
     background-color: var(--hover-bg) !important;
     color: var(--text-primary) !important;
@@ -67,9 +74,6 @@
 .menu-item-btn:hover .MuiListItemIcon-root {
     color: var(--text-primary) !important;
 }
-
-/* Estado activo en la pagina actual */
-/* MUI aplica la clase Mui selected automaticamente */
 
 .menu-item-btn.Mui-selected {
     background-color: var(--accent-bg) !important;
@@ -81,7 +85,6 @@
     color: var(--accent-color) !important;
 }
 
-/* Linea decorativa a la izquierda del boton activo */
 .menu-item-btn.Mui-selected::before {
     content: '';
     position: absolute;
@@ -96,8 +99,7 @@
     background-color: var(--accent-bg) !important;
 }
 
-/* Boton de cerrar sesion */
-
+/* Logout */
 .logout-btn:hover {
     background-color: rgba(239, 68, 68, 0.1) !important;
     color: var(--danger-color) !important;
@@ -107,7 +109,7 @@
     color: var(--danger-color) !important;
 }
 
-/* Boton de cambio de tema */
+/* Tema */
 .theme-toggle-btn .MuiListItemIcon-root {
     color: #f59e0b !important;
     transition: color 0.3s ease;
@@ -115,4 +117,45 @@
 
 .theme-toggle-btn:hover .MuiListItemIcon-root {
     color: #fbbf24 !important;
+}
+
+/* Boton colapsar sidebar */
+.sidebar-collapse-btn {
+    color: var(--text-secondary) !important;
+    border: 1px solid var(--border-color) !important;
+    transition: background-color 0.2s ease !important;
+}
+
+.sidebar-collapse-btn:hover {
+    background-color: var(--hover-bg) !important;
+    color: var(--text-primary) !important;
+}
+
+/* AppBar movil */
+
+.mobile-appbar {
+    background-color: var(--bg-sidebar) !important;
+    border-bottom: 1px solid var(--border-color) !important;
+    color: var(--text-primary) !important;
+    z-index: 1300 !important;
+    backdrop-filter: blur(8px);
+}
+
+/* Media queries */
+
+@media (max-width: 960px) {
+    .MainContainer {
+        padding: 14px;
+    }
+}
+
+@media (max-width: 600px) {
+    .MainContainer {
+        padding: 10px;
+    }
+
+    /* Sin hover translateX en movil (no tiene cursor) */
+    .menu-item-btn:hover {
+        transform: none;
+    }
 }

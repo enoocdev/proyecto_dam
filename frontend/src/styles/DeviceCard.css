@@ -281,3 +281,11 @@
     border-color: #f87171 !important;
     color: #f87171 !important;
 }
+
+/* Responsive */
+
+@media (max-width: 600px) {
+    .device-card__preview { height: 120px; }
+    .device-card__body { padding: 10px 12px 12px; }
+    .action-btn { padding: 8px 12px !important; font-size: 0.8rem !important; }
+}

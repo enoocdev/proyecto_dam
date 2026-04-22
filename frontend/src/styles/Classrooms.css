@@ -1,6 +1,4 @@
-/* =========================================
-   Estilos de la pagina de aulas
-   ========================================= */
+/* Estilos de la pagina de aulas */
 
 .classrooms-container {
     padding: 2rem;
@@ -15,9 +13,7 @@
     transition: background-color 0.3s ease;
 }
 
-/* =========================================
-   Header
-   ========================================= */
+/* Header */
 
 .classrooms-header {
     margin-bottom: 2rem;
@@ -54,9 +50,7 @@ button.new-classroom-button:hover {
     background-color: var(--accent-hover) !important;
 }
 
-/* =========================================
-   Lista de Aulas (scroll)
-   ========================================= */
+/* Lista de Aulas (scroll) */
 
 .classrooms-list {
     flex-grow: 1;
@@ -81,9 +75,7 @@ button.new-classroom-button:hover {
     background: var(--scrollbar-thumb-hover);
 }
 
-/* =========================================
-   Tarjeta de Aula (ClassroomCard)
-   ========================================= */
+/* Tarjeta de Aula (ClassroomCard) */
 
 .classroom-card {
     background-color: var(--bg-card);
@@ -184,9 +176,7 @@ button.new-classroom-button:hover {
     gap: 5px;
 }
 
-/* =========================================
-   Paginacion
-   ========================================= */
+/* Paginacion */
 
 .classrooms-pagination {
     padding: 1rem 0;
@@ -210,9 +200,7 @@ button.new-classroom-button:hover {
     background-color: var(--accent-bg);
 }
 
-/* =========================================
-   Mensajes vacios y spinner
-   ========================================= */
+/* Mensajes vacios y spinner */
 
 .no-classrooms-message {
     text-align: center;
@@ -230,15 +218,23 @@ button.new-classroom-button:hover {
     color: var(--accent-color) !important;
 }
 
-/* =========================================
-   Boton eliminar del dialogo
-   ========================================= */
+/* Boton eliminar del dialogo */
 
 .confirm-delete-button {
     color: var(--danger-color) !important;
 }
 
-/* =========================================
-   Reutiliza estilos de UserModal css para
-   ClassroomModal
-   ========================================= */
+/* Reutiliza estilos de UserModal css para ClassroomModal */
+
+/* Responsive */
+
+@media (max-width: 960px) {
+    .classrooms-container { padding: 1.25rem; }
+}
+
+@media (max-width: 600px) {
+    .classrooms-container { padding: 1rem; height: calc(100vh - 52px); }
+    .classrooms-header { flex-direction: column; align-items: flex-start; gap: 10px; margin-bottom: 1rem; }
+    .classrooms-header-actions { width: 100%; justify-content: flex-end; }
+    button.new-classroom-button { width: 100%; }
+}

@@ -84,7 +84,6 @@ const UserGroups = () => {
 
     useEffect(() => {
         fetchUserGroups(page);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [page]); 
 
     const handlePageChange = (event, value) => {
