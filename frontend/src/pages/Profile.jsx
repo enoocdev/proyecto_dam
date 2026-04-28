@@ -30,11 +30,12 @@ import WarningIcon from '@mui/icons-material/Warning';
 import BoltIcon from '@mui/icons-material/Bolt';
 import CloudOffIcon from '@mui/icons-material/CloudOff';
 import RefreshIcon from '@mui/icons-material/Refresh';
+import DnsIcon from '@mui/icons-material/Dns';
 
 import '../styles/Profile.css';
 import api from "../api";
 import { jwtDecode } from "jwt-decode";
-import { ACCESS_TOKEN , API_PATH_USERS} from "../constants"
+import { ACCESS_TOKEN, API_PATH_USERS, SERVER_URL } from "../constants"
 
 const Profile = () => {
 
@@ -325,6 +326,23 @@ const Profile = () => {
                             }}
                         >
                             ACTUALIZAR PERFIL
+                        </Button>
+                        <Button
+                            variant="outlined"
+                            size="large"
+                            startIcon={<DnsIcon />}
+                            onClick={() => {
+                                localStorage.removeItem(SERVER_URL);
+                                window.location.href = "/";
+                            }}
+                            sx={{
+                                borderColor: 'var(--border-light)',
+                                color: 'var(--text-secondary)',
+                                padding: '10px 24px',
+                                '&:hover': { borderColor: 'var(--accent-color)', color: 'var(--accent-color)' }
+                            }}
+                        >
+                            CAMBIAR SERVIDOR
                         </Button>
                     </div>
                 </div>

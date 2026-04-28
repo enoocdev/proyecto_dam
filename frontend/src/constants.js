@@ -2,6 +2,7 @@
 export const ACCESS_TOKEN = "access";
 export const REFRESH_TOKEN = "refresh"
 export const USER_PERMISSIONS = "user-permissions"
+export const SERVER_URL = "server-url"
 
 // Rutas de los endpoints de la API REST
 export const API_PATH_USERS = "/users/";

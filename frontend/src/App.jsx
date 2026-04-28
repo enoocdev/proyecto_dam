@@ -1,5 +1,6 @@
 // Componente principal que define las rutas de la aplicacion
 // Cada ruta protegida verifica permisos antes de mostrar el contenido
+import { useState } from "react";
 import { BrowserRouter, Routes, Route, Outlet } from "react-router-dom";
 import Login from "./pages/Login";
 import Logout from "./components/Logout";
@@ -14,8 +15,20 @@ import DashboardPage from "./pages/Dashboard";
 import Classroom from "./pages/Classrooms";
 import NetworkDevices from "./pages/NetworkDevices";
 import AllowedHosts from "./pages/AllowedHosts";
+import ServerSetup from "./pages/ServerSetup";
+import { SERVER_URL } from "./constants";
 
 function App() {
+  // Solo pedimos la URL del servidor si estamos dentro de la app Tauri (escritorio)
+  // En web siempre se usa VITE_API_URL del .env, sin mostrar la pantalla de configuracion
+  const isTauri = Boolean(window.__TAURI__);
+  const [serverConfigured, setServerConfigured] = useState(
+    () => !isTauri || !!localStorage.getItem(SERVER_URL)
+  );
+
+  if (!serverConfigured) {
+    return <ServerSetup onConfigured={() => setServerConfigured(true)} />;
+  }
 
   return (
     <BrowserRouter>

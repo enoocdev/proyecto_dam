@@ -1,0 +1,581 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Net Management - Defensa Proyecto</title>
+    <!-- Fuentes Modernas -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;500;700;800&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <!-- Iconos FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        /* VARIABLES Y ESTILO BASE */
+        :root {
+            --bg-color: #050b14;
+            --bg-gradient: radial-gradient(circle at top right, #0a192f, #050b14 70%);
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --primary: #0ea5e9;
+            --secondary: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --purple: #a855f7;
+            --glass-bg: rgba(15, 23, 42, 0.75);
+            --glass-border: rgba(255, 255, 255, 0.1);
+            --transition-speed: 0.5s;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body, html {
+            height: 100%; width: 100%; overflow: hidden;
+            background: var(--bg-color); background-image: var(--bg-gradient);
+            color: var(--text-main); font-family: 'Inter', sans-serif;
+        }
+
+        /* FONDO ANIMADO */
+        .bg-grid {
+            position: fixed; top: 0; left: 0; width: 200vw; height: 200vh;
+            background-image: linear-gradient(var(--glass-border) 1px, transparent 1px),
+                              linear-gradient(90deg, var(--glass-border) 1px, transparent 1px);
+            background-size: 50px 50px; z-index: 0;
+            transform: perspective(500px) rotateX(60deg) translateY(-100px) translateZ(-200px);
+            animation: gridMove 20s linear infinite; opacity: 0.3; pointer-events: none;
+        }
+        @keyframes gridMove {
+            0% { transform: perspective(500px) rotateX(60deg) translateY(0) translateZ(-200px); }
+            100% { transform: perspective(500px) rotateX(60deg) translateY(50px) translateZ(-200px); }
+        }
+
+        .blob {
+            position: absolute; border-radius: 50%; filter: blur(80px); z-index: 0; opacity: 0.25;
+            animation: float 10s infinite ease-in-out alternate;
+        }
+        .blob-1 { top: 10%; left: 10%; width: 400px; height: 400px; background: var(--primary); }
+        .blob-2 { bottom: 10%; right: 10%; width: 500px; height: 500px; background: var(--secondary); animation-delay: -5s; }
+        
+        @keyframes float {
+            0% { transform: translate(0, 0) scale(1); }
+            100% { transform: translate(30px, 50px) scale(1.1); }
+        }
+
+        /* TIPOGRAFIA */
+        h1, h2, h3, h4 { font-family: 'Outfit', sans-serif; }
+        h1 { font-size: 4.5rem; font-weight: 800; line-height: 1.1; margin-bottom: 1rem; background: linear-gradient(to right, #fff, var(--primary)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        h2 { font-size: 3rem; font-weight: 700; margin-bottom: 2rem; border-bottom: 2px solid var(--primary); padding-bottom: 0.5rem; display: inline-block; }
+        h3 { font-size: 1.5rem; font-weight: 600; color: var(--primary); margin-bottom: 1rem; }
+        p, li { font-size: 1.2rem; line-height: 1.6; color: var(--text-muted); }
+        strong, b { color: #fff !important; font-weight: 700 !important; }
+        .accent { color: var(--secondary); font-weight: 600; }
+
+        /* SLIDES LOGIC */
+        #presentation { position: relative; width: 100vw; height: 100vh; z-index: 1; }
+        .slide {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            opacity: 0; visibility: hidden; transform: scale(0.98) translateY(10px);
+            transition: opacity var(--transition-speed) ease, transform var(--transition-speed) ease, visibility var(--transition-speed);
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
+            padding: 2rem 4rem 6rem 4rem;
+        }
+        .slide.active { opacity: 1; visibility: visible; transform: scale(1) translateY(0); z-index: 10; }
+        .slide-content { width: 100%; max-width: 1200px; position: relative; }
+
+        /* COMPONENTES */
+        .glass-panel {
+            background: var(--glass-bg); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
+            border: 1px solid var(--glass-border); border-radius: 20px; padding: 2.5rem;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+        }
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 3rem; align-items: stretch; }
+        .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2rem; align-items: stretch; }
+
+        .custom-list { list-style: none; }
+        .custom-list li { position: relative; padding-left: 2rem; margin-bottom: 1rem; color: #e2e8f0; }
+        .custom-list li::before {
+            content: '\f105'; font-family: 'FontAwesome'; position: absolute; left: 0; top: 2px;
+            color: var(--primary); font-size: 1.2rem; font-weight: 900;
+        }
+
+        /* DIAGRAMA ARQUITECTURA */
+        .arch-container { position: relative; width: 1100px; height: 420px; margin: -6rem auto 0 auto; }
+        .arch-node {
+            position: absolute; background: rgba(15, 23, 42, 0.95); border: 2px solid var(--glass-border);
+            border-radius: 16px; padding: 0.8rem 1.2rem; text-align: center; z-index: 10; width: 240px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+        .arch-node h4 { font-size: 1rem; color: #fff; margin-bottom: 0.2rem; white-space: nowrap; }
+        .arch-node p { font-size: 0.8rem; color: var(--text-muted); line-height: 1.2; margin: 0; }
+        .arch-node i { font-size: 1.8rem; margin-bottom: 0.5rem; color: var(--primary); }
+
+        #node-frontend { top: 250px; left: 10px; border-color: var(--primary); }
+        #node-caddy { top: 120px; left: 425px; border-color: var(--purple); }
+        #node-django { top: 340px; left: 425px; border-color: var(--secondary); }
+        #node-agente { top: 30px; left: 840px; border-color: var(--warning); }
+        #node-redis { top: 180px; left: 840px; border-color: var(--danger); }
+        #node-mikrotik { top: 330px; left: 840px; border-style: dashed; border-color: var(--danger); }
+        #node-db { top: 400px; left: 150px; width: 180px; border-radius: 40px/20px; }
+
+        .svg-lines { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 1; pointer-events: none; }
+        .svg-line { stroke: rgba(255,255,255,0.25); stroke-width: 2.5; fill: none; }
+        .svg-label { font-family: 'Inter'; font-size: 11px; fill: #fff; font-weight: 700; text-anchor: middle; }
+        .c-wss { fill: var(--secondary); }
+        .c-http { fill: var(--primary); }
+        .c-tcp { fill: var(--danger); }
+
+        /* RBAC SCHEMATIC */
+        .rbac-flow { display: flex; flex-direction: column; align-items: center; width: 100%; gap: 15px; margin-top: 1rem; }
+        .rbac-level { display: flex; align-items: center; gap: 30px; }
+        .rbac-box { background: var(--glass-bg); border: 2px solid var(--glass-border); border-radius: 12px; padding: 15px; width: 240px; text-align: center; }
+        .rbac-box h4 { font-size: 0.9rem; color: var(--primary); margin-bottom: 8px; text-transform: uppercase; }
+        .rbac-box span { font-size: 0.85rem; color: #fff; display: block; }
+        .rbac-perms { display: grid; grid-template-columns: 1fr 1fr; gap: 5px; margin-top: 10px; }
+        .rbac-perms div { background: rgba(255,255,255,0.05); padding: 3px; font-size: 10px; border-radius: 4px; color: var(--text-muted); border: 1px solid rgba(255,255,255,0.1); }
+        .rbac-arrow-h { font-size: 1.5rem; color: var(--primary); }
+        .rbac-gate { background: rgba(16, 185, 129, 0.1); border: 2px solid var(--secondary); border-radius: 50%; width: 60px; height: 60px; display: flex; align-items: center; justify-content: center; font-weight: 800; color: var(--secondary); }
+
+        /* TRABAJOS FUTUROS TILES */
+        .grid-future { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; width: 100%; }
+        .future-tile { background: var(--glass-bg); border: 1px solid var(--glass-border); border-radius: 15px; padding: 1.2rem; transition: transform 0.3s; display: flex; flex-direction: column; align-items: flex-start; }
+        .future-tile i { font-size: 1.8rem; color: var(--primary); margin-bottom: 0.8rem; }
+        .future-tile h3 { font-size: 1.1rem; color: #fff; margin-bottom: 0.5rem; border: none; padding: 0; }
+        .future-tile p { font-size: 0.85rem; line-height: 1.4; margin: 0; color: var(--text-muted); }
+
+        /* CONTROLES */
+        #ui-layer {
+            position: fixed; bottom: 0; left: 0; width: 100%; z-index: 100;
+            padding: 1.5rem 2rem; display: flex; justify-content: space-between; align-items: center;
+            background: linear-gradient(to top, rgba(0,0,0,0.9), transparent);
+        }
+        .controls button {
+            background: var(--glass-bg); border: 1px solid var(--glass-border); color: white;
+            width: 50px; height: 50px; border-radius: 50%; cursor: pointer; transition: all 0.2s;
+        }
+        .controls button:hover { background: var(--primary); border-color: var(--primary); }
+        #progress-container { flex-grow: 1; margin: 0 3rem; height: 4px; background: rgba(255,255,255,0.1); border-radius: 2px; }
+        #progress-bar { height: 100%; background: var(--primary); width: 0%; transition: width 0.3s ease; }
+        #slide-counter { font-family: 'Outfit'; font-weight: 600; color: var(--text-muted); font-size: 1.1rem; min-width: 60px; }
+
+    </style>
+</head>
+<body>
+
+    <div class="bg-grid"></div>
+    <div class="blob blob-1"></div>
+    <div class="blob blob-2"></div>
+
+    <div id="presentation">
+        
+        <!-- Slide 1: PORTADA -->
+        <section class="slide active">
+            <div class="slide-content text-center">
+                <div style="background: rgba(16, 185, 129, 0.1); border: 1px solid var(--secondary); padding: 5px 25px; border-radius: 20px; color: var(--secondary); display: inline-block; font-weight: 800; margin-bottom: 1.5rem;">DEFENSA DE PROYECTO FINAL</div>
+                <h1>Net Management</h1>
+                <p style="font-size: 1.8rem; color: #e2e8f0; margin-bottom: 4rem;">Sistema de Monitorizacion y Control de Red</p>
+                <div class="glass-panel" style="display: inline-block; text-align: left; padding: 2.5rem 4rem;">
+                    <p style="margin-bottom:0.5rem;"><strong>Autor:</strong> Enooc Dominguez Quiroga</p>
+                    <p style="margin-bottom:0.5rem;"><strong>Centro:</strong> IES San Mamede</p>
+                    <p><strong>Ciclo:</strong> DAM | Junio 2026</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Slide 2: EL PROBLEMA -->
+        <section class="slide">
+            <div class="slide-content">
+                <h2>El Problema y la Motivacion</h2>
+                <div class="grid-2">
+                    <div class="glass-panel">
+                        <h3 style="color: var(--danger);"><i class="fa-solid fa-triangle-exclamation"></i> Limitaciones Actuales</h3>
+                        <ul class="custom-list">
+                            <li>La gestion de aulas informaticas es hoy una tarea <strong>lenta y manual</strong>.</li>
+                            <li>El software comercial tradicional se limita a la <strong>supervision visual</strong> de pantallas.</li>
+                            <li>No existe capacidad de intervencion en la <strong>infraestructura fisica</strong> de red.</li>
+                        </ul>
+                    </div>
+                    <div class="glass-panel">
+                        <h3 style="color: var(--secondary);"><i class="fa-solid fa-bullseye"></i> La Necesidad Real</h3>
+                        <ul class="custom-list">
+                            <li>Es necesario aislar el trafico actuando directamente sobre el <strong>puerto del switch</strong>.</li>
+                            <li>Integrar la monitorizacion de software con el hardware <strong>MikroTik</strong> del centro.</li>
+                            <li>Proveer una solucion centralizada que funcione estrictamente <strong>en tiempo real</strong>.</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Slide 3: OBJETIVOS -->
+        <section class="slide">
+            <div class="slide-content">
+                <h2>Objetivos del Proyecto</h2>
+                <div class="grid-3 mt-2">
+                    <div class="glass-panel">
+                        <i class="fa-solid fa-globe" style="color: var(--primary); font-size: 2.5rem; margin-bottom: 1.5rem; display: block; text-align: center;"></i>
+                        <h3>Centralizacion</h3>
+                        <p>Interfaz web unica para gestionar <strong>multiples aulas</strong> y dispositivos de red de forma remota.</p>
+                    </div>
+                    <div class="glass-panel">
+                        <i class="fa-solid fa-bolt" style="color: var(--primary); font-size: 2.5rem; margin-bottom: 1.5rem; display: block; text-align: center;"></i>
+                        <h3>Tiempo Real</h3>
+                        <p>Control inmediato de pantallas, hardware y latidos de conexion mediante <strong>WebSockets</strong>.</p>
+                    </div>
+                    <div class="glass-panel">
+                        <i class="fa-solid fa-shield-halved" style="color: var(--primary); font-size: 2.5rem; margin-bottom: 1.5rem; display: block; text-align: center;"></i>
+                        <h3>Network Fencing</h3>
+                        <p>Aislamiento fisico de red para permitir solo el acceso a <strong>recursos autorizados</strong> dinamicamente.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Slide 4: ARQUITECTURA -->
+        <section class="slide">
+            <div class="slide-content text-center">
+                <h2 style="margin-bottom: 3.5rem;">Arquitectura y Comunicacion</h2>
+                <div class="arch-container">
+                    <svg class="svg-lines">
+                        <defs><marker id="arr" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0 0 L8 4 L0 8 z" fill="rgba(255,255,255,0.4)"/></marker></defs>
+                        
+                        <!-- Navegador <-> Caddy (WSS/HTTPS) -->
+                        <path d="M 135 250 L 135 150 L 425 150" class="svg-line" marker-end="url(#arr)"/>
+                        <text x="280" y="140" class="svg-label c-http">HTTPS (REST)</text>
+                        <text x="280" y="175" class="svg-label c-wss">WSS (Sockets)</text>
+                        
+                        <!-- Agente <-> Caddy (WSS) - RUTA SUPERIOR LIMPIA -->
+                        <path d="M 965 50 L 550 50 L 550 120" class="svg-line" marker-end="url(#arr)"/>
+                        <text x="750" y="40" class="svg-label c-wss">WebSockets (WSS Seguro)</text>
+                        
+                        <!-- Caddy <-> Django -->
+                        <line x1="535" y1="180" x2="535" y2="320" class="svg-line" marker-end="url(#arr)"/>
+                        <text x="550" y="270" class="svg-label c-http" style="text-anchor:start">HTTP / WS</text>
+                        
+                        <!-- Django <-> Redis -->
+                        <line x1="675" y1="360" x2="840" y2="210" class="svg-line" marker-end="url(#arr)"/>
+                        <text x="760" y="280" class="svg-label c-wss">Channel Layer</text>
+                        
+                        <!-- Django <-> MikroTik -->
+                        <line x1="675" y1="380" x2="840" y2="380" class="svg-line" marker-end="url(#arr)"/>
+                        <text x="760" y="370" class="svg-label c-tcp">RouterOS API (TCP)</text>
+                        
+                        <!-- DB -->
+                        <line x1="425" y1="400" x2="330" y2="420" class="svg-line" marker-end="url(#arr)"/>
+                    </svg>
+
+                    <div class="arch-node" id="node-frontend"><i class="fa-brands fa-react"></i><h4>Navegador Web</h4><p>Frontend React SPA</p></div>
+                    <div class="arch-node" id="node-caddy"><i class="fa-solid fa-shield-halved" style="color:var(--purple)"></i><h4>Proxy Caddy</h4><p>SSL y Enrutamiento</p></div>
+                    <div class="arch-node" id="node-django"><i class="fa-solid fa-server" style="color:var(--secondary)"></i><h4>Backend Django</h4><p>Logica y Daphne</p></div>
+                    <div class="arch-node" id="node-agente"><i class="fa-brands fa-python" style="color:var(--warning)"></i><h4>Agente Cliente</h4><p>PCs del Aula</p></div>
+                    <div class="arch-node" id="node-redis"><i class="fa-solid fa-bolt" style="color:var(--danger)"></i><h4>Redis 7</h4><p>Eventos y Latidos</p></div>
+                    <div class="arch-node" id="node-mikrotik"><i class="fa-solid fa-network-wired" style="color:var(--danger)"></i><h4>MikroTik</h4><p>Reglas Hardware</p></div>
+                    <div class="arch-node" id="node-db"><i class="fa-solid fa-database"></i><h4>PostgreSQL</h4></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Slide 5: STACK I - LOGICA -->
+        <section class="slide">
+            <div class="slide-content">
+                <h2>Stack Tecnologico I: Logica y Conectividad</h2>
+                <div class="grid-3 mt-2">
+                    <div class="glass-panel">
+                        <i class="fa-brands fa-python" style="color:var(--warning); font-size: 2.5rem; margin-bottom: 1.5rem; display: block; text-align: center;"></i>
+                        <h3>Python 3.13 + Django 5</h3>
+                        <p>Elegido por su arquitectura modular y el potente <strong>ORM</strong>, que permite gestionar modelos complejos de red con alta seguridad nativa.</p>
+                    </div>
+                    <div class="glass-panel">
+                        <i class="fa-solid fa-network-wired" style="color:var(--primary); font-size: 2.5rem; margin-bottom: 1.5rem; display: block; text-align: center;"></i>
+                        <h3>librouteros</h3>
+                        <p>Libreria especializada en la <strong>comunicacion binaria nativa</strong> con la API de MikroTik, permitiendo ejecuciones de red en milisegundos.</p>
+                    </div>
+                    <div class="glass-panel">
+                        <i class="fa-solid fa-key" style="color:var(--purple); font-size: 2.5rem; margin-bottom: 1.5rem; display: block; text-align: center;"></i>
+                        <h3>Fernet (AES-128)</h3>
+                        <p>Implementacion de criptografia simetrica para <strong>cifrar las contraseñas</strong> de los equipos de red antes de su persistencia en la base de datos.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Slide 6: STACK II - TIEMPO REAL -->
+        <section class="slide">
+            <div class="slide-content">
+                <h2>Stack Tecnologico II: Tiempo Real y Agente</h2>
+                <div class="grid-3 mt-2">
+                    <div class="glass-panel">
+                        <i class="fa-solid fa-bolt" style="color:var(--secondary); font-size: 2.5rem; margin-bottom: 1.5rem; display: block; text-align: center;"></i>
+                        <h3>WebSockets + Daphne</h3>
+                        <p>Uso de <strong>servidor ASGI</strong> para canales de datos persistentes. Imprescindible para recibir capturas de pantalla y enviar comandos en vivo.</p>
+                    </div>
+                    <div class="glass-panel">
+                        <i class="fa-solid fa-memory" style="color:var(--danger); font-size: 2.5rem; margin-bottom: 1.5rem; display: block; text-align: center;"></i>
+                        <h3>Redis 7</h3>
+                        <p>Actua como <strong>Channel Layer</strong> para Daphne y gestiona el sistema de latidos (heartbeat) mediante notificaciones keyspace por TTL.</p>
+                    </div>
+                    <div class="glass-panel">
+                        <i class="fa-solid fa-camera" style="color:white; font-size: 2.5rem; margin-bottom: 1.5rem; display: block; text-align: center;"></i>
+                        <h3>mss (Python)</h3>
+                        <p>Motor de <strong>captura de pantalla</strong> ultrarrapido integrado en el agente. Permite monitorizacion visual con impacto nulo en la CPU.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Slide 7: STACK III - FRONTEND -->
+        <section class="slide">
+            <div class="slide-content">
+                <h2>Stack Tecnologico III: Interfaz y UX</h2>
+                <div class="grid-3 mt-2">
+                    <div class="glass-panel">
+                        <i class="fa-brands fa-react" style="color:var(--primary); font-size: 2.5rem; margin-bottom: 1.5rem; display: block; text-align: center;"></i>
+                        <h3>React 19 + Vite</h3>
+                        <p>Construccion modular basada en <strong>componentes reactivos</strong>. Vite garantiza tiempos de carga y desarrollo instantaneos.</p>
+                    </div>
+                    <div class="glass-panel">
+                        <i class="fa-solid fa-swatchbook" style="color:var(--primary); font-size: 2.5rem; margin-bottom: 1.5rem; display: block; text-align: center;"></i>
+                        <h3>Material UI 7</h3>
+                        <p>Biblioteca de diseño que aporta una <strong>estetica profesional</strong> y componentes accesibles que agilizan el uso del dashboard docente.</p>
+                    </div>
+                    <div class="glass-panel">
+                        <i class="fa-solid fa-database" style="color:var(--secondary); font-size: 2.5rem; margin-bottom: 1.5rem; display: block; text-align: center;"></i>
+                        <h3>Nanostores</h3>
+                        <p>Gestion de estado atomica. Se utiliza para <strong>cachear imagenes</strong> enviadas por sockets de forma eficiente en el navegador.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Slide 8: RBAC ESQUEMATICO -->
+        <section class="slide">
+            <div class="slide-content text-center">
+                <h2>Sistema de Permisos (RBAC)</h2>
+                <div class="glass-panel" style="margin-top: 1rem;">
+                    <div class="rbac-flow">
+                        <!-- Nivel 1: Permisos CRUD -->
+                        <div class="rbac-level">
+                            <div class="rbac-box">
+                                <h4>Permisos Base</h4>
+                                <div class="rbac-perms">
+                                    <div>Lectura</div><div>Escritura</div>
+                                    <div>Actualizar</div><div>Eliminar</div>
+                                </div>
+                            </div>
+                            <div class="rbac-arrow-h"><i class="fa-solid fa-link"></i></div>
+                            <div class="rbac-box" style="border-color: var(--primary);">
+                                <h4>Grupos</h4>
+                                <span>ADMINISTRADOR</span>
+                                <hr style="margin:8px 0; opacity:0.2;">
+                                <span>PROFESOR</span>
+                            </div>
+                            <div class="rbac-arrow-h"><i class="fa-solid fa-link"></i></div>
+                            <div class="rbac-box" style="border-color: var(--secondary);">
+                                <h4>Usuarios</h4>
+                                <i class="fa-solid fa-user-group" style="font-size:1rem; margin-bottom:5px;"></i>
+                                <span>Asignacion de Roles</span>
+                            </div>
+                        </div>
+                        
+                        <!-- Nivel 2: Logica Staff -->
+                        <div class="rbac-level" style="margin-top:30px;">
+                            <div class="rbac-box" style="width:180px;">
+                                <span>Intento de Acceso</span>
+                            </div>
+                            <div class="rbac-arrow-h"><i class="fa-solid fa-arrow-right"></i></div>
+                            <div class="rbac-gate">?</div>
+                            <div class="rbac-arrow-h"><i class="fa-solid fa-arrow-right"></i></div>
+                            
+                            <div style="display:flex; flex-direction:column; gap:10px;">
+                                <div class="rbac-box" style="border-color: var(--secondary); width:300px; padding:10px;">
+                                    <i class="fa-solid fa-check-double"></i>
+                                    <span><strong>ES STAFF:</strong> Accede a panel admin segun permisos de grupo.</span>
+                                </div>
+                                <div class="rbac-box" style="border-color: var(--danger); width:300px; padding:10px;">
+                                    <i class="fa-solid fa-ban"></i>
+                                    <span><strong>NO STAFF:</strong> Acceso restringido a areas administrativas.</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Slide 9: NETWORK FENCING -->
+        <section class="slide">
+            <div class="slide-content">
+                <h2>El Corazon: Network Fencing</h2>
+                <div class="grid-2">
+                    <div class="glass-panel">
+                        <h3 class="accent">Estrategia Dual de Bloqueo</h3>
+                        <p>El sistema protege el entorno mediante una doble capa de aislamiento fisico automatizado.</p>
+                        <ul class="custom-list mt-2">
+                            <li><strong>Capa L2 (Enlace):</strong> Modificacion dinamica del <em>split-horizon</em> en el bridge para aislar ordenadores entre si.</li>
+                            <li><strong>Capa L3 (Red):</strong> Inyeccion de reglas <em>Firewall Filter</em> que bloquean internet pero permiten recursos educativos.</li>
+                        </ul>
+                    </div>
+                    <div class="glass-panel text-center" style="display:flex; flex-direction:column; justify-content:center; border: 1px solid var(--secondary);">
+                        <i class="fa-solid fa-shield-halved" style="font-size: 7rem; color: var(--secondary); margin-bottom: 20px;"></i>
+                        <h3>Aislamiento Real</h3>
+                        <p>Operacion ejecutada en hardware MikroTik.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Slide 10: MONITORIZACION -->
+        <section class="slide">
+            <div class="slide-content">
+                <h2>Monitorizacion y Heartbeat</h2>
+                <div class="grid-2">
+                    <div class="glass-panel">
+                        <h3 class="accent">Deteccion Inmediata</h3>
+                        <ul class="custom-list">
+                            <li>El agente emite un latido (heartbeat) vital cada <strong>60 segundos</strong>.</li>
+                            <li>El servidor renueva una clave en Redis con <strong>TTL de 2 minutos</strong>.</li>
+                            <li>Si la clave expira, Redis dispara una <strong>notificacion asincrona</strong>.</li>
+                            <li>El dashboard marca el equipo como offline al instante.</li>
+                        </ul>
+                    </div>
+                    <div class="glass-panel">
+                        <h3 class="accent">Telemetria Visual</h3>
+                        <ul class="custom-list">
+                            <li>Capturas de pantalla codificadas en <strong>Base64</strong>.</li>
+                            <li>Compresion en origen para no saturar el ancho de banda.</li>
+                            <li>Reporte continuo de usuario local y direccion IP activa.</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Slide 11: COMPLICACIONES I -->
+        <section class="slide">
+            <div class="slide-content">
+                <h2>Complicaciones Encontradas I: Sistemas</h2>
+                <div class="grid-2 mt-2">
+                    <div class="glass-panel" style="border-top: 4px solid var(--danger);">
+                        <i class="fa-brands fa-linux" style="color:var(--danger); font-size: 2rem; margin-bottom: 1rem; display: block;"></i>
+                        <h3>Wayland vs X11</h3>
+                        <p>En Linux modernos, Wayland impide por seguridad que aplicaciones capturen pantalla de otros procesos. Se exigio forzar <strong>sesiones X11</strong> en el aula.</p>
+                    </div>
+                    <div class="glass-panel" style="border-top: 4px solid var(--primary);">
+                        <i class="fa-brands fa-windows" style="color:var(--primary); font-size: 2rem; margin-bottom: 1rem; display: block;"></i>
+                        <h3>Servicios Windows</h3>
+                        <p>El registro del agente como servicio puro (NSSM) era inestable. Solucionado usando el <strong>Task Scheduler</strong> con privilegios de sistema vinculados al arranque.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Slide 12: COMPLICACIONES II -->
+        <section class="slide">
+            <div class="slide-content">
+                <h2>Complicaciones Encontradas II: Red</h2>
+                <div class="grid-2 mt-2">
+                    <div class="glass-panel" style="border-top: 4px solid var(--purple);">
+                        <i class="fa-solid fa-certificate" style="color:var(--purple); font-size: 2rem; margin-bottom: 1rem; display: block;"></i>
+                        <h3>Certificados WSS</h3>
+                        <p>Los navegadores rechazan WebSockets seguros en red local sin certificados validos. Resuelto configurando Caddy como <strong>Autoridad Certificadora (CA)</strong> local.</p>
+                    </div>
+                    <div class="glass-panel" style="border-top: 4px solid var(--warning);">
+                        <i class="fa-solid fa-network-wired" style="color:var(--warning); font-size: 2rem; margin-bottom: 1rem; display: block;"></i>
+                        <h3>Puertos del Switch</h3>
+                        <p>Dificultad tecnica para asociar IPs con sus puertos fisicos. Requirio procesar iterativamente las tablas <strong>ARP y CAM (MAC)</strong> de MikroTik para el autodescubrimiento.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Slide 13: TRABAJO FUTURO -->
+        <section class="slide">
+            <div class="slide-content">
+                <h2 style="margin-bottom: 2.5rem;">Lineas de Trabajo Futuro</h2>
+                <div class="grid-future">
+                    <div class="future-tile">
+                        <i class="fa-solid fa-desktop"></i>
+                        <h3>Control Remoto</h3>
+                        <p>Implementacion de control interactivo de pantallas sobre navegador (VNC/RDP).</p>
+                    </div>
+                    <div class="future-tile">
+                        <i class="fa-solid fa-lock"></i>
+                        <h3>Seguridad Sockets</h3>
+                        <p>Handshake con autenticacion mutua obligatoria mediante tokens JWT iniciales.</p>
+                    </div>
+                    <div class="future-tile">
+                        <i class="fa-solid fa-code-merge"></i>
+                        <h3>Pipelines CI/CD</h3>
+                        <p>Automatizacion total del testing y despliegue continuo de los servicios distribuidos.</p>
+                    </div>
+                    <div class="future-tile">
+                        <i class="fa-solid fa-box-open"></i>
+                        <h3>Empaquetado MSI</h3>
+                        <p>Compilacion de instaladores silenciosos para despliegue masivo via politicas GPO.</p>
+                    </div>
+                    <div class="future-tile">
+                        <i class="fa-brands fa-linux"></i>
+                        <h3>Entornos UNIX</h3>
+                        <p>Configuracion automatica de sudoers para comandos remotos sin interrupcion de password.</p>
+                    </div>
+                    <div class="future-tile">
+                        <i class="fa-solid fa-power-off"></i>
+                        <h3>Wake-on-LAN</h3>
+                        <p>Integracion definitiva del estandar de encendido remoto para aulas completas.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Slide 14: FIN -->
+        <section class="slide">
+            <div class="slide-content text-center">
+                <i class="fa-solid fa-circle-check" style="font-size: 6rem; color: var(--secondary); margin-bottom: 2rem;"></i>
+                <h1 style="font-size: 8rem;">FIN</h1>
+                <p style="font-size: 2rem; color: white;">Muchas gracias por su atencion</p>
+                <div style="background: rgba(14, 165, 233, 0.1); border: 1px solid var(--primary); padding: 10px 40px; border-radius: 20px; color: var(--primary); display: inline-block; font-weight: 700; margin-top: 2rem;">PREGUNTAS Y DUDAS</div>
+            </div>
+        </section>
+
+    </div>
+
+    <!-- UI LAYER -->
+    <div id="ui-layer">
+        <div id="slide-counter">1 / 14</div>
+        <div id="progress-container"><div id="progress-bar"></div></div>
+        <div class="controls">
+            <button id="prevBtn" onclick="prevSlide()"><i class="fa-solid fa-chevron-left"></i></button>
+            <button id="nextBtn" onclick="nextSlide()"><i class="fa-solid fa-chevron-right"></i></button>
+        </div>
+    </div>
+
+    <script>
+        let currentSlideIndex = 0;
+        const slides = document.querySelectorAll('.slide');
+        const progressBar = document.getElementById('progress-bar');
+        const counter = document.getElementById('slide-counter');
+        const prevBtn = document.getElementById('prevBtn');
+        const nextBtn = document.getElementById('nextBtn');
+
+        function updateUI() {
+            slides.forEach((slide, index) => {
+                slide.classList.toggle('active', index === currentSlideIndex);
+            });
+            const progress = (currentSlideIndex / (slides.length - 1)) * 100;
+            progressBar.style.width = `${progress}%`;
+            counter.textContent = `${currentSlideIndex + 1} / ${slides.length}`;
+            prevBtn.disabled = currentSlideIndex === 0;
+            nextBtn.disabled = currentSlideIndex === slides.length - 1;
+        }
+
+        function nextSlide() { if (currentSlideIndex < slides.length - 1) { currentSlideIndex++; updateUI(); } }
+        function prevSlide() { if (currentSlideIndex > 0) { currentSlideIndex--; updateUI(); } }
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowRight' || e.key === ' ') { nextSlide(); }
+            else if (e.key === 'ArrowLeft') { prevSlide(); }
+        });
+
+        updateUI();
+    </script>
+</body>
+</html>
