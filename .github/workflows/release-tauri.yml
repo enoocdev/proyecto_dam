@@ -6,7 +6,8 @@ on:
       - 'v[0-9]+.[0-9]+.[0-9]+'
 
 jobs:
-  release:
+  # ─── Desktop: Linux + Windows ────────────────────────────────────────────────
+  release-desktop:
     permissions:
       contents: write
     strategy:
@@ -73,8 +74,92 @@ jobs:
             ### Instaladores disponibles
             - **Windows**: `.exe` (NSIS installer) / `.msi`
             - **Linux**: `.deb` (Debian/Ubuntu) / `.AppImage` (portable)
+            - **Android**: `.apk`
 
             > Consulta el [CHANGELOG](https://github.com/${{ github.repository }}/blob/main/CHANGELOG.md) para ver los cambios de esta versión.
           releaseDraft: true
           prerelease: false
           args: ${{ matrix.args }}
+
+  # ─── Android ─────────────────────────────────────────────────────────────────
+  release-android:
+    permissions:
+      contents: write
+    runs-on: ubuntu-24.04
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Setup Java 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Install Android NDK and build tools
+        run: |
+          sdkmanager "ndk;27.0.12077973" "build-tools;34.0.0" "platforms;android-34"
+
+      - name: Setup Rust (stable) + Android targets
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: aarch64-linux-android,armv7-linux-androideabi,i686-linux-android,x86_64-linux-android
+
+      - name: Cache Rust dependencies
+        uses: swatinem/rust-cache@v2
+        with:
+          workspaces: './frontend/src-tauri -> target'
+
+      - name: Install frontend dependencies
+        working-directory: frontend
+        run: bun install
+
+      - name: Initialize Tauri Android project
+        working-directory: frontend
+        env:
+          NDK_HOME: ${{ env.ANDROID_HOME }}/ndk/27.0.12077973
+        run: bunx tauri android init
+
+      # Firma con keystore de produccion si existen los secrets,
+      # si no genera un APK de debug sin firma (util para pruebas)
+      - name: Build Android APK
+        working-directory: frontend
+        env:
+          NDK_HOME: ${{ env.ANDROID_HOME }}/ndk/27.0.12077973
+          TAURI_SIGNING_ANDROID_KEYSTORE: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          TAURI_SIGNING_ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+          TAURI_SIGNING_ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          TAURI_SIGNING_ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+        run: |
+          if [ -n "$TAURI_SIGNING_ANDROID_KEYSTORE" ]; then
+            echo "$TAURI_SIGNING_ANDROID_KEYSTORE" | base64 -d > /tmp/keystore.jks
+            export TAURI_SIGNING_ANDROID_KEYSTORE=/tmp/keystore.jks
+            bunx tauri android build --apk
+          else
+            echo "⚠️  Sin keystore de producción — generando APK de debug"
+            bunx tauri android build --apk --debug
+          fi
+
+      - name: Upload APK to release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.ref_name }}
+          draft: true
+          files: |
+            frontend/src-tauri/gen/android/app/build/outputs/apk/**/*.apk
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
