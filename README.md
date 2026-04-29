@@ -3,6 +3,7 @@
 ![Status](https://img.shields.io/badge/Estado-En%20Desarrollo-yellow?style=for-the-badge)
 [![Django](https://img.shields.io/badge/Backend-Django_5_+_DRF-092E20?style=for-the-badge&logo=django)](https://www.django-rest-framework.org/)
 [![React](https://img.shields.io/badge/Frontend-React_19_+_Vite-61DAFB?style=for-the-badge&logo=react)](https://react.dev/)
+[![Tauri](https://img.shields.io/badge/Desktop-Tauri_2-FFC131?style=for-the-badge&logo=tauri)](https://tauri.app/)
 [![Postgres](https://img.shields.io/badge/DB-PostgreSQL_16-336791?style=for-the-badge&logo=postgresql)](https://www.postgresql.org/)
 [![Redis](https://img.shields.io/badge/Cache-Redis_7-DC382D?style=for-the-badge&logo=redis)](https://redis.io/)
 [![Caddy](https://img.shields.io/badge/Proxy-Caddy_2-00A95C?style=for-the-badge)](https://caddyserver.com/)
@@ -22,27 +23,29 @@ Este sistema aborda la necesidad de administrar aulas informáticas de forma cen
 
 ### **🌟 Funcionalidades Clave**
 
-#### **1. Monitorización y Control (Agente PC)**
-* **📡 Transmisión en Tiempo Real:** Visualización de pantallas de los alumnos mediante [WebSockets](https://developer.mozilla.org/es/docs/Web/API/WebSockets_API) de baja latencia.
-* **⚡ Control de Energía:** Ejecución remota de comandos de Apagado, Reinicio y Suspensión.
-* **📸 Evidencias:** Toma de capturas de pantalla bajo demanda y almacenamiento centralizado.
-* **💓 Heartbeat Monitor:** Detección automática de equipos offline mediante claves TTL en Redis con notificaciones keyspace.
+#### **1. Monitorización y Control (Agente PC y Escritorio)**
+* **📡 Transmisión en tiempo real:** Visualización de pantallas de los alumnos mediante [WebSockets](https://developer.mozilla.org/es/docs/Web/API/WebSockets_API) de baja latencia.
+* **⚡ Control de energía:** Ejecución remota de comandos de apagado, reinicio y suspensión.
+* **📸 Evidencias:** Captura de pantalla bajo demanda y almacenamiento centralizado.
+* **💓 Heartbeat monitor:** Detección automática de equipos offline mediante claves TTL en Redis con notificaciones keyspace.
+* **🖥️ Aplicación de escritorio:** El dashboard web de React se empaqueta como aplicación nativa multiplataforma usando [Tauri](https://tauri.app/), permitiendo gestión local y remota desde Windows, Linux y Mac.
 
 #### **2. Gestión de Infraestructura (Network Fencing)**
-* **🔒 Aislamiento Dinámico:** Integración directa con la API de [Mikrotik RouterOS](https://mikrotik.com/software).
-* **🚫 Modos de Restricción:**
-  * **Modo Examen:** Bloquea el acceso a Internet, permitiendo únicamente tráfico hacia hosts permitidos configurables.
-  * **Modo Bloqueo Total:** Aísla completamente el puerto del switch (Port Disable / VLAN switching).
-* **🆔 Identificación Hardware:** Mapeo automático de direcciones MAC a puertos físicos del switch.
-* **✅ Hosts Permitidos:** Lista configurable de IPs que permanecen accesibles durante bloqueos de red.
+* **🔒 Aislamiento dinámico:** Integración directa con la API de [Mikrotik RouterOS](https://mikrotik.com/software).
+* **🚫 Modos de restricción:**
+  * **Modo examen:** Bloquea el acceso a internet, permitiendo solo tráfico hacia hosts permitidos configurables.
+  * **Modo bloqueo total:** Aísla completamente el puerto del switch (Port Disable / VLAN switching).
+* **🆔 Identificación hardware:** Mapeo automático de direcciones MAC a puertos físicos del switch.
+* **✅ Hosts permitidos:** Lista configurable de IPs que permanecen accesibles durante bloqueos de red.
 
-#### **3. Panel de Administración (Web)**
-* **Dashboard Interactivo:** Interfaz desarrollada en [React 19](https://react.dev/) con [Material UI 7](https://mui.com/) para visualización en grid de todos los equipos.
-* **Tema Claro/Oscuro:** Soporte nativo de temas persistente en localStorage.
+#### **3. Panel de Administración (Web y Desktop)**
+* **Dashboard interactivo:** Interfaz en [React 19](https://react.dev/) y [Material UI 7](https://mui.com/) para grid de equipos.
+* **Tema claro/oscuro:** Soporte nativo persistente en localStorage.
 * **RBAC (Role-Based Access Control):**
   * *Profesores:* Control de aula y visualización de equipos asignados.
-  * *Administradores:* Configuración de red, gestión de dispositivos, usuarios y grupos.
-* **Gestión Completa:** CRUD de aulas, dispositivos de red, hosts permitidos, usuarios y grupos de permisos.
+  * *Administradores:* Gestión de red, dispositivos, usuarios y grupos.
+* **Gestión completa:** CRUD de aulas, dispositivos de red, hosts permitidos, usuarios y grupos de permisos.
+* **Aplicación de escritorio:** Todas las funciones del dashboard web disponibles como app nativa multiplataforma (Tauri).
 
 ---
 
@@ -63,13 +66,14 @@ El sistema utiliza una arquitectura distribuida orientada a eventos. La comunica
 | **Backend** | [Python](https://www.python.org/), [Django 5](https://www.djangoproject.com/), [DRF](https://www.django-rest-framework.org/) | Robustez, seguridad y estructura sólida de modelos. |
 | **Real-Time** | [Django Channels](https://channels.readthedocs.io/) + [Daphne](https://github.com/django/daphne) | WebSockets asíncronos (ASGI) para streaming y heartbeat. |
 | **Frontend** | [React 19](https://react.dev/), [Vite](https://vitejs.dev/), [Material UI 7](https://mui.com/) | SPA rápida con HMR y componentes modernos. |
+| **Desktop** | [Tauri 2](https://tauri.app/) | Empaquetado nativo multiplataforma del dashboard React. |
 | **Estado (Frontend)** | [Nanostores](https://github.com/nanostores/nanostores) + [react-use-websocket](https://github.com/robtaussig/react-use-websocket) | Estado ligero y persistente; hook declarativo para WS. |
 | **Base de Datos** | [PostgreSQL 16](https://www.postgresql.org/) | Alta concurrencia transaccional y fiabilidad. |
 | **Cache / Bus** | [Redis 7](https://redis.io/) | Broker de Channel Layers, heartbeat TTL y pub/sub. |
 | **Redes** | [Librouteros](https://librouteros.readthedocs.io/) (Python) | Comunicación segura con la API de Mikrotik. |
-| **Agente** | Python ([mss](https://python-mss.readthedocs.io/), [psutil](https://psutil.readthedocs.io/)) | Cliente ligero multiplataforma para captura y control. |
+| **Agente** | Python ([mss](https://python-mss.readthedocs.io/), [psutil](https://psutil.readthedocs.io/)), PyInstaller, servicio residente | Cliente ligero multiplataforma, ejecutable y servicio en segundo plano. |
 | **Proxy Inverso** | [Caddy 2](https://caddyserver.com/) | TLS automático, HTTP/3, proxy de API y WebSockets. |
-| **DevOps** | [Docker Compose](https://docs.docker.com/compose/) | Orquestación completa para desarrollo y producción. |
+| **DevOps / CI** | [Docker Compose](https://docs.docker.com/compose/), [GitHub Actions](https://github.com/features/actions) | Orquestación completa y pipelines CI/CD para releases automatizadas. |
 
 ---
 
@@ -111,7 +115,10 @@ proyecto_dam/
 * **[Docker](https://www.docker.com/)** y **[Docker Compose](https://docs.docker.com/compose/)** v2+
 * **[Python 3.11+](https://www.python.org/downloads/)**
 * **[Bun](https://bun.sh/)** (o Node.js 18+)
+* **[Rust / Cargo](https://www.rust-lang.org/tools/install)** (solo si deseas compilar la app de escritorio Tauri localmente)
 * Acceso a un router/switch **[Mikrotik](https://mikrotik.com/products)** (opcional, se puede simular).
+
+docker compose up -d
 
 ### **Desarrollo Local**
 
@@ -133,9 +140,7 @@ cd backend
 python -m venv .venv
 source .venv/bin/activate          # Linux/Mac
 # .venv\Scripts\Activate           # Windows
-
 pip install -r requirements.txt
-
 cp .envExample .env                # Editar con tus credenciales
 python manage.py migrate
 python manage.py createsuperuser
@@ -149,7 +154,21 @@ bun install          # o: npm install
 bun run dev          # o: npm run dev
 ```
 
-#### 5. Variables de entorno (backend/.env)
+#### 5. Desktop (Tauri)
+```bash
+cd frontend
+bun run tauri dev    # o: npm run tauri dev
+```
+
+#### 6. Cliente agente (ejecutable y servicio)
+```bash
+cd client
+pip install -r requirements.txt
+pyinstaller build/netmanagement_installer.spec
+python install_service.py          # Instala el agente como servicio residente
+```
+
+#### 7. Variables de entorno (backend/.env)
 ```dotenv
 POSTGRES_DB=monitor_db
 POSTGRES_USER=postgres
@@ -171,9 +190,10 @@ DJANGO_SUPERUSER_EMAIL=admin@ejemplo.com
 
 ---
 
-### **Producción**
 
-El despliegue en producción utiliza **Docker Compose** con **Caddy** como proxy inverso con TLS automático. Consulta la guía completa en [`produccion/README.md`](produccion/README.md).
+### **Produccion**
+
+El despliegue en produccion utiliza **Docker Compose** con **Caddy** como proxy inverso con TLS automatico. Consulta la guia completa en [`produccion/README.md`](produccion/README.md).
 
 ```bash
 cd produccion
@@ -182,21 +202,22 @@ chmod +x deploy.sh
 ./deploy.sh
 ```
 
-**Arquitectura de producción:**
+**Arquitectura de produccion:**
 ```
-Internet ──80/443──▶ Caddy (TLS automático)
+Internet ──80/443──▶ Caddy (TLS automatico)
                         ├─ /api/*    ──▶ backend:8000 (Django REST)
                         ├─ /ws/*     ──▶ backend:8000 (Daphne WebSockets)
                         ├─ /admin/*  ──▶ backend:8000 (Django Admin)
-                        ├─ /static/* ──▶ ficheros estáticos de Django
-                        └─ /*        ──▶ React SPA (build compilado)
+                        ├─ /static/* ──▶ ficheros estaticos de Django
+                        └─ /*        ──▶ React SPA (build compilado) o Tauri Desktop
 ```
 
 ---
 
+
 ## **📸 Capturas de Pantalla**
 
-*(Espacio reservado para screenshots del Dashboard y funcionamiento)*
+*(Espacio reservado para screenshots del dashboard, desktop y agente)*
 
 | Dashboard Principal | Panel de Control de Red |
 | :---- | :---- |
@@ -209,6 +230,6 @@ Internet ──80/443──▶ Caddy (TLS automático)
 **Enooc Domínguez** — *Desarrollador Full Stack & SysAdmin*
 
 * 📧 **Email:** [enooc.dominguez@iessanmamede.com](mailto:enooc.dominguez@iessanmamede.com)
-* 🐙 **GitHub:** [@enooc](https://github.com/enooc)
+* 🐙 **GitHub:** [@enoocdev](https://github.com/enoocdev)
 
 Proyecto desarrollado como Trabajo de Fin de Grado — Desarrollo de Aplicaciones Multiplataforma (DAM).
