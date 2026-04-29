@@ -136,6 +136,38 @@ jobs:
           NDK_HOME: ${{ env.ANDROID_HOME }}/ndk/27.0.12077973
         run: bunx tauri android init
 
+        - name: Patch MainActivity.java to avoid fullscreen
+            run: |
+            MAINACT=frontend/src-tauri/gen/android/app/src/main/java/com/netmanagement/app/MainActivity.java
+            mkdir -p "$(dirname "$MAINACT")"
+            cat > "$MAINACT" <<'EOF'
+      package com.netmanagement.app;
+
+      import android.os.Build;
+      import android.os.Bundle;
+      import android.view.View;
+      import android.view.WindowInsets;
+      import android.view.WindowInsetsController;
+      import androidx.appcompat.app.AppCompatActivity;
+
+      public class MainActivity extends AppCompatActivity {
+        @Override
+        protected void onCreate(Bundle savedInstanceState) {
+          super.onCreate(savedInstanceState);
+          // Mostrar barras de estado y navegación correctamente según versión
+          if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            final WindowInsetsController insetsController = getWindow().getInsetsController();
+            if (insetsController != null) {
+              insetsController.show(WindowInsets.Type.statusBars() | WindowInsets.Type.navigationBars());
+            }
+          } else {
+            View decorView = getWindow().getDecorView();
+            decorView.setSystemUiVisibility(View.SYSTEM_UI_FLAG_VISIBLE);
+          }
+        }
+      }
+      EOF
+
       - name: Patch Android SDK versions to API 36 (Android 16)
         run: |
           GRADLE=frontend/src-tauri/gen/android/app/build.gradle.kts
