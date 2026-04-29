@@ -16,18 +16,22 @@ import Classroom from "./pages/Classrooms";
 import NetworkDevices from "./pages/NetworkDevices";
 import AllowedHosts from "./pages/AllowedHosts";
 import ServerSetup from "./pages/ServerSetup";
-import { SERVER_URL } from "./constants";
+import { ACCESS_TOKEN, REFRESH_TOKEN, USER_PERMISSIONS, SERVER_URL } from "./constants";
 
 function App() {
-  // Solo pedimos la URL del servidor si estamos dentro de la app Tauri (escritorio)
-  // En web siempre se usa VITE_API_URL del .env, sin mostrar la pantalla de configuracion
-  const isTauri = Boolean(window.__TAURI__);
+  const isTauri = Boolean(window.__TAURI_INTERNALS__);
   const [serverConfigured, setServerConfigured] = useState(
-    () => !isTauri || !!localStorage.getItem(SERVER_URL)
+    () => {if (isTauri){ return false }else return true }
   );
 
   if (!serverConfigured) {
-    return <ServerSetup onConfigured={() => setServerConfigured(true)} />;
+    return <ServerSetup onConfigured={() => {
+      // Limpiar tokens antiguos al configurar nuevo servidor para forzar login
+      localStorage.removeItem(ACCESS_TOKEN);
+      localStorage.removeItem(REFRESH_TOKEN);
+      localStorage.removeItem(USER_PERMISSIONS);
+      setServerConfigured(true);
+    }} />;
   }
 
   return (

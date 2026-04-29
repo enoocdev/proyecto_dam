@@ -13,35 +13,40 @@ function ServerSetup({ onConfigured }) {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
 
-    const normalize = (raw) => raw.replace(/\/+$/, ""); // quitar trailing slash
+    // quita slashes finales y asegura que termina en /api/
+    const normalize = (raw) => {
+        let base = raw.trim().replace(/\/+$/, "");
+        // Quitar /api al final
+        base = base.replace(/\/api$/, "");
+        return base + "/api/";
+    };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
         setError(null);
 
-        const base = normalize(url.trim());
-        if (!base.startsWith("http://") && !base.startsWith("https://")) {
+        const raw = url.trim();
+        if (!raw.startsWith("http://") && !raw.startsWith("https://")) {
             setError("La URL debe empezar por http:// o https://");
             return;
         }
 
+        const base = normalize(raw);
         setLoading(true);
-        try {
-            // Prueba de conectividad: intenta llegar al endpoint de token
-            // Si responde (aunque sea 400/405) el servidor está accesible
-            await axios.get(`${base}/token/`, { timeout: 5000 });
-        } catch (err) {
-            // 400 / 405 significa que el servidor responde → OK
-            if (!err.response) {
-                setLoading(false);
-                setError("No se pudo conectar. Comprueba la IP/puerto y que el servidor esté activo.");
-                return;
-            }
-        }
 
-        localStorage.setItem(SERVER_URL, base);
-        setLoading(false);
-        onConfigured();
+        try {
+            await axios.get(base, {
+                timeout: 6000,
+                validateStatus: () => true,
+            });
+            
+            localStorage.setItem(SERVER_URL, base);
+            setLoading(false);
+            onConfigured();
+        } catch (err) {
+            setError("Servidor no encontrado. Comprueba la dirección e inténtalo de nuevo.");
+            setLoading(false);
+        }
     };
 
     return (
@@ -52,7 +57,7 @@ function ServerSetup({ onConfigured }) {
                     Configurar servidor
                 </Typography>
                 <Typography variant="body2" className="setup-subtitle">
-                    Introduce la dirección del servidor donde está instalado Net Management.
+                    Introduce la direccion del servidor donde esta instalado Net Management.
                 </Typography>
 
                 <form onSubmit={handleSubmit} className="setup-form">

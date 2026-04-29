@@ -1,73 +1,64 @@
-// Instancia de Axios con interceptores para autenticacion JWT
-// Anade el token de acceso a cada peticion automaticamente
-// Si el token caduca intenta refrescarlo y reenviar la peticion
 import axios from "axios";
-import { ACCESS_TOKEN, REFRESH_TOKEN, SERVER_URL } from "./constants";
+import { ACCESS_TOKEN, REFRESH_TOKEN, USER_PERMISSIONS, SERVER_URL } from "./constants";
 
-// Obtiene la URL base:
-//  En Tauri: usa la URL guardada por el usuario en localStorage
-//  En web: siempre usa VITE_API_URL del .env
-const isTauri = Boolean(window.__TAURI__);
-const getBaseURL = () =>
-    isTauri
-        ? (localStorage.getItem(SERVER_URL) || import.meta.env.VITE_API_URL || "")
-        : (import.meta.env.VITE_API_URL || "");
+// Lee la base URL en el instante exacto del disparo (nunca en el arranque)
+// para evitar race conditions con localStorage
+const readBase = () => {
+    let base = localStorage.getItem(SERVER_URL) || import.meta.env.VITE_API_URL || "";
+    if (base && !base.endsWith("/")) base += "/";
+    return base;
+};
 
-// Crea la instancia de Axios con la URL base del backend
-const api = axios.create({
-    baseURL: getBaseURL(),
-})
+// Instancia sin baseURL: la URL absoluta se construye manualmente en el interceptor
+// para evitar el bug de Axios que ignora cambios dinamicos de baseURL
+const api = axios.create();
 
-// Interceptor de peticion que anade el token JWT en la cabecera
-// y actualiza la baseURL por si el usuario la cambio en ajustes
 api.interceptors.request.use((config) => {
-    config.baseURL = getBaseURL();
+    const base = readBase();
+    console.log("[api] base:", base, "| endpoint:", config.url);
 
-    const token = localStorage.getItem(ACCESS_TOKEN)
-
-    if (token){
-        config.headers.Authorization = `Bearer ${token}`
+    // Construir URL absoluta manualmente si aun no lo es
+    if (config.url && !config.url.startsWith("http")) {
+        config.url = base + config.url.replace(/^\//, "");
     }
 
-    return config
-},
-(error) => Promise.reject(error))
+    const token = localStorage.getItem(ACCESS_TOKEN);
+    if (token) {
+        config.headers.Authorization = `Bearer ${token}`;
+    }
+    return config;
+}, (error) => Promise.reject(error));
 
-// Interceptor de respuesta que refresca el token si recibe un error de autenticacion
 api.interceptors.response.use(
     (response) => response,
     async (error) => {
-        const request = error.config
-        if (error.response.status === 401 && !request._retry){
-            request._retry = true
-            
-            try{
+        const request = error.config;
+        if (error.response?.status === 401 && !request._retry) {
+            request._retry = true;
+            try {
+                const refreshToken = localStorage.getItem(REFRESH_TOKEN);
+                const base = readBase();
 
-                const refreshToken = localStorage.getItem(REFRESH_TOKEN)
-                
-                const { data } = await axios.post("/token/refresh/", { refresh :  refreshToken},{baseURL: api.defaults.baseURL} )
+                // URL absoluta construida manualmente para el refresh
+                const { data } = await axios.post(
+                    base + "token/refresh/",
+                    { refresh: refreshToken }
+                );
 
-                localStorage.setItem(ACCESS_TOKEN, data.access)
-
-                const token = localStorage.getItem(ACCESS_TOKEN)
-
-                if (token){
-                    request.headers.Authorization = `bearer ${token}`
-                }
-
-                return api(request)
-
-            }catch(refreshError){
-                localStorage.clear()
+                localStorage.setItem(ACCESS_TOKEN, data.access);
+                request.headers.Authorization = `Bearer ${data.access}`;
+                return api(request);
+            } catch (refreshError) {
+                // Borrar solo tokens, conservar SERVER_URL para el siguiente login
+                localStorage.removeItem(ACCESS_TOKEN);
+                localStorage.removeItem(REFRESH_TOKEN);
+                localStorage.removeItem(USER_PERMISSIONS);
                 window.location.href = "/login";
-                return Promise.reject(refreshError)
+                return Promise.reject(refreshError);
             }
-
         }
-
-        return Promise.reject(error)
+        return Promise.reject(error);
     }
-    
-)
+);
 
 export default api;
