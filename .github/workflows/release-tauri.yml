@@ -115,8 +115,8 @@ jobs:
 
       - name: Install Android NDK and build tools
         run: |
-          # Cambiado a API 34 para mayor estabilidad
-          sdkmanager "ndk;27.0.12077973" "build-tools;34.0.0" "platforms;android-34"
+          # Actualizado a API 35 para solucionar el error de dependencias
+          sdkmanager "ndk;27.0.12077973" "build-tools;35.0.0" "platforms;android-35"
 
       - name: Setup Rust (stable) + Android targets
         uses: dtolnay/rust-toolchain@stable
@@ -138,7 +138,7 @@ jobs:
           NDK_HOME: ${{ env.ANDROID_HOME }}/ndk/27.0.12077973
         run: bunx tauri android init
 
-      - name: Patch MainActivity to avoid duplicate and fullscreen
+      - name: Patch MainActivity to avoid duplicate and set fullscreen to NO
         run: |
           PACKAGE_DIR="frontend/src-tauri/gen/android/app/src/main/java/com/netmanagement/app"
           mkdir -p "$PACKAGE_DIR"
@@ -159,6 +159,7 @@ jobs:
               @Override
               protected void onCreate(Bundle savedInstanceState) {
                   super.onCreate(savedInstanceState);
+                  // Esto fuerza a mostrar la barra de estado y navegacion (desactiva fullscreen)
                   if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
                       final WindowInsetsController insetsController = getWindow().getInsetsController();
                       if (insetsController != null) {
@@ -172,14 +173,14 @@ jobs:
           }
           EOF
 
-      - name: Patch Android SDK versions to API 34
+      - name: Patch Android SDK versions to API 35
         run: |
           GRADLE=frontend/src-tauri/gen/android/app/build.gradle.kts
           if [ -f "$GRADLE" ]; then
-            sed -i 's/compileSdk = [0-9]*/compileSdk = 34/' "$GRADLE"
-            sed -i 's/targetSdk = [0-9]*/targetSdk = 34/' "$GRADLE"
+            sed -i 's/compileSdk = [0-9]*/compileSdk = 35/' "$GRADLE"
+            sed -i 's/targetSdk = [0-9]*/targetSdk = 35/' "$GRADLE"
             sed -i 's/minSdk = [0-9]*/minSdk = 24/' "$GRADLE"
-            echo "build.gradle.kts parcheado a API 34"
+            echo "build.gradle.kts parcheado a API 35"
           fi
 
       - name: Build Android APK
