@@ -78,14 +78,13 @@ jobs:
             - **Linux**: `.deb` (Debian/Ubuntu) / `.AppImage` (portable)
             - **Android**: `.apk`
 
-            > Consulta el [CHANGELOG](https://github.com/${{ github.repository }}/blob/main/CHANGELOG.md) para ver los cambios de esta version.
+            > Consulta el [CHANGELOG](https://github.com/${{ github.repository }}/blob/main/CHANGELOG.md) para ver los cambios de esta versión.
           releaseDraft: true
           prerelease: false
           args: ${{ matrix.args }}
 
-  # ─── Android ─────────────────────────────────────────────────────────────────
+  #  Android 
   release-android:
-    needs: release-desktop # IMPORTANTE: Evita conflictos al editar la misma Release
     permissions:
       contents: write
     runs-on: ubuntu-24.04
@@ -104,19 +103,18 @@ jobs:
         with:
           bun-version: latest
 
-      - name: Setup Java 17 # IMPORTANTE: Java 17 es necesario para Gradle estable
+      - name: Setup Java 21
         uses: actions/setup-java@v4
         with:
           distribution: temurin
-          java-version: '17'
+          java-version: '21'
 
       - name: Setup Android SDK
         uses: android-actions/setup-android@v3
 
       - name: Install Android NDK and build tools
         run: |
-          # Actualizado a API 35 para solucionar el error de dependencias
-          sdkmanager "ndk;27.0.12077973" "build-tools;35.0.0" "platforms;android-35"
+          sdkmanager "ndk;27.0.12077973" "build-tools;36.0.0" "platforms;android-36"
 
       - name: Setup Rust (stable) + Android targets
         uses: dtolnay/rust-toolchain@stable
@@ -138,51 +136,32 @@ jobs:
           NDK_HOME: ${{ env.ANDROID_HOME }}/ndk/27.0.12077973
         run: bunx tauri android init
 
-      - name: Patch MainActivity to avoid duplicate and set fullscreen to NO
-        run: |
-          PACKAGE_DIR="frontend/src-tauri/gen/android/app/src/main/java/com/netmanagement/app"
-          mkdir -p "$PACKAGE_DIR"
-          
-          rm -f "$PACKAGE_DIR/MainActivity.kt"
-          
-          cat > "$PACKAGE_DIR/MainActivity.java" <<'EOF'
-          package com.netmanagement.app;
-
-          import android.os.Build;
-          import android.os.Bundle;
-          import android.view.View;
-          import android.view.WindowInsets;
-          import android.view.WindowInsetsController;
-          import androidx.appcompat.app.AppCompatActivity;
-
-          public class MainActivity extends AppCompatActivity {
-              @Override
-              protected void onCreate(Bundle savedInstanceState) {
-                  super.onCreate(savedInstanceState);
-                  // Esto fuerza a mostrar la barra de estado y navegacion (desactiva fullscreen)
-                  if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-                      final WindowInsetsController insetsController = getWindow().getInsetsController();
-                      if (insetsController != null) {
-                          insetsController.show(WindowInsets.Type.statusBars() | WindowInsets.Type.navigationBars());
-                      }
-                  } else {
-                      View decorView = getWindow().getDecorView();
-                      decorView.setSystemUiVisibility(View.SYSTEM_UI_FLAG_VISIBLE);
-                  }
-              }
-          }
-          EOF
-
-      - name: Patch Android SDK versions to API 35
+      - name: Patch Android SDK versions to API 36 (Android 16)
         run: |
           GRADLE=frontend/src-tauri/gen/android/app/build.gradle.kts
           if [ -f "$GRADLE" ]; then
-            sed -i 's/compileSdk = [0-9]*/compileSdk = 35/' "$GRADLE"
-            sed -i 's/targetSdk = [0-9]*/targetSdk = 35/' "$GRADLE"
+            sed -i 's/compileSdk = [0-9]*/compileSdk = 36/' "$GRADLE"
+            sed -i 's/targetSdk = [0-9]*/targetSdk = 36/' "$GRADLE"
             sed -i 's/minSdk = [0-9]*/minSdk = 24/' "$GRADLE"
-            echo "build.gradle.kts parcheado a API 35"
+            echo "✓ build.gradle.kts parcheado"
+            grep -E 'compileSdk|targetSdk|minSdk' "$GRADLE"
           fi
 
+      - name: Disable Android Fullscreen
+        run: |
+          CONF="frontend/src-tauri/tauri.conf.json"
+          if [ -f "$CONF" ]; then
+            sed -i 's/"fullscreen":[[:space:]]*true/"fullscreen": false/g' "$CONF"
+            echo "✓ Fullscreen desactivado en tauri.conf.json"
+          fi
+          STYLES="frontend/src-tauri/gen/android/app/src/main/res/values/styles.xml"
+          if [ -f "$STYLES" ]; then
+            sed -i 's/<item name="android:windowFullscreen">true<\/item>/<item name="android:windowFullscreen">false<\/item>/g' "$STYLES"
+            echo "✓ Fullscreen desactivado en styles.xml"
+          fi
+
+      # Firma con keystore de produccion si existen los secrets,
+      # si no genera un APK de debug sin firma (util para pruebas)
       - name: Build Android APK
         working-directory: frontend
         env:
@@ -190,13 +169,14 @@ jobs:
           TAURI_SIGNING_ANDROID_KEYSTORE: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
           TAURI_SIGNING_ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
           TAURI_SIGNING_ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          TAURI_SIGNING_ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
         run: |
           if [ -n "$TAURI_SIGNING_ANDROID_KEYSTORE" ]; then
             echo "$TAURI_SIGNING_ANDROID_KEYSTORE" | base64 -d > /tmp/keystore.jks
             export TAURI_SIGNING_ANDROID_KEYSTORE=/tmp/keystore.jks
             bunx tauri android build --apk
           else
-            echo "Generando APK de debug"
+            echo "⚠️  Sin keystore de producción — generando APK de debug"
             bunx tauri android build --apk --debug
           fi
 
