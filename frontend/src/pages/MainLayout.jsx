@@ -192,7 +192,7 @@ function MainLayout() {
                         >
                             <MenuIcon />
                         </IconButton>
-                        <Typography variant="h6" sx={{ fontWeight: 'bold', color: 'var(--text-primary)', flexGrow: 1, fontSize: '1rem' }}>
+                        <Typography variant="h6" sx={{ fontWeight: 'bold', color: 'var(--text-on-accent)', flexGrow: 1, fontSize: '1rem' }}>
                             Monitorización
                         </Typography>
                         <Tooltip title={isDark ? 'Modo Claro' : 'Modo Oscuro'}>

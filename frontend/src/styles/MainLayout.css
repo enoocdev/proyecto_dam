@@ -32,6 +32,7 @@
     border-right: 1px solid var(--border-color) !important;
     display: flex;
     flex-direction: column;
+    padding-top: env(safe-area-inset-top) !important;
 }
 
 /* Cabecera del sidebar – modo completo */
@@ -134,11 +135,12 @@
 /* AppBar movil */
 
 .mobile-appbar {
-    background-color: var(--bg-sidebar) !important;
+    background-color: var(--accent-color) !important;
     border-bottom: 1px solid var(--border-color) !important;
-    color: var(--text-primary) !important;
+    color: var(--text-on-accent) !important;
     z-index: 1300 !important;
     backdrop-filter: blur(8px);
+    padding-top: env(safe-area-inset-top) !important;
 }
 
 /* Media queries */
