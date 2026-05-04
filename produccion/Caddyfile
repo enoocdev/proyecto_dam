@@ -1,4 +1,4 @@
-http://{$DOMAIN}, https://{$DOMAIN}{
+http://{$DOMAIN}, https://{$DOMAIN} {
     #  Archivos estaticos de Django (/static/*) 
     handle_path /static/* {
         root * /var/www/django_static

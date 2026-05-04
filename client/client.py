@@ -10,11 +10,6 @@ from pathlib import Path
 if sys.platform.startswith("linux"):
     if "DISPLAY" not in os.environ:
         os.environ["DISPLAY"] = ":0"
-
-        # NOTA: Si tras esto te da un error de "Access denied" o "Connection refused",
-        # descomenta la siguiente linea y cambia 'tu_usuario' por el usuario de Arch Linux:
-        # os.environ["XAUTHORITY"] = "/home/tu_usuario/.Xauthority"
-
 # Fija el directorio de trabajo al del propio script
 # Necesario cuando se ejecuta como tarea programada del sistema
 

@@ -138,6 +138,8 @@
   0.3 & Marzo 2026   & Integración con API de MikroTik: bloqueo/desbloqueo de internet por dispositivo y por aula (Network Fencing L2+L3). \\
   0.4 & Abril 2026   & Sistema RBAC completo, gestión de aulas, equipos de red, hosts permitidos. Tema claro/oscuro en el frontend. \\
   0.5 & Mayo 2026    & Monitor de heartbeat con Redis keyspace notifications. Auto-descubrimiento de puertos del switch. Instalador del agente como servicio del SO. \\
+  0.6 & Mayo 2026    & Empaquetado del agente como binario autocontenido con PyInstaller. Script de compilación \texttt{build.py} con spec de PyInstaller multiplataforma. \\
+  0.7 & Mayo 2026    & Integración de Tauri 2 en el frontend. La interfaz web se empaqueta también como aplicación de escritorio nativa multiplataforma (Windows, Linux, macOS). \\
   1.0 & Junio 2026   & Despliegue en producción con Docker Compose y Caddy como proxy inverso con TLS automático. Documentación final completa. \\
   \bottomrule
 \end{tabularx}
@@ -188,6 +190,7 @@ Los objetivos principales de \textbf{NetManagement} son:
   \item \textbf{Capa de infraestructura de red:} Los routers y switches MikroTik ejecutan las reglas de firewall y aislamiento de red dictadas por el backend a través de su API nativa (librouteros).
 
   \item \textbf{Capa de aula (Agentes):} Un cliente ligero en Python se instala en cada equipo del aula. Se conecta al servidor por WebSocket, reporta información del sistema, envía capturas de pantalla periódicas y ejecuta los comandos recibidos (apagado, reinicio, etc.).
+  \item \textbf{Capa de escritorio (Tauri):} Opcionalmente, el frontend React puede distribuirse también como aplicación de escritorio nativa mediante Tauri 2, sin necesidad de instalar un navegador independiente. El núcleo de la aplicación en Rust actúa como contenedor de la SPA, gestionando la ventana nativa del sistema operativo.
 \end{enumerate}
 
 \section{Definición del alcance}
@@ -322,6 +325,8 @@ Las funcionalidades que conforman el MVP son:
   RNF-08 & Las contraseñas de usuario deben almacenarse con hash seguro (PBKDF2 de Django). \\
   RNF-09 & El agente cliente debe funcionar en Windows 10+ y distribuciones Linux con escritorio. \\
   RNF-10 & El sistema debe ser escalable horizontalmente añadiendo más instancias del backend detrás del proxy. \\
+  RNF-11 & El frontend debe poder distribuirse como aplicación de escritorio nativa (Windows, Linux, macOS) mediante Tauri 2, además de como SPA web. \\
+  RNF-12 & El agente cliente debe poder compilarse como un binario autocontenido (sin dependencias externas) usando PyInstaller, para facilitar su distribución masiva en los equipos del aula. \\
   \bottomrule
 \end{longtable}
 
@@ -342,9 +347,6 @@ Las funcionalidades que conforman el MVP son:
 \centering
 \resizebox{\textwidth}{!}{%
 \begin{tikzpicture}[
-  actor/.style={
-    draw, minimum width=1.5cm, minimum height=1cm, align=center, font=\small\bfseries, fill=primary!10, rounded corners
-  },
   usecase/.style={
     draw, ellipse, minimum width=3.5cm, minimum height=1.2cm, align=center, font=\small, fill=white, text width=3cm
   },
@@ -354,10 +356,31 @@ Las funcionalidades que conforman el MVP son:
   arrow/.style={-{Stealth[length=3mm]}, thick}
 ]
 
-\node[actor] (admin) at (-7, 0) {Administrador};
-\node[actor] (prof) at (-7, -7) {Profesor};
-\node[actor] (agent) at (9, -2) {Agente\\(Sistema)};
-\node[actor] (mikrotik) at (9, -6) {MikroTik\\(Externo)};
+% ── Monigote UML (stick figure) ──────────────────────────────────────────────
+\tikzset{stickman/.pic={
+  \draw[line width=1.3pt] (0, 0.38) circle(0.22cm);
+  \draw[line width=1.3pt] (0, 0.16) -- (0,-0.28);
+  \draw[line width=1.3pt] (-0.30,-0.04) -- (0.30,-0.04);
+  \draw[line width=1.3pt] (0,-0.28) -- (-0.24,-0.65);
+  \draw[line width=1.3pt] (0,-0.28) -- ( 0.24,-0.65);
+}}
+
+% ── Actores (notación UML: monigote + etiqueta) ───────────────────────────────
+\coordinate (admin) at (-7, -0.15);
+\pic at (-7, 0.35) {stickman};
+\node[font=\small\bfseries, text width=2.5cm, align=center] at (-7, -1.0) {Administrador};
+
+\coordinate (prof) at (-7, -7.15);
+\pic at (-7, -6.65) {stickman};
+\node[font=\small\bfseries, text width=2.5cm, align=center] at (-7, -8.0) {Profesor};
+
+\coordinate (agent) at (9, -2.15);
+\pic at (9, -1.65) {stickman};
+\node[font=\small\bfseries, text width=2.5cm, align=center] at (9, -3.0) {Agente\\(Sistema)};
+
+\coordinate (mikrotik) at (9, -6.15);
+\pic at (9, -5.65) {stickman};
+\node[font=\small\bfseries, text width=2.5cm, align=center] at (9, -7.0) {MikroTik\\(Externo)};
 
 \node[usecase] (uc1) at (1, 2) {Gestionar usuarios y grupos};
 \node[usecase] (uc2) at (1, 0.5) {Gestionar equipos de red};
@@ -561,17 +584,18 @@ El backend es el núcleo del sistema. Está desarrollado en Python con el framew
 
 El backend se ejecuta con \textbf{Daphne} como servidor ASGI, que maneja tanto las peticiones HTTP como las conexiones WebSocket de forma asíncrona.
 
-\subsubsection{Frontend (React 19 + Vite + Material UI 7)}
+\subsubsection{Frontend (React 19 + Vite + Material UI 7 + Tauri 2)}
 
 La interfaz de usuario es una Single Page Application (SPA) desarrollada con:
 
 \begin{itemize}
   \item \textbf{React 19:} Biblioteca de UI con hooks y componentes funcionales.
-  \item \textbf{Vite:} Bundler de nueva generación con HMR instantáneo.
+  \item \textbf{Vite (rolldown-vite):} Bundler de nueva generación con HMR instantáneo. Se utiliza la variante \texttt{rolldown-vite} (v7.2.5) que incorpora el nuevo motor Rolldown escrito en Rust para tiempos de compilación aún más rápidos.
   \item \textbf{Material UI 7:} Biblioteca de componentes con soporte para tema claro/oscuro.
   \item \textbf{Nanostores:} Gestión de estado ligera con persistencia en \texttt{sessionStorage}.
   \item \textbf{react-use-websocket:} Hook declarativo para la conexión WebSocket del dashboard.
   \item \textbf{Axios:} Cliente HTTP con interceptores para gestión automática de tokens JWT.
+  \item \textbf{Tauri 2:} Framework para empaquetar aplicaciones web como aplicaciones de escritorio nativas. Permite distribuir el frontend como un ejecutable nativo de Windows, Linux o macOS, aprovechando el WebView del sistema operativo y añadiendo un núcleo Rust ligero.
 \end{itemize}
 
 \subsubsection{Agente cliente (Python)}
@@ -1270,6 +1294,10 @@ El modelo relacional se presenta a continuación en formato tabular detallado. L
   Infraestructura & Docker Compose & Permite definir todos los servicios (backend, BD, Redis, Caddy) en un solo fichero y desplegarlos con un único comando. Garantiza entornos reproducibles. \\
   \addlinespace
   Cifrado & cryptography (Fernet) & Cifrado simétrico AES-128-CBC para almacenar las contraseñas de los equipos de red en la base de datos. La clave se deriva de la SECRET\_KEY de Django. \\
+  \addlinespace
+  Escritorio & Tauri 2 (Rust) & Framework para empaquetar la SPA de React como aplicación de escritorio nativa. Utiliza el WebView del sistema operativo (WebView2 en Windows, WebKitGTK en Linux, WKWebView en macOS) con un núcleo Rust mínimo. Es la alternativa moderna a Electron, con un tamaño de binario mucho menor. \\
+  \addlinespace
+  Empaquetado agente & PyInstaller & Herramienta para compilar el agente Python y todos sus scripts auxiliares en un único binario autocontenido. Permite distribuir el agente sin necesidad de instalar Python ni dependencias en los equipos del aula. \\
   \bottomrule
 \end{longtable}
 
@@ -1496,7 +1524,7 @@ proyecto_dam/
 |   |   +-- asgi.py          # Punto de entrada ASGI
 |   |-- Dockerfile.prod      # Imagen Docker multi-stage
 |   +-- requirements.txt
-|-- frontend/                # React 19 + Vite + Material UI 7
+|-- frontend/                # React 19 + Vite + Material UI 7 + Tauri 2
 |   |-- src/
 |   |   |-- components/      # Tarjetas, modales, rutas protegidas
 |   |   |-- hooks/           # useAuth, useDashboardSocket
@@ -1505,13 +1533,23 @@ proyecto_dam/
 |   |   |-- styles/          # CSS + tema claro/oscuro
 |   |   |-- api.js           # Axios con interceptores JWT
 |   |   +-- App.jsx          # Rutas de la aplicacion
+|   |-- src-tauri/           # Nucleo Rust de la app de escritorio
+|   |   |-- tauri.conf.json  # Configuracion Tauri (ventana, bundle, etc.)
+|   |   |-- Cargo.toml       # Dependencias Rust (tauri 2, serde, log)
+|   |   |-- src/             # Codigo Rust del nucleo (main.rs, lib.rs)
+|   |   |-- capabilities/    # Permisos Tauri 2
+|   |   +-- icons/           # Iconos de la aplicacion (.png, .icns, .ico)
+|   |-- init-tauri.sh        # Script de inicializacion automatica de Tauri
 |   +-- package.json
 |-- client/                  # Agente Python para PCs de alumnos
 |   |-- client.py            # Clase DeviceClient (WebSocket)
 |   |-- system_info.py       # Recopilacion de info del sistema
 |   |-- config.py            # Carga de configuracion
 |   |-- install_service.py   # Instalador como servicio del SO
-|   +-- requirements.txt
+|   |-- requirements.txt
+|   +-- build/               # Sistema de compilacion con PyInstaller
+|       |-- build.py         # Script de compilacion multiplataforma
+|       +-- netmanagement_installer.spec  # Spec de PyInstaller
 |-- produccion/              # Configuracion de despliegue
 |   |-- docker-compose.prod.yml
 |   |-- Caddyfile
@@ -1612,6 +1650,27 @@ El componente \texttt{ProtectedRoute} verifica:
 
 \subsection{Agente cliente — Aspectos destacados}
 
+\subsubsection{Compilación como binario autocontenido (PyInstaller)}
+
+Para facilitar la distribución masiva del agente en los equipos del aula, se ha creado un sistema de compilación basado en \textbf{PyInstaller}. El directorio \texttt{client/build/} contiene:
+
+\begin{itemize}
+  \item \textbf{\texttt{build.py}:} Script de compilación que detecta automáticamente la plataforma (Windows o Linux), invoca PyInstaller con el spec correspondiente y genera el binario en \texttt{build/dist/\{platform\}/}.
+  \item \textbf{\texttt{netmanagement\_installer.spec}:} Spec de PyInstaller que empaqueta \texttt{install\_service.py} como punto de entrada e incluye como datos adicionales los ficheros \texttt{client.py}, \texttt{config.py}, \texttt{system\_info.py} y \texttt{requirements.txt}, necesarios en tiempo de ejecución. El resultado es un ejecutable único \texttt{NetManagement-Installer} (\texttt{.exe} en Windows) que puede distribuirse mediante GPO o copiado manual sin necesidad de instalar Python en el equipo destino.
+\end{itemize}
+
+\begin{lstlisting}[language=Python, caption={Fragmento del script de compilación build.py.}]
+cmd = [
+    "pyinstaller",
+    str(SPEC_FILE),
+    "--distpath", str(dist_out),
+    "--workpath",  str(work_out),
+    "--noconfirm",
+    "--clean",
+]
+subprocess.run(cmd, check=True, cwd=str(CLIENT_DIR))
+\end{lstlisting}
+
 \subsubsection{Instalación como servicio del sistema}
 
 El script \texttt{install\_service.py} automatiza la instalación del agente como:
@@ -1626,6 +1685,60 @@ El instalador crea automáticamente un entorno virtual, instala las dependencias
 \subsubsection{Reconexión automática}
 
 El agente implementa reconexión automática con backoff configurable. Si la conexión WebSocket se pierde, reintenta la conexión cada \texttt{RECONNECT\_DELAY} segundos (configurable, por defecto 5) hasta alcanzar el máximo de reintentos (configurable, 0 = infinito).
+
+\subsection{Aplicación de escritorio — Tauri 2}
+
+Además de funcionar como SPA web, el frontend de NetManagement puede distribuirse como una \textbf{aplicación de escritorio nativa} gracias a \textbf{Tauri 2}. Tauri es un framework que combina un núcleo en Rust con el WebView nativo del sistema operativo para renderizar la interfaz web, obteniendo binarios mucho más ligeros que Electron (que incluye Chromium completo).
+
+\subsubsection{Estructura del proyecto Tauri}
+
+La configuración de Tauri se encuentra en el directorio \texttt{frontend/src-tauri/}:
+
+\begin{itemize}
+  \item \textbf{\texttt{tauri.conf.json}:} Fichero principal de configuración. Define el nombre del producto (\textit{Net Management}), el identificador de la aplicación (\texttt{com.netmanagement.app}), la URL de desarrollo, la ruta de distribución y los ajustes de la ventana principal.
+  \item \textbf{\texttt{Cargo.toml}:} Manifiesto de Rust. Declara las dependencias del núcleo: \texttt{tauri} (v2.10.3), \texttt{tauri-plugin-log} para logging nativo, \texttt{serde} y \texttt{serde\_json}.
+  \item \textbf{\texttt{src/}:} Código Rust del núcleo. En la versión actual, el núcleo es mínimo: solo se registran los plugins y se lanza la aplicación, delegando toda la lógica de negocio al frontend React.
+  \item \textbf{\texttt{capabilities/}:} Permisos y capacidades de la aplicación Tauri (modelo de seguridad basado en capabilities de Tauri 2).
+  \item \textbf{\texttt{icons/}:} Iconos de la aplicación en todos los formatos requeridos (32×32, 128×128, 128×128@2x, \texttt{.icns} para macOS, \texttt{.ico} para Windows).
+  \item \textbf{\texttt{init-tauri.sh}:} Script de inicialización automática que instala \texttt{@tauri-apps/cli}, ejecuta \texttt{tauri init} en modo no interactivo y parcha el fichero de configuración.
+\end{itemize}
+
+\subsubsection{Configuración de la ventana}
+
+La ventana principal de la aplicación de escritorio se ha configurado con las siguientes características:
+
+\begin{table}[H]
+\centering
+\begin{tabularx}{\textwidth}{llX}
+  \toprule
+  \textbf{Parámetro} & \textbf{Valor} & \textbf{Justificación} \\
+  \midrule
+  Título & Net Management & Nombre del producto. \\
+  Ancho & 800 px & Anchura mínima adecuada para el dashboard. \\
+  Alto & 600 px & Altura mínima adecuada. \\
+  Redimensionable & No & Evita que el layout se rompa en resoluciones imprevistas. \\
+  Pantalla completa & No & Modo ventana estándar. \\
+  CSP & null (deshabilitado) & La app hace peticiones a un dominio externo configurable; una CSP estática rompería la funcionalidad. \\
+  \bottomrule
+\end{tabularx}
+\caption{Configuración de la ventana Tauri de NetManagement.}
+\end{table}
+
+\subsubsection{Flujo de compilación}
+
+El proceso para generar el instalador de escritorio es el siguiente:
+
+\begin{enumerate}
+  \item \textbf{Instalar Rust} (\texttt{rustup}) y las dependencias de sistema de Tauri (WebKitGTK en Linux).
+  \item Desde \texttt{frontend/}, ejecutar: \texttt{bun run tauri build}.
+  \item Tauri compila el frontend con Vite (\texttt{bun run build}), después compila el núcleo Rust y enlaza el resultado con el WebView del sistema.
+  \item Los artefactos generados en \texttt{src-tauri/target/release/bundle/} incluyen:
+  \begin{itemize}
+    \item \texttt{.deb} y \texttt{.AppImage} en Linux.
+    \item \texttt{.msi} y \texttt{.exe} (NSIS) en Windows.
+    \item \texttt{.dmg} en macOS.
+  \end{itemize}
+\end{enumerate}
 
 \section{Despliegue}
 
@@ -1844,6 +1957,9 @@ A continuación se describen las principales líneas de mejora identificadas par
   \item websockets. \textit{websockets Python library}. \url{https://websockets.readthedocs.io/}
   \item psutil. \textit{psutil — cross-platform process and system utilities}. \url{https://psutil.readthedocs.io/}
   \item mss. \textit{python-mss — fast screenshots}. \url{https://python-mss.readthedocs.io/}
+  \item Tauri. \textit{Tauri v2 documentation}. \url{https://v2.tauri.app/}
+  \item The Rust Programming Language. \textit{The Rust Reference}. \url{https://doc.rust-lang.org/reference/}
+  \item PyInstaller. \textit{PyInstaller documentation}. \url{https://pyinstaller.org/en/stable/}
 \end{enumerate}
 
 \end{document}
