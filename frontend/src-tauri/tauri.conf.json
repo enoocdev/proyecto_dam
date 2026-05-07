@@ -15,8 +15,8 @@
         "title": "Net Management",
         "width": 800,
         "height": 600,
-        "resizable": false,
-        "fullscreen": false
+        "resizable": true,
+        "fullscreen": true
       }
     ],
     "security": {
