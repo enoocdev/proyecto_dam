@@ -1,5 +1,6 @@
 // Componente principal que define las rutas de la aplicacion
 // Cada ruta protegida verifica permisos antes de mostrar el contenido
+import { useState } from "react";
 import { BrowserRouter, Routes, Route, Outlet } from "react-router-dom";
 import Login from "./pages/Login";
 import Logout from "./components/Logout";
@@ -14,8 +15,24 @@ import DashboardPage from "./pages/Dashboard";
 import Classroom from "./pages/Classrooms";
 import NetworkDevices from "./pages/NetworkDevices";
 import AllowedHosts from "./pages/AllowedHosts";
+import ServerSetup from "./pages/ServerSetup";
+import { ACCESS_TOKEN, REFRESH_TOKEN, USER_PERMISSIONS, SERVER_URL } from "./constants";
 
 function App() {
+  const isTauri = Boolean(window.__TAURI_INTERNALS__);
+  const [serverConfigured, setServerConfigured] = useState(
+    () => {if (isTauri){ return false }else return true }
+  );
+
+  if (!serverConfigured) {
+    return <ServerSetup onConfigured={() => {
+      // Limpiar tokens antiguos al configurar nuevo servidor para forzar login
+      localStorage.removeItem(ACCESS_TOKEN);
+      localStorage.removeItem(REFRESH_TOKEN);
+      localStorage.removeItem(USER_PERMISSIONS);
+      setServerConfigured(true);
+    }} />;
+  }
 
   return (
     <BrowserRouter>

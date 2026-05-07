@@ -1,38 +1,36 @@
 // Hook que conecta al WebSocket del dashboard para recibir actualizaciones
-// Construye la URL a partir de la variable de entorno y gestiona la reconexion
 import { useMemo } from "react";
 import useWebSocketLib from "react-use-websocket";
-import { ACCESS_TOKEN } from "../constants";
+import { ACCESS_TOKEN, SERVER_URL } from "../constants";
 import { setScreenshot } from "../stores/screenshotStore";
 
 const useWebSocket = useWebSocketLib.default || useWebSocketLib;
 
-// Construye la URL del WebSocket a partir de window.location (produccion)
-// o la variable de entorno VITE_API_URL (desarrollo local)
 function buildWsUrl() {
     let wsProtocol;
-    let host;
+    let hostPath;
 
-    const apiUrl = import.meta.env.VITE_API_URL || "";
+    // Obtenemos la URL base del setup (o de la variable de entorno si no hay setup)
+    const apiUrl = localStorage.getItem(SERVER_URL) || import.meta.env.VITE_API_URL || "";
 
     if (apiUrl.startsWith("http")) {
-        // Desarrollo: URL absoluta definida en .env
+        // Determinar protocolo
         wsProtocol = apiUrl.startsWith("https") ? "wss" : "ws";
-        host = apiUrl.replace(/^https?:\/\//, "").replace(/\/+$/, "");
+
+        hostPath = apiUrl.replace(/^https?:\/\//, "").replace(/\/+$/, "");
     } else {
-        // Produccion: URL relativa — usar window.location
+        // Fallback para produccion relativa
         wsProtocol = window.location.protocol === "https:" ? "wss" : "ws";
-        host = window.location.host;
+        hostPath = window.location.host;
     }
 
     const token = localStorage.getItem(ACCESS_TOKEN);
-    const base = `${wsProtocol}://${host}/ws/dashboard/`;
+    const base = `${wsProtocol}://${hostPath}/ws/dashboard/`;
+    
     return token ? `${base}?token=${token}` : base;
 }
 
-// Hook que consume el WebSocket del dashboard y ejecuta el callback al recibir eventos
 export default function useDashboardSocket({ onDeviceStatus, onScreenshot } = {}) {
-
     const socketUrl = useMemo(() => buildWsUrl(), []);
 
     useWebSocket(socketUrl, {
@@ -43,12 +41,9 @@ export default function useDashboardSocket({ onDeviceStatus, onScreenshot } = {}
 
         onMessage: (event) => {
             try {
+                console.log(event)
                 const payload = JSON.parse(event.data);
-                console.log(payload);
-
-                // Separa eventos de estado de dispositivo y capturas de pantalla
                 if (payload.event === "screenshot") {
-                    // Persiste la imagen en el nanostore (sessionStorage)
                     if (payload.mac && payload.image) {
                         setScreenshot(payload.mac, payload.image);
                     }
@@ -57,10 +52,11 @@ export default function useDashboardSocket({ onDeviceStatus, onScreenshot } = {}
                     onDeviceStatus?.(payload);
                 }
             } catch {
-                console.warn("[useDashboardSocket] payload no válido:", event.data);
+                console.warn("[useDashboardSocket] payload no valido:", event.data);
             }
         },
 
-        onError: (event) => console.error("[useDashboardSocket] error:", event),
+        onOpen: () => console.log("[useDashboardSocket] Conectado con exito a:", socketUrl),
+        onError: (event) => console.error("[useDashboardSocket] error de conexion:", event),
     });
 }

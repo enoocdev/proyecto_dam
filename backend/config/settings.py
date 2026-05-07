@@ -149,14 +149,26 @@ STATIC_ROOT = BASE_DIR / 'staticfiles'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-# Configuracion de CORS para permitir conexiones desde el frontend
-# En produccion se leen los origenes permitidos de la variable de entorno
+# CONFIGURACION DE CORS Y SEGURIDAD PARA TAURI 
+
 _cors_origins = os.getenv('CORS_ALLOWED_ORIGINS', '')
+
+# Origenes obligatorios para que Tauri funcione en Windows, Linux y macOS
+TAURI_ORIGINS = [
+    "tauri://localhost",       # Windows / macOS
+    "http://tauri.localhost",  # Linux (WebKitGTK)
+    "https://tauri.localhost", # Linux SSL
+    "http://localhost:5173",   # Dev mode
+]
+
 if DEBUG:
     CORS_ALLOW_ALL_ORIGINS = True
 else:
     CORS_ALLOW_ALL_ORIGINS = False
-    CORS_ALLOWED_ORIGINS = [o.strip() for o in _cors_origins.split(',') if o.strip()]
+    # Procesar origenes del .env
+    env_origins = [o.strip() for o in _cors_origins.split(',') if o.strip()]
+    # Fusionar con los de Tauri sin duplicados
+    CORS_ALLOWED_ORIGINS = list(set(env_origins + TAURI_ORIGINS))
 
 CORS_ALLOW_CREDENTIALS = True
 CORS_ALLOW_HEADERS = [
@@ -169,10 +181,12 @@ CORS_ALLOW_HEADERS = [
 ]
 CORS_EXPOSE_HEADERS = ['Allow', 'Content-Type']
 
-# Origenes confiables para CSRF (necesario cuando Caddy hace proxy)
-CSRF_TRUSTED_ORIGINS = [o.strip() for o in _cors_origins.split(',') if o.strip()] if _cors_origins else []
+# Configuracion CSRF: Crucial para permitir POST/PUT desde Tauri
+_csrf_origins = [o.strip() for o in _cors_origins.split(',') if o.strip()] if _cors_origins else []
+CSRF_TRUSTED_ORIGINS = list(set(_csrf_origins + TAURI_ORIGINS))
 
-# Configuracion de Channel Layers con Redis para WebSockets en tiempo real
+# CONFIGURACION DE CHANNELS / WEBSOCKETS 
+
 CHANNEL_LAYERS = {
     "default": {
         "BACKEND": "channels_redis.core.RedisChannelLayer",
@@ -181,10 +195,8 @@ CHANNEL_LAYERS = {
                 os.getenv("REDIS_HOST", "127.0.0.1"),
                 int(os.getenv("REDIS_PORT", 6379)),
             )],
-            # Capacidad ampliada para soportar mensajes con capturas de pantalla
             "capacity": 300,
             "expiry": 60,
         },
     },
 }
-

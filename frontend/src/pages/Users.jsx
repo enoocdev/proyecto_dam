@@ -111,9 +111,9 @@ const Users = () => {
     const handleSaveUser = async (userData, userId) => {
         try {
             if (userId) {
-                await api.patch(`/users/${userId}/`, userData);
+                await api.patch(`users/${userId}/`, userData);
             } else {
-                await api.post('/users/', userData);
+                await api.post('users/', userData);
             }
             fetchUsers(page); 
             handleCloseModal();
@@ -135,7 +135,7 @@ const Users = () => {
 
     const handleConfirmDelete = async () => {
         try {
-            await api.delete(`/users/${userToDelete.id}/`);
+            await api.delete(`users/${userToDelete.id}/`);
             fetchUsers(page); 
             handleCloseDeleteDialog();
         } catch {

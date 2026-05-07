@@ -1,0 +1,193 @@
+name: Release Tauri App
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+  workflow_dispatch:
+
+jobs:
+  # Desktop: Linux + Windows
+  release-desktop:
+    permissions:
+      contents: write
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: linux
+            runner: ubuntu-24.04
+          - os: windows
+            runner: windows-latest
+
+    runs-on: ${{ matrix.runner }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install system dependencies (Linux)
+        if: matrix.os == 'linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            libwebkit2gtk-4.1-dev \
+            librsvg2-dev \
+            patchelf \
+            libssl-dev \
+            libgtk-3-dev \
+            libayatana-appindicator3-dev
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+
+      - name: Setup Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Cache Rust
+        uses: swatinem/rust-cache@v2
+        with:
+          workspaces: './frontend/src-tauri -> target'
+
+      - name: Install frontend deps
+        working-directory: frontend
+        run: bun install
+
+      - name: Build & Release
+        uses: tauri-apps/tauri-action@v0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          projectPath: frontend
+          tagName: ${{ github.ref_name }}
+          releaseName: 'Net Management ${{ github.ref_name }}'
+          releaseDraft: true
+
+  # ANDROID
+  release-android:
+    permissions:
+      contents: write
+    runs-on: ubuntu-24.04
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Install SDK components
+        run: |
+          sdkmanager "ndk;27.0.12077973" "build-tools;36.0.0" "platforms;android-36"
+
+      - name: Setup Rust + targets
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: aarch64-linux-android,armv7-linux-androideabi,i686-linux-android,x86_64-linux-android
+
+      - name: Cache Rust
+        uses: swatinem/rust-cache@v2
+        with:
+          workspaces: './frontend/src-tauri -> target'
+
+      - name: Install frontend deps
+        working-directory: frontend
+        run: bun install
+
+      - name: Init Tauri Android
+        working-directory: frontend
+        env:
+          NDK_HOME: ${{ env.ANDROID_HOME }}/ndk/27.0.12077973
+        run: bunx tauri android init
+
+      - name: Enable HTTP (cleartext) in Android Manifest
+        run: |
+          MANIFEST=frontend/src-tauri/gen/android/app/src/main/AndroidManifest.xml
+
+          if [ -f "$MANIFEST" ]; then
+            echo "Modificando AndroidManifest para permitir HTTP..."
+
+            if grep -q "usesCleartextTraffic" "$MANIFEST"; then
+              echo "Ya existe usesCleartextTraffic"
+            else
+              sed -i 's/<application/<application android:usesCleartextTraffic="true"/' "$MANIFEST"
+            fi
+          else
+            echo "Manifest no encontrado aún"
+            find frontend/src-tauri/gen/android -name AndroidManifest.xml
+          fi
+
+      - name: Generate Icons
+        working-directory: frontend
+        run: |
+          if [ -f "src-tauri/app-icon.svg" ]; then
+            bunx tauri icon src-tauri/app-icon.svg
+          fi
+
+      - name: Patch SDK versions
+        run: |
+          GRADLE=frontend/src-tauri/gen/android/app/build.gradle.kts
+          if [ -f "$GRADLE" ]; then
+            sed -i 's/compileSdk = [0-9]*/compileSdk = 36/' "$GRADLE"
+            sed -i 's/targetSdk = [0-9]*/targetSdk = 36/' "$GRADLE"
+            sed -i 's/minSdk = [0-9]*/minSdk = 24/' "$GRADLE"
+          fi
+
+      - name: Decode keystore
+        run: |
+          echo "${{ secrets.ANDROID_KEYSTORE_BASE64 }}" | base64 -di > /tmp/keystore.jks
+
+      - name: Build APK (unsigned)
+        working-directory: frontend
+        env:
+          NDK_HOME: ${{ env.ANDROID_HOME }}/ndk/27.0.12077973
+        run: |
+          bunx tauri android build --apk
+
+      - name: Sign APK
+        run: |
+          APK_RAW=$(find frontend/src-tauri/gen/android/app/build/outputs/apk -name "*.apk" | head -n 1)
+
+          echo "APK encontrado: $APK_RAW"
+
+          $ANDROID_HOME/build-tools/36.0.0/zipalign -v 4 "$APK_RAW" app-aligned.apk
+
+          $ANDROID_HOME/build-tools/36.0.0/apksigner sign \
+            --ks /tmp/keystore.jks \
+            --ks-key-alias "${{ secrets.ANDROID_KEY_ALIAS }}" \
+            --ks-pass pass:${{ secrets.ANDROID_STORE_PASSWORD }} \
+            --key-pass pass:${{ secrets.ANDROID_KEY_PASSWORD }} \
+            --out app-release.apk \
+            app-aligned.apk
+
+      - name: Verify APK
+        run: |
+          $ANDROID_HOME/build-tools/36.0.0/apksigner verify app-release.apk
+
+      - name: Upload APK
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.ref_name }}
+          draft: true
+          files: app-release.apk
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

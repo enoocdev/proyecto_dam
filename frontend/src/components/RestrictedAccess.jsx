@@ -27,7 +27,7 @@ const RestrictedAccess = () => {
                 alignItems: 'center',
                 minHeight: '70vh',
                 padding: 3,
-                background: 'transparent' // Deja ver el fondo de tu app (#121212)
+                background: 'transparent'
             }}
         >
             <Paper
@@ -54,7 +54,8 @@ const RestrictedAccess = () => {
                     alignItems: 'center'
                 }}
             >
-                {/* Icono de candado */}
+                
+
                 <Box
                     sx={{
                         mb: 3,
