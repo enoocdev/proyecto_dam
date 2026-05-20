@@ -45,7 +45,7 @@ function App() {
           <Route path="/network-device" element={<ProtectedRoute requiredPermission="view_networkdevice" requireStaff><NetworkDevices/></ProtectedRoute>} />
           <Route path="/allowed-hosts" element={<ProtectedRoute requiredPermission="view_allowedhost" requireStaff><AllowedHosts/></ProtectedRoute>} />
           <Route path="/users" element={<ProtectedRoute requiredPermission="view_user" requireStaff><Users/></ProtectedRoute>} />
-          <Route path="/users-groups" element={<ProtectedRoute requiredPermission="view_group" requireStaff><UserGroups/></ProtectedRoute>} />
+          <Route path="/users-groups" element={\<ProtectedRoute requiredPermission="view_group" requireStaff><UserGroups/></ProtectedRoute>} />
           <Route path="/profile" element={<Profile/>} />
         </Route>
       </Routes>
